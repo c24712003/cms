@@ -115,5 +115,37 @@ Refactor `server/src/index.ts` to use structured routes.
 - **Frontend**:
   - `MediaPickerComponent`: Select image for Page Content.
 
+# Phase 5: UX Polish & Deployment
+
+## 1. Visual Page Editor
+- **Component**: `PageEditorComponent`
+- **Change**: Remove JSON textarea. Replace with `BlockList`.
+- **Structure**:
+  ```typescript
+  interface Block {
+    type: 'text' | 'image' | 'html';
+    content: string; // Text or HTML or Image URL
+  }
+  ```
+- **UI**:
+  - Add Block Dropdown.
+  - Text Block: Textarea.
+  - Image Block: Button to open `MediaPickerModal`.
+
+## 2. Visual Menu Builder
+- **Component**: `MenuBuilderComponent`
+- **Change**: Remove JSON textarea. Use `*ngFor` table.
+- **UI**:
+  - Inputs for `Label` and `Link`.
+  - Add/Delete buttons.
+  - Up/Down buttons for ordering.
+
+## 3. Deployment
+- **Dockerfile**:
+  - Stage 1: Build Client (SSR).
+  - Stage 2: Build Server (TS).
+  - Stage 3: Runtime Config (Node.js).
+
+
 
 

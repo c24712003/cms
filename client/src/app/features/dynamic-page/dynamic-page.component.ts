@@ -1,6 +1,6 @@
-import { Component, OnInit, signal, effect, Injector, runInInjectionContext } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 import { PageService } from '../../core/services/page.service';
 import { I18nService } from '../../core/services/i18n.service';
@@ -13,7 +13,26 @@ import { PageContent } from '../../core/models/language.model';
     template: `
     <div class="page-container" *ngIf="pageContent(); else loading">
       <h1>{{ pageContent()?.title }}</h1>
-      <div class="content-body" [innerHTML]="jsonToHtml(pageContent()?.content_json)"></div>
+      
+      <div class="content-blocks">
+        <ng-container *ngFor="let block of blocks()">
+            
+            <!-- Text Block -->
+            <div *ngIf="block.type === 'text'" class="block-text">
+                <p>{{ block.content }}</p>
+            </div>
+
+            <!-- HTML Block -->
+            <div *ngIf="block.type === 'html'" class="block-html" [innerHTML]="block.content"></div>
+
+            <!-- Image Block -->
+            <div *ngIf="block.type === 'image'" class="block-image">
+                <img [src]="block.content" alt="Page Image" />
+            </div>
+
+        </ng-container>
+      </div>
+    
     </div>
     <ng-template #loading>
       <p>Loading...</p>
@@ -21,14 +40,17 @@ import { PageContent } from '../../core/models/language.model';
   `,
     styles: [`
     .page-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+    .block-text { margin-bottom: 1.5rem; line-height: 1.6; }
+    .block-image { margin-bottom: 2rem; text-align: center; }
+    .block-image img { max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
   `]
 })
 export class DynamicPageComponent implements OnInit {
     pageContent = signal<PageContent | null>(null);
+    blocks = signal<any[]>([]);
 
     constructor(
         private route: ActivatedRoute,
-        private router: Router,
         private pageService: PageService,
         private i18n: I18nService,
         private title: Title,
@@ -40,18 +62,19 @@ export class DynamicPageComponent implements OnInit {
             const lang = params.get('lang') || 'en';
             const slug = params.get('slug') || 'home';
 
-            // Update I18n Service
-            if (lang !== this.i18n.currentLang()) {
-                // In a real app we might want to validate if lang is supported
-            }
-
             this.pageService.getPage(slug, lang).subscribe({
                 next: (data) => {
                     if (data && data.title) {
                         this.pageContent.set(data);
                         this.updateSeo(data);
+
+                        // Parse Content JSON
+                        if (data.content_json && Array.isArray(data.content_json)) {
+                            this.blocks.set(data.content_json);
+                        } else {
+                            this.blocks.set([]);
+                        }
                     } else {
-                        // 404 handling
                         this.pageContent.set({ title: 'Not Found', content_json: {}, seo_title: '404', seo_desc: '', slug_localized: '' });
                     }
                 },
@@ -65,16 +88,5 @@ export class DynamicPageComponent implements OnInit {
     updateSeo(data: PageContent) {
         this.title.setTitle(data.seo_title || data.title);
         this.meta.updateTag({ name: 'description', content: data.seo_desc || '' });
-    }
-
-    // Simple Block Renderer for Demo
-    jsonToHtml(json: any): string {
-        // Expecting simple structure: { "blocks": [ { "type": "text", "content": "..." } ] }
-        // Or just raw html/text for MVP
-        if (!json) return '';
-        if (typeof json === 'string') return json;
-
-        // Detailed implementation would use a proper block renderer system
-        return JSON.stringify(json);
     }
 }

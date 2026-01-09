@@ -44,3 +44,12 @@
     - [x] DB: Menus Table (JSON structure) <!-- id: 35 -->
     - [x] Admin: Menu Builder UI <!-- id: 36 -->
     - [x] Public: Dynamic Header Component <!-- id: 37 -->
+
+# Phase 5: UX Polish & Deployment (Finalizing)
+- [x] Visual Page Editor (Blocks) <!-- id: 38 -->
+    - [x] Replace JSON Area with Block List UI <!-- id: 39 -->
+    - [x] Integrate Media Picker for Images <!-- id: 40 -->
+- [x] Visual Menu Builder <!-- id: 41 -->
+    - [x] Replace JSON Area with Item List UI <!-- id: 42 -->
+- [ ] Deployment Configuration <!-- id: 43 -->
+    - [ ] Create Dockerfile <!-- id: 44 -->
