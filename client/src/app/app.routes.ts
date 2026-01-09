@@ -10,11 +10,7 @@ export const routes: Routes = [
         path: 'admin',
         loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)
     },
-    // Wildcard catch-all for SSR i18n or 404
-    {
-        path: ':lang/contact',
-        loadComponent: () => import('./features/contact-form/contact-form.component').then(m => m.ContactFormComponent)
-    },
+    // Dynamic pages (including contact, home, about, services, etc.)
     {
         path: ':lang/:slug',
         loadComponent: () => import('./features/dynamic-page/dynamic-page.component').then(m => m.DynamicPageComponent)

@@ -38,6 +38,14 @@ router.get('/:slug/content', async (req: Request, res: Response) => {
             [page.id, lang]
         );
 
+        if (content && content.content_json) {
+            try {
+                content.content_json = JSON.parse(content.content_json);
+            } catch (e) {
+                // Keep as string if parsing fails
+            }
+        }
+
         res.json(content || {}); // Return empty object if no content yet
     } catch (e) {
         res.status(500).json({ error: String(e) });

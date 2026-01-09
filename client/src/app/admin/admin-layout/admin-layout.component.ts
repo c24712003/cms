@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -8,74 +8,101 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <div class="flex h-screen bg-gray-100">
-      <!-- Sidebar -->
-      <nav class="w-64 bg-slate-800 text-white flex flex-col shadow-lg">
-        <div class="p-6 border-b border-slate-700">
-          <h2 class="text-xl font-bold tracking-wide">CMS Admin</h2>
+    <!-- Sidebar -->
+    <aside class="admin-sidebar shadow-2xl">
+      <!-- Logo -->
+      <div class="admin-sidebar-logo flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30">
+          C
         </div>
+        <h1 class="text-xl font-bold tracking-tight">
+          <span class="text-white">CMS</span><span class="text-blue-400">Admin</span>
+        </h1>
+      </div>
+      
+      <!-- Navigation -->
+      <nav class="admin-sidebar-nav custom-scrollbar">
+        <a routerLink="dashboard" routerLinkActive="active" class="admin-sidebar-item group">
+          <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+          </svg>
+          <span class="font-medium">Dashboard</span>
+        </a>
         
-        <div class="flex-1 overflow-y-auto py-4">
-          <ul class="space-y-1">
-            <li>
-              <a routerLink="dashboard" routerLinkActive="bg-slate-700 text-blue-400 border-r-4 border-blue-400" class="flex items-center px-6 py-3 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
-                <span class="mr-3">📊</span> Dashboard
-              </a>
-            </li>
-            <li>
-              <a routerLink="languages" routerLinkActive="bg-slate-700 text-blue-400 border-r-4 border-blue-400" class="flex items-center px-6 py-3 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
-                <span class="mr-3">🌍</span> Languages
-              </a>
-            </li>
-            <li>
-              <a routerLink="translations" routerLinkActive="bg-slate-700 text-blue-400 border-r-4 border-blue-400" class="flex items-center px-6 py-3 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
-                <span class="mr-3">🗣️</span> Translations
-              </a>
-            </li>
-            <li>
-              <a routerLink="pages" routerLinkActive="bg-slate-700 text-blue-400 border-r-4 border-blue-400" class="flex items-center px-6 py-3 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
-                <span class="mr-3">📄</span> Pages
-              </a>
-            </li>
-            <li>
-              <a routerLink="media" routerLinkActive="bg-slate-700 text-blue-400 border-r-4 border-blue-400" class="flex items-center px-6 py-3 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
-                <span class="mr-3">🖼️</span> Media Library
-              </a>
-            </li>
-            <li>
-              <a routerLink="menus" routerLinkActive="bg-slate-700 text-blue-400 border-r-4 border-blue-400" class="flex items-center px-6 py-3 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
-                 <span class="mr-3">🍔</span> Menus
-              </a>
-            </li>
-          </ul>
-        </div>
+        <div class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Content</div>
 
-        <div class="p-4 border-t border-slate-700 bg-slate-900">
-            <div class="flex items-center justify-between mb-4 px-2">
-                <div class="text-sm text-slate-400">
-                    User: Admin
-                </div>
-            </div>
-            <button (click)="logout()" class="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded transition-colors text-sm font-medium">
-                Sign Out
-            </button>
-            <div class="mt-4 text-center">
-                 <a routerLink="/" target="_blank" class="text-xs text-slate-500 hover:text-slate-300">View Public Site ↗</a>
-            </div>
-        </div>
+        <a routerLink="pages" routerLinkActive="active" class="admin-sidebar-item group">
+          <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Pages
+        </a>
+        
+        <a routerLink="media" routerLinkActive="active" class="admin-sidebar-item group">
+          <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          Media Library
+        </a>
+
+        <div class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Localization</div>
+        
+        <a routerLink="languages" routerLinkActive="active" class="admin-sidebar-item group">
+          <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Languages
+        </a>
+        
+        <a routerLink="translations" routerLinkActive="active" class="admin-sidebar-item group">
+          <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+          </svg>
+          Translations
+        </a>
+
+        <div class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">System</div>
+        
+        <a routerLink="menus" routerLinkActive="active" class="admin-sidebar-item group">
+          <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          Menus
+        </a>
       </nav>
 
-      <!-- Main Content -->
-      <main class="flex-1 overflow-y-auto p-8">
-        <div class="max-w-6xl mx-auto">
-            <router-outlet></router-outlet>
+      <!-- Footer -->
+      <div class="admin-sidebar-footer">
+        <div class="flex items-center gap-3 mb-4 p-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+            A
+          </div>
+          <div>
+            <div class="text-sm font-medium text-white">Admin User</div>
+            <div class="text-xs text-slate-400">admin@cms.com</div>
+          </div>
         </div>
-      </main>
-    </div>
+        
+        <button (click)="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all text-sm font-medium border border-red-500/10">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-content">
+      <!-- Top Bar (Optional if needed for breadcrumbs later) -->
+      <div class="p-8 max-w-7xl mx-auto">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
   `
 })
 export class AdminLayoutComponent {
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private router: Router) { }
 
   logout() {
     this.authService.logout();

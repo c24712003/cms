@@ -7,67 +7,95 @@ import { CommonModule } from '@angular/common';
     standalone: true,
     imports: [CommonModule],
     template: `
-    <div class="space-y-6">
-      <h2 class="text-3xl font-bold text-slate-800">Overview</h2>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Stat Card 1 -->
-        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-blue-500">
-            <div class="text-slate-500 text-sm font-uppercase mb-1">Total Languages</div>
-            <div class="text-4xl font-bold text-slate-800">{{ stats().languages }}</div>
-        </div>
+    <div>
+      <!-- Page Header -->
+      <div class="admin-page-header">
+        <h1 class="admin-page-title">Dashboard</h1>
+        <span class="text-sm text-slate-500">Welcome back, Admin</span>
+      </div>
 
-        <!-- Stat Card 2 -->
-        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-emerald-500">
-            <div class="text-slate-500 text-sm font-uppercase mb-1">Translation Keys</div>
-            <div class="text-4xl font-bold text-slate-800">{{ stats().translations }}</div>
+      <!-- Stat Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card border-l-blue-500">
+          <div class="stat-card-value">{{ stats().languages }}</div>
+          <div class="stat-card-label">Languages</div>
         </div>
-
-        <!-- Stat Card 3 -->
-        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-indigo-500">
-            <div class="text-slate-500 text-sm font-uppercase mb-1">Pages Created</div>
-            <div class="text-4xl font-bold text-slate-800">{{ stats().pages }}</div>
+        
+        <div class="stat-card border-l-emerald-500">
+          <div class="stat-card-value">{{ stats().translations }}</div>
+          <div class="stat-card-label">Translation Keys</div>
         </div>
-
-        <!-- Stat Card 4 -->
-        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-amber-500">
-            <div class="text-slate-500 text-sm font-uppercase mb-1">Menus</div>
-             <!-- Mock Data for now as API might not return menus count yet -->
-            <div class="text-4xl font-bold text-slate-800">{{ stats().menus || 1 }}</div>
+        
+        <div class="stat-card border-l-violet-500">
+          <div class="stat-card-value">{{ stats().pages }}</div>
+          <div class="stat-card-label">Pages Created</div>
+        </div>
+        
+        <div class="stat-card border-l-amber-500">
+          <div class="stat-card-value">{{ stats().menus }}</div>
+          <div class="stat-card-label">Menus</div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <div class="bg-white rounded-xl shadow p-6">
-            <h3 class="text-lg font-bold text-slate-700 mb-4">Quick Actions</h3>
-            <div class="space-y-2">
-                <button class="w-full text-left px-4 py-3 rounded hover:bg-slate-50 border border-slate-200 text-slate-600 flex items-center group transition">
-                    <span class="w-8 h-8 rounded bg-blue-100 text-blue-600 flex items-center justify-center mr-3 group-hover:bg-blue-600 group-hover:text-white transition">✎</span>
-                    Create New Page
-                </button>
-                <button class="w-full text-left px-4 py-3 rounded hover:bg-slate-50 border border-slate-200 text-slate-600 flex items-center group transition">
-                     <span class="w-8 h-8 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center mr-3 group-hover:bg-emerald-600 group-hover:text-white transition">🌍</span>
-                    Add Language
-                </button>
-            </div>
+      <!-- Two Column Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Quick Actions Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold text-slate-800">Quick Actions</h3>
+          </div>
+          <div class="card-body space-y-3">
+            <button class="w-full flex items-center p-4 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all group">
+              <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mr-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+              </div>
+              <div class="text-left">
+                <div class="font-medium text-slate-800">Create New Page</div>
+                <div class="text-sm text-slate-500">Add a new content page</div>
+              </div>
+            </button>
+            
+            <button class="w-full flex items-center p-4 rounded-lg border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all group">
+              <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mr-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div class="text-left">
+                <div class="font-medium text-slate-800">Add Language</div>
+                <div class="text-sm text-slate-500">Enable new locale support</div>
+              </div>
+            </button>
+          </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow p-6">
-             <h3 class="text-lg font-bold text-slate-700 mb-4">System Status</h3>
-             <ul class="space-y-3">
-                <li class="flex justify-between items-center pb-2 border-b border-gray-100">
-                    <span class="text-slate-600">Server Status</span>
-                    <span class="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-bold">ONLINE</span>
-                </li>
-                <li class="flex justify-between items-center pb-2 border-b border-gray-100">
-                    <span class="text-slate-600">Database</span>
-                    <span class="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-bold">CONNECTED</span>
-                </li>
-                <li class="flex justify-between items-center pb-2 border-b border-gray-100">
-                    <span class="text-slate-600">Version</span>
-                    <span class="text-slate-800 font-mono text-sm">v1.0.0</span>
-                </li>
-             </ul>
+        <!-- System Status Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold text-slate-800">System Status</h3>
+          </div>
+          <div class="card-body">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between py-3 border-b border-slate-100">
+                <span class="text-slate-600">Server Status</span>
+                <span class="badge badge-success">Online</span>
+              </div>
+              <div class="flex items-center justify-between py-3 border-b border-slate-100">
+                <span class="text-slate-600">Database</span>
+                <span class="badge badge-success">Connected</span>
+              </div>
+              <div class="flex items-center justify-between py-3 border-b border-slate-100">
+                <span class="text-slate-600">API Health</span>
+                <span class="badge badge-success">Healthy</span>
+              </div>
+              <div class="flex items-center justify-between py-3">
+                <span class="text-slate-600">Version</span>
+                <span class="font-mono text-sm text-slate-800">v1.0.0</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
