@@ -16,125 +16,145 @@ interface Block {
     standalone: true,
     imports: [CommonModule, FormsModule, MediaPickerComponent],
     template: `
-    <div class="page-header">
-      <h1>Page Content Editor</h1>
-      <select [ngModel]="selectedPageSlug()" (ngModelChange)="loadPage($event)">
-          <option value="">Select a Page...</option>
-          <option *ngFor="let p of pages()" [value]="p.slug_key">{{ p.slug_key }}</option>
-      </select>
+    <div class="space-y-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-slate-800">Page Editor</h2>
+        <select [ngModel]="selectedPageSlug()" (ngModelChange)="loadPage($event)" class="input-field w-64 bg-white">
+            <option value="">Select a Page...</option>
+            <option *ngFor="let p of pages()" [value]="p.slug_key">{{ p.slug_key }}</option>
+        </select>
+      </div>
+
+      <!-- Language Tabs -->
+      <div *ngIf="selectedPageSlug()" class="space-y-6">
+          <div class="flex border-b border-gray-200">
+              <button 
+                  *ngFor="let lang of languages()" 
+                  [class.text-blue-600]="activeLang() === lang.code"
+                  [class.border-blue-600]="activeLang() === lang.code"
+                  class="px-6 py-3 font-medium text-sm text-slate-500 hover:text-slate-700 border-b-2 border-transparent transition-colors"
+                  (click)="switchLang(lang.code)"
+              >{{ lang.name }} <span class="text-xs uppercase ml-1 opacity-75">{{ lang.code }}</span></button>
+          </div>
+
+          <div class="space-y-8 animate-in fade-in duration-300" *ngIf="activeLang()">
+              <!-- Metadata Card -->
+              <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+                  <h3 class="text-lg font-bold text-slate-800 border-b border-gray-100 pb-2">Metadata</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div class="space-y-1">
+                          <label class="block text-sm font-medium text-slate-700">Page Title</label>
+                          <input [(ngModel)]="content.title" class="input-field" placeholder="Entry Title" />
+                      </div>
+                      <div class="space-y-1">
+                          <label class="block text-sm font-medium text-slate-700">URL Slug</label>
+                          <div class="flex items-center">
+                              <span class="bg-gray-50 border border-r-0 border-gray-300 rounded-l-lg px-3 py-2 text-gray-500 text-sm">/{{ activeLang() }}/</span>
+                              <input [(ngModel)]="content.slug_localized" class="input-field rounded-l-none" />
+                          </div>
+                      </div>
+                  </div>
+                  <div class="space-y-4 pt-4">
+                      <div class="space-y-1">
+                          <label class="block text-sm font-medium text-slate-700">SEO Title</label>
+                          <input [(ngModel)]="content.seo_title" class="input-field" />
+                      </div>
+                      <div class="space-y-1">
+                          <label class="block text-sm font-medium text-slate-700">SEO Description</label>
+                          <textarea [(ngModel)]="content.seo_desc" rows="2" class="input-field"></textarea>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Content Blocks -->
+              <div class="space-y-4">
+                  <div class="flex justify-between items-center">
+                      <h3 class="text-lg font-bold text-slate-800">Content Blocks</h3>
+                      <div class="flex space-x-2">
+                          <button (click)="addBlock('text')" class="btn btn-secondary text-sm flex items-center shadow-sm">
+                            <span class="mr-1 text-blue-500">¶</span> Text
+                          </button>
+                          <button (click)="addBlock('image')" class="btn btn-secondary text-sm flex items-center shadow-sm">
+                            <span class="mr-1 text-emerald-500">🖼</span> Image
+                          </button>
+                          <button (click)="addBlock('html')" class="btn btn-secondary text-sm flex items-center shadow-sm">
+                             <span class="mr-1 text-orange-500">&lt;/&gt;</span> HTML
+                          </button>
+                      </div>
+                  </div>
+
+                  <div class="space-y-4 min-h-[200px]">
+                      <div *ngFor="let block of blocks; let i = index" 
+                           class="group relative bg-white rounded-xl shadow-sm border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200">
+                          
+                          <!-- Drag Handle & Actions -->
+                          <div class="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50 rounded-l-xl border-r border-gray-100 cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600">
+                              <span class="text-xl">⋮</span>
+                          </div>
+
+                          <div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                              <button (click)="moveBlock(i, -1)" *ngIf="i > 0" class="p-1 hover:bg-slate-100 rounded text-slate-500">↑</button>
+                              <button (click)="moveBlock(i, 1)" *ngIf="i < blocks.length - 1" class="p-1 hover:bg-slate-100 rounded text-slate-500">↓</button>
+                              <button (click)="removeBlock(i)" class="p-1 hover:bg-red-50 rounded text-red-500">✕</button>
+                          </div>
+
+                          <!-- Block Content -->
+                          <div class="p-6 pl-12">
+                              <div class="text-xs uppercase font-bold text-slate-300 mb-2 tracking-wider">{{ block.type }}</div>
+                              
+                              <!-- Text Block -->
+                              <div *ngIf="block.type === 'text'">
+                                  <textarea [(ngModel)]="block.content" rows="3" 
+                                      class="w-full border-0 focus:ring-0 p-0 text-slate-700 text-lg placeholder-gray-300 resize-none font-serif leading-relaxed" 
+                                      placeholder="Type your story here..."></textarea>
+                              </div>
+                              
+                               <!-- HTML Block -->
+                              <div *ngIf="block.type === 'html'">
+                                  <textarea [(ngModel)]="block.content" rows="4" 
+                                      class="w-full bg-slate-50 border border-slate-200 rounded p-3 font-mono text-sm text-slate-600 focus:border-blue-500 outline-none" 
+                                      placeholder="<p>Raw HTML content</p>"></textarea>
+                              </div>
+
+                              <!-- Image Block -->
+                              <div *ngIf="block.type === 'image'">
+                                  <div *ngIf="block.content" class="relative group/img rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+                                      <img [src]="block.content" class="max-h-64 mx-auto" />
+                                      <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex justify-center items-center">
+                                          <button (click)="openPicker(i)" class="btn btn-secondary">Change Image</button>
+                                      </div>
+                                  </div>
+                                  <div *ngIf="!block.content" class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer" (click)="openPicker(i)">
+                                      <div class="text-4xl mb-2">🖼</div>
+                                      <span class="text-slate-500 font-medium">Select an Image</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <div *ngIf="blocks.length === 0" class="text-center py-12 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 text-slate-400">
+                          Add your first block to start writing.
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Footer Actions -->
+              <div class="sticky bottom-6 flex justify-end">
+                  <button class="btn btn-primary shadow-lg border border-blue-500/50" (click)="save()">
+                      Save {{ activeLang() | uppercase }} Version
+                  </button>
+              </div>
+          </div>
+      </div>
+      
+      <div *ngIf="!selectedPageSlug() && pages().length === 0" class="text-center py-20">
+          <h3 class="text-xl font-medium text-slate-600 mb-4">No content yet.</h3>
+          <button class="btn btn-primary" (click)="createHome()">Initialize Home Page</button>
+      </div>
+
+      <app-media-picker *ngIf="showPicker" (onSelect)="onImageSelected($event)" (onCancel)="showPicker = false"></app-media-picker>
     </div>
-
-    <!-- Language Tabs -->
-    <div *ngIf="selectedPageSlug()" class="editor-container">
-        <div class="lang-tabs">
-            <button 
-                *ngFor="let lang of languages()" 
-                [class.active]="activeLang() === lang.code"
-                (click)="switchLang(lang.code)"
-            >{{ lang.name }} ({{ lang.code }})</button>
-        </div>
-
-        <div class="form-content" *ngIf="activeLang()">
-            <div class="form-group">
-                <label>Page Title</label>
-                <input [(ngModel)]="content.title" />
-            </div>
-            
-            <div class="form-group">
-                <label>Localized Slug (URL)</label>
-                <input [(ngModel)]="content.slug_localized" />
-            </div>
-
-            <fieldset>
-                <legend>SEO</legend>
-                <div class="form-group">
-                    <label>Meta Title</label>
-                    <input [(ngModel)]="content.seo_title" />
-                </div>
-                <div class="form-group">
-                    <label>Meta Description</label>
-                    <textarea [(ngModel)]="content.seo_desc" rows="2"></textarea>
-                </div>
-            </fieldset>
-
-            <div class="block-editor">
-                <h3>Content Blocks</h3>
-                <div class="blocks-list">
-                    <div class="block-item" *ngFor="let block of blocks; let i = index">
-                        <div class="block-header">
-                            <span class="type-tag">{{ block.type | uppercase }}</span>
-                            <div class="actions">
-                                <button class="btn-sm danger" (click)="removeBlock(i)">Delete</button>
-                                <button class="btn-sm" *ngIf="i > 0" (click)="moveBlock(i, -1)">↑</button>
-                                <button class="btn-sm" *ngIf="i < blocks.length - 1" (click)="moveBlock(i, 1)">↓</button>
-                            </div>
-                        </div>
-                        
-                        <!-- Text Block -->
-                        <div *ngIf="block.type === 'text'" class="block-body">
-                            <textarea [(ngModel)]="block.content" rows="4" placeholder="Enter text content..."></textarea>
-                        </div>
-                        
-                         <!-- HTML Block -->
-                        <div *ngIf="block.type === 'html'" class="block-body">
-                            <textarea [(ngModel)]="block.content" rows="4" placeholder="Enter raw HTML..."></textarea>
-                        </div>
-
-                        <!-- Image Block -->
-                        <div *ngIf="block.type === 'image'" class="block-body image-block">
-                            <div *ngIf="block.content" class="preview">
-                                <img [src]="block.content" style="max-height: 100px;" />
-                                <button (click)="openPicker(i)">Change Image</button>
-                            </div>
-                            <div *ngIf="!block.content">
-                                <button (click)="openPicker(i)">Select Image</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="add-bar">
-                    <button (click)="addBlock('text')">+ Text</button>
-                    <button (click)="addBlock('image')">+ Image</button>
-                    <button (click)="addBlock('html')">+ HTML</button>
-                </div>
-            </div>
-
-            <div class="actions main-actions">
-                <button class="btn-primary" (click)="save()">Save {{ activeLang() }} Version</button>
-            </div>
-        </div>
-    </div>
-    
-    <div *ngIf="!selectedPageSlug() && pages().length === 0">
-        <p>No pages found. <button (click)="createHome()">Create Home Page</button></p>
-    </div>
-
-    <app-media-picker *ngIf="showPicker" (onSelect)="onImageSelected($event)" (onCancel)="showPicker = false"></app-media-picker>
-  `,
-    styles: [`
-    .page-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
-    .lang-tabs { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 20px; }
-    .lang-tabs button { background: none; border: none; padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent; }
-    .lang-tabs button.active { border-bottom-color: #3498db; color: #3498db; font-weight: bold; }
-    
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
-    input, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-    
-    .btn-primary { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 1rem; }
-    fieldset { border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin-bottom: 15px; }
-
-    /* Block Editor Styles */
-    .block-editor { background: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid #eee; margin-bottom: 20px; }
-    .block-item { background: white; border: 1px solid #ddd; margin-bottom: 10px; padding: 10px; border-radius: 4px; }
-    .block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-    .type-tag { font-size: 0.8rem; background: #eee; padding: 2px 6px; border-radius: 3px; font-weight: bold; color: #555; }
-    .btn-sm { padding: 3px 8px; font-size: 0.8rem; margin-left: 5px; cursor: pointer; }
-    .btn-sm.danger { color: #e74c3c; border: 1px solid #e74c3c; background: transparent; }
-    .add-bar button { margin-right: 10px; padding: 8px 15px; background: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    .main-actions { text-align: right; border-top: 1px solid #eee; padding-top: 20px; }
-  `]
+  `
 })
 export class PageEditorComponent {
     pages = signal<any[]>([]);
@@ -156,8 +176,8 @@ export class PageEditorComponent {
     }
 
     init() {
-        this.http.get<any[]>('http://localhost:3000/api/pages').subscribe(p => this.pages.set(p));
-        this.http.get<Language[]>('http://localhost:3000/api/languages').subscribe(l => {
+        this.http.get<any[]>('/api/pages').subscribe(p => this.pages.set(p));
+        this.http.get<Language[]>('/api/languages').subscribe(l => {
             this.languages.set(l);
             if (l.length > 0) this.activeLang.set(l[0].code);
         });
@@ -178,7 +198,7 @@ export class PageEditorComponent {
     fetchContent() {
         if (!this.selectedPageSlug() || !this.activeLang()) return;
 
-        this.http.get<any>(`http://localhost:3000/api/pages/${this.selectedPageSlug()}/content?lang=${this.activeLang()}`)
+        this.http.get<any>(`/api/pages/${this.selectedPageSlug()}/content?lang=${this.activeLang()}`)
             .subscribe(data => {
                 this.content = data.title ? data : {
                     title: '', slug_localized: '', seo_title: '', seo_desc: ''
@@ -189,7 +209,6 @@ export class PageEditorComponent {
                 if (json && Array.isArray(json)) {
                     this.blocks = json;
                 } else if (json && typeof json === 'object') {
-                    // Migration support if structure was different (e.g. { blocks: [] })
                     this.blocks = []; // Default empty
                 } else {
                     this.blocks = [];
@@ -231,7 +250,7 @@ export class PageEditorComponent {
         // Update content object
         this.content.content_json = this.blocks;
 
-        this.http.post(`http://localhost:3000/api/pages/${this.pageId}/content`, {
+        this.http.post(`/api/pages/${this.pageId}/content`, {
             lang: this.activeLang(),
             ...this.content
         }).subscribe(() => {
@@ -240,7 +259,7 @@ export class PageEditorComponent {
     }
 
     createHome() {
-        this.http.post('http://localhost:3000/api/pages', { slug_key: 'home', template: 'home' }).subscribe(() => {
+        this.http.post('/api/pages', { slug_key: 'home', template: 'home' }).subscribe(() => {
             this.init();
         });
     }

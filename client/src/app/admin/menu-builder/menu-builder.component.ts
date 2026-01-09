@@ -8,61 +8,49 @@ import { MenuService, MenuItem } from '../../core/services/menu.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="menu-builder">
-      <h2>Menu Builder (Main)</h2>
+    <div class="space-y-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-slate-800">Menu Builder</h2>
+        <div class="space-x-2">
+            <button class="btn btn-secondary" (click)="reload()">Reload</button>
+            <button class="btn btn-primary" (click)="save()">Save Menu</button>
+        </div>
+      </div>
       
-      <div class="menu-list">
-        <table>
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="w-full text-left border-collapse">
             <thead>
-                <tr>
-                    <th>Label</th>
-                    <th>Link (e.g. /home)</th>
-                    <th style="width: 150px">Actions</th>
+                <tr class="bg-slate-50 text-slate-600 uppercase text-xs tracking-wider border-b border-gray-200">
+                    <th class="p-4 font-semibold w-1/3">Label</th>
+                    <th class="p-4 font-semibold w-1/3">Link</th>
+                    <th class="p-4 font-semibold text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr *ngFor="let item of items; let i = index">
-                    <td><input [(ngModel)]="item.label" placeholder="Label" /></td>
-                    <td><input [(ngModel)]="item.link" placeholder="Link" /></td>
-                    <td class="actions-cell">
-                        <button class="btn-sm" (click)="move(i, -1)" [disabled]="i === 0">↑</button>
-                        <button class="btn-sm" (click)="move(i, 1)" [disabled]="i === items.length - 1">↓</button>
-                        <button class="btn-sm danger" (click)="remove(i)">✖</button>
+            <tbody class="divide-y divide-gray-100">
+                <tr *ngFor="let item of items; let i = index" class="hover:bg-gray-50 transition-colors">
+                    <td class="p-4">
+                        <input [(ngModel)]="item.label" placeholder="Label" class="input-field" />
+                    </td>
+                    <td class="p-4">
+                        <input [(ngModel)]="item.link" placeholder="Link" class="input-field font-mono text-sm text-blue-600" />
+                    </td>
+                    <td class="p-4 text-right flex justify-end gap-2">
+                         <button (click)="move(i, -1)" [disabled]="i === 0" class="p-2 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-slate-600 transition">↑</button>
+                         <button (click)="move(i, 1)" [disabled]="i === items.length - 1" class="p-2 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-slate-600 transition">↓</button>
+                         <button (click)="remove(i)" class="p-2 rounded bg-red-50 text-red-500 hover:bg-red-100 transition">✕</button>
                     </td>
                 </tr>
             </tbody>
         </table>
         
-        <div class="add-bar">
-            <button (click)="add()">+ Add Item</button>
+        <div class="p-4 bg-slate-50 border-t border-gray-200">
+            <button (click)="add()" class="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition font-medium">
+                + Add Menu Item
+            </button>
         </div>
       </div>
-
-      <div class="main-actions">
-        <button class="btn-primary" (click)="save()">Save Menu</button>
-        <button class="btn-secondary" (click)="reload()">Reload</button>
-      </div>
-
     </div>
-  `,
-  styles: [`
-    .menu-builder { padding: 20px; max-width: 800px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-    th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-    th { background: #f9f9f9; }
-    input { width: 100%; padding: 5px; box-sizing: border-box; }
-    
-    .actions-cell { display: flex; gap: 5px; justify-content: center; }
-    .btn-sm { padding: 2px 8px; cursor: pointer; background: #eee; border: 1px solid #ccc; border-radius: 3px; }
-    .btn-sm.danger { color: #e74c3c; border-color: #e74c3c; background: white; }
-    
-    .add-bar { margin-bottom: 20px; }
-    .add-bar button { width: 100%; padding: 10px; background: #2ecc71; color: white; border: none; cursor: pointer; border-radius: 4px; }
-    
-    .main-actions button { padding: 10px 20px; margin-right: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
-    .btn-primary { background: #3498db; color: white; }
-    .btn-secondary { background: #95a5a6; color: white; }
-  `]
+  `
 })
 export class MenuBuilderComponent implements OnInit {
   items: MenuItem[] = [];
@@ -96,7 +84,7 @@ export class MenuBuilderComponent implements OnInit {
   }
 
   remove(index: number) {
-    if (confirm('Are you sure?')) {
+    if (confirm('Delete this item?')) {
       this.items.splice(index, 1);
     }
   }
@@ -110,7 +98,7 @@ export class MenuBuilderComponent implements OnInit {
 
   save() {
     this.menuService.saveMenu('main', this.items).subscribe(() => {
-      alert('Menu saved! Refresh public site to see changes.');
+      alert('Menu saved!');
     });
   }
 }

@@ -1,121 +1,101 @@
-import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Language } from '../../core/models/language.model';
 
 @Component({
-    selector: 'app-language-manager',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    template: `
-    <div class="page-header">
-      <h1>Language Management</h1>
-      <button class="btn-primary" (click)="isAdding.set(true)">+ Add Language</button>
+  selector: 'app-language-manager',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <div class="space-y-6">
+       <div class="flex justify-between items-center">
+         <h2 class="text-2xl font-bold text-slate-800">Languages</h2>
+         <div class="flex gap-2">
+             <input [(ngModel)]="newLang.code" placeholder="Code (e.g. fr)" class="input-field w-32" />
+             <input [(ngModel)]="newLang.name" placeholder="Name (e.g. French)" class="input-field w-40" />
+             <button class="btn btn-primary" (click)="add()">+ Add</button>
+         </div>
+       </div>
+
+       <div class="bg-white rounded-lg shadow overflow-hidden">
+         <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 text-slate-600 uppercase text-xs tracking-wider border-b border-gray-200">
+                    <th class="p-4 font-semibold">Code</th>
+                    <th class="p-4 font-semibold">Name</th>
+                    <th class="p-4 font-semibold text-center">Default</th>
+                    <th class="p-4 font-semibold text-center">Status</th>
+                    <th class="p-4 font-semibold text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                <tr *ngFor="let lang of languages()" class="hover:bg-gray-50 transition-colors">
+                    <td class="p-4 font-mono font-medium text-blue-600">{{ lang.code }}</td>
+                    <td class="p-4 text-slate-700">
+                        <input [(ngModel)]="lang.name" class="bg-transparent border-none focus:ring-0 p-0 w-full" />
+                    </td>
+                    <td class="p-4 text-center">
+                        <span *ngIf="lang.is_default" class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">DEFAULT</span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <button (click)="toggleStatus(lang)" 
+                            [class]="lang.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'" 
+                            class="px-2 py-1 rounded-full text-xs font-bold cursor-pointer hover:opacity-80">
+                            {{ lang.enabled ? 'ACTIVE' : 'DISABLED' }}
+                        </button>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button class="text-blue-600 hover:text-blue-800 mr-3 text-sm font-medium" (click)="update(lang)">Save</button>
+                        <button class="text-red-500 hover:text-red-700 text-sm font-medium" (click)="delete(lang.code)" *ngIf="!lang.is_default">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+         </table>
+         <div class="p-4 text-center text-slate-400 text-sm" *ngIf="languages().length === 0">
+            No languages found.
+         </div>
+       </div>
     </div>
-
-    <!-- Add Form -->
-    <div *ngIf="isAdding()" class="card form-card">
-        <h3>New Language</h3>
-        <input [(ngModel)]="newLang.code" placeholder="Code (e.g., fr)" />
-        <input [(ngModel)]="newLang.name" placeholder="Name (e.g., Français)" />
-        <select [(ngModel)]="newLang.direction">
-            <option value="ltr">LTR</option>
-            <option value="rtl">RTL</option>
-        </select>
-        <div class="actions">
-            <button (click)="isAdding.set(false)">Cancel</button>
-            <button class="btn-primary" (click)="addLanguage()">Save</button>
-        </div>
-    </div>
-
-    <!-- List -->
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Code</th>
-          <th>Name</th>
-          <th>Direction</th>
-          <th>Default</th>
-          <th>Enabled</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let lang of languages()">
-          <td>{{ lang.code }}</td>
-          <td>{{ lang.name }}</td>
-          <td>{{ lang.direction.toUpperCase() }}</td>
-          <td><span *ngIf="lang.is_default" class="badge">Default</span></td>
-          <td>
-            <label class="switch">
-              <input type="checkbox" [checked]="lang.enabled" (change)="toggleEnabled(lang)">
-              <span class="slider"></span>
-            </label>
-          </td>
-          <td>
-            <button *ngIf="!lang.is_default" (click)="deleteLang(lang)">Delete</button>
-            <button *ngIf="!lang.is_default" (click)="setAsDefault(lang)">Set Default</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  `,
-    styles: [`
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-    .data-table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
-    .data-table th { background: #f8f9fa; font-weight: 600; color: #555; }
-    
-    .card { background: white; padding: 20px; border: 1px solid #ddd; margin-bottom: 20px; }
-    input, select { padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px; }
-    
-    .btn-primary { background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
-    button { cursor: pointer; }
-
-    .badge { background: #2ecc71; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; }
-  `]
+  `
 })
-export class LanguageManagerComponent {
-    languages = signal<Language[]>([]);
-    isAdding = signal(false);
-    newLang: Partial<Language> = { direction: 'ltr' };
+export class LanguageManagerComponent implements OnInit {
+  languages = signal<Language[]>([]);
+  newLang = { code: '', name: '' };
 
-    constructor(private http: HttpClient) {
-        this.fetchLanguages();
-    }
+  constructor(private http: HttpClient) { }
 
-    fetchLanguages() {
-        this.http.get<Language[]>('http://localhost:3000/api/languages').subscribe(data => {
-            this.languages.set(data);
-        });
-    }
+  ngOnInit() {
+    this.load();
+  }
 
-    addLanguage() {
-        this.http.post('http://localhost:3000/api/languages', this.newLang).subscribe(() => {
-            this.newLang = { direction: 'ltr' };
-            this.isAdding.set(false);
-            this.fetchLanguages();
-        });
-    }
+  load() {
+    this.http.get<Language[]>('/api/languages').subscribe(data => this.languages.set(data));
+  }
 
-    toggleEnabled(lang: any) { // Using any for simplicity in rapid prototype, ideally proper type
-        this.http.put(`http://localhost:3000/api/languages/${lang.code}`, { enabled: !lang.enabled }).subscribe(() => {
-            this.fetchLanguages();
-        });
-    }
+  add() {
+    if (!this.newLang.code || !this.newLang.name) return;
+    this.http.post('/api/languages', this.newLang).subscribe(() => {
+      this.newLang = { code: '', name: '' };
+      this.load();
+    });
+  }
 
-    setAsDefault(lang: any) {
-        this.http.put(`http://localhost:3000/api/languages/${lang.code}`, { is_default: true, enabled: true }).subscribe(() => {
-            this.fetchLanguages();
-        });
-    }
+  update(lang: Language) {
+    this.http.put(`/api/languages/${lang.code}`, lang).subscribe(() => {
+      alert('Updated');
+    });
+  }
 
-    deleteLang(lang: any) {
-        if (confirm(`Delete ${lang.name}?`)) {
-            this.http.delete(`http://localhost:3000/api/languages/${lang.code}`).subscribe(() => {
-                this.fetchLanguages();
-            });
-        }
+  toggleStatus(lang: Language) {
+    lang.enabled = !lang.enabled;
+    this.update(lang);
+  }
+
+  delete(code: string) {
+    if (confirm('Delete language?')) {
+      this.http.delete(`/api/languages/${code}`).subscribe(() => this.load());
     }
+  }
 }
