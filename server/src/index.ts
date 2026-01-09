@@ -17,7 +17,7 @@ let db: any;
         filename: path.join(__dirname, 'db', 'cms.db'),
         driver: sqlite3.Database
     });
-    
+
     // Load Schema
     const fs = require('fs');
     const schemaSql = fs.readFileSync(path.join(__dirname, 'db', 'schema.sql'), 'utf8');
@@ -25,35 +25,19 @@ let db: any;
     console.log('Database initialized');
 })();
 
-// API: Get Languages
-app.get('/api/languages', async (req, res) => {
-    try {
-        const langs = await db.all('SELECT * FROM languages WHERE enabled = 1');
-        res.json(langs);
-    } catch (e) {
-        res.status(500).json({ error: String(e) });
-    }
-});
+export const getDb = () => db;
 
-// API: Get Translations (by Lang)
-app.get('/api/translations/:lang', async (req, res) => {
-    const { lang } = req.params;
-    try {
-        const rows = await db.all(`
-            SELECT t.key, v.value 
-            FROM translation_keys t 
-            LEFT JOIN translation_values v ON t.key = v.trans_key AND v.lang_code = ?
-        `, lang);
-        
-        const result: Record<string, string> = {};
-        rows.forEach((row: any) => {
-            result[row.key] = row.value || '';
-        });
-        res.json(result);
-    } catch (e) {
-        res.status(500).json({ error: String(e) });
-    }
-});
+// Import Routes
+import languagesRouter from './routes/languages';
+import translationsRouter from './routes/translations';
+import pagesRouter from './routes/pages';
+import sitemapRouter from './routes/sitemap';
+
+// Register Routes
+app.use('/api/languages', languagesRouter);
+app.use('/api/translations', translationsRouter);
+app.use('/api/pages', pagesRouter);
+app.use('/', sitemapRouter); // Root level for /sitemap.xml
 
 app.listen(PORT, () => {
     console.log(`CMS Server running on port ${PORT}`);

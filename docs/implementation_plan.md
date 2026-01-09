@@ -44,3 +44,54 @@
    - `curl http://localhost:4000/zh-tw/home` -> Check if `<html lang="zh-TW">` exists.
 2. **Service Check**:
    - Verify that changing language in the UI (if a button is added) updates the URL or fetches new data.
+
+# Phase 2: Implementation Plan (Admin & APIs)
+
+## 1. Backend API Implementation (`server/src/index.ts` & `routes/`)
+Refactor `server/src/index.ts` to use structured routes.
+
+### endpoints
+- **Languages**
+  - `POST /api/languages`: Add new language.
+  - `PUT /api/languages/:code`: Update (enable/disable, default).
+  - `DELETE /api/languages/:code`: Remove language.
+- **Translations**
+  - `GET /api/translations/keys`: List all keys.
+  - `POST /api/translations/keys`: Create key.
+  - `PUT /api/translations`: Bulk update values `{ "key": "val", "lang": "en" }`.
+- **Page Content**
+  - `GET /api/pages`: List pages.
+  - `GET /api/pages/:slug`: Get page details.
+  - `POST /api/pages/:id/content`: Update content for specific language.
+
+## 2. Admin Frontend (`client/src/app/admin`)
+- **Structure**: Lazy loaded route `/admin`.
+- **Components**:
+  - `AdminLayout`: Sidebar, Header.
+  - `Dashboard`: Stats.
+  - `LanguageManager`: Table to edit languages.
+  - `TranslationEditor`: DataGrid for editing translations.
+  - `PageEditor`: Form to edit Page SEO and Content JSON.
+
+## 3. Security (Basic)
+- Simple hardcoded API Key middleware for now (User didn't specify Auth provider, will use a simple "Admin-Secret" header for MVP).
+
+# Phase 3: Client Features Implementation
+
+## 1. Dynamic Page Rendering (`AppPage`)
+- **Route**: `/:lang/:slug`
+- **Logic**:
+    - Guard/Resolver checks URL language and slug.
+    - Fetches `PageContents` from Backend.
+    - Updates `Title`, `Meta` tags.
+    - Renders `content_json` using a `BlockRendererComponent`.
+
+## 2. Contact Form with i18n
+- **Component**: `ContactBlockComponent`.
+- **Validation**: Use Angular `Validators` with error messages coming from `I18nService.translate('ERR_REQUIRED')`.
+
+## 3. SEO
+- **Sitemap**: `server/src/routes/sitemap.ts` generates XML from DB.
+- **Robots.txt**: Serve static file.
+
+

@@ -11,6 +11,23 @@
     - [x] Scaffold Angular v21 Frontend <!-- id: 8 -->
 - [/] Implement Proof of Concept Code <!-- id: 9 -->
     - [x] Create Signal-based Dynamic Language Switching Service <!-- id: 10 -->
-- [ ] Finalize Documentation & Push <!-- id: 11 -->
-    - [ ] Update `walkthrough.md` <!-- id: 12 -->
-    - [ ] Push to GitHub <!-- id: 13 -->
+- [x] Finalize Documentation & Push <!-- id: 11 -->
+    - [x] Update `walkthrough.md` <!-- id: 12 -->
+    - [x] Push to GitHub <!-- id: 13 -->
+
+# Phase 2: Admin Dashboard & Content API (Next)
+- [x] Implement Backend CRUD APIs <!-- id: 14 -->
+    - [x] Language Management API (Create/Update/Delete) <!-- id: 15 -->
+    - [x] Translation Key-Value API <!-- id: 16 -->
+    - [x] Page Content API (JSONB handling) <!-- id: 17 -->
+- [x] Implement Admin Frontend (Lazy Loaded Module) <!-- id: 18 -->
+    - [x] Auth & RBAC Guard <!-- id: 19 -->
+    - [x] Language Editor UI <!-- id: 20 -->
+    - [x] Translation Editor UI (Grid View) <!-- id: 21 -->
+    - [x] Page Content Editor (Block/Text) <!-- id: 22 -->
+
+# Phase 3: Client Features & Enhancements
+- [x] Implement Dynamic Page Rendering (Frontend) <!-- id: 23 -->
+    - [x] Resolve Page Content from API based on Route <!-- id: 24 -->
+- [x] Contact Form with i18n Validation <!-- id: 25 -->
+- [x] SEO Enhancements (Sitemap Generator, Robots.txt) <!-- id: 26 -->

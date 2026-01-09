@@ -2,6 +2,7 @@ export interface Language {
     code: string;
     name: string;
     is_default: boolean;
+    enabled: boolean;
     direction: 'ltr' | 'rtl';
 }
 

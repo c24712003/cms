@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getDb = void 0;
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const sqlite3_1 = __importDefault(require("sqlite3"));
@@ -25,35 +26,18 @@ let db;
     await db.exec(schemaSql);
     console.log('Database initialized');
 })();
-// API: Get Languages
-app.get('/api/languages', async (req, res) => {
-    try {
-        const langs = await db.all('SELECT * FROM languages WHERE enabled = 1');
-        res.json(langs);
-    }
-    catch (e) {
-        res.status(500).json({ error: String(e) });
-    }
-});
-// API: Get Translations (by Lang)
-app.get('/api/translations/:lang', async (req, res) => {
-    const { lang } = req.params;
-    try {
-        const rows = await db.all(`
-            SELECT t.key, v.value 
-            FROM translation_keys t 
-            LEFT JOIN translation_values v ON t.key = v.trans_key AND v.lang_code = ?
-        `, lang);
-        const result = {};
-        rows.forEach((row) => {
-            result[row.key] = row.value || '';
-        });
-        res.json(result);
-    }
-    catch (e) {
-        res.status(500).json({ error: String(e) });
-    }
-});
+const getDb = () => db;
+exports.getDb = getDb;
+// Import Routes
+const languages_1 = __importDefault(require("./routes/languages"));
+const translations_1 = __importDefault(require("./routes/translations"));
+const pages_1 = __importDefault(require("./routes/pages"));
+const sitemap_1 = __importDefault(require("./routes/sitemap"));
+// Register Routes
+app.use('/api/languages', languages_1.default);
+app.use('/api/translations', translations_1.default);
+app.use('/api/pages', pages_1.default);
+app.use('/', sitemap_1.default); // Root level for /sitemap.xml
 app.listen(PORT, () => {
     console.log(`CMS Server running on port ${PORT}`);
 });
