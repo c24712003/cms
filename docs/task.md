@@ -31,3 +31,16 @@
     - [x] Resolve Page Content from API based on Route <!-- id: 24 -->
 - [x] Contact Form with i18n Validation <!-- id: 25 -->
 - [x] SEO Enhancements (Sitemap Generator, Robots.txt) <!-- id: 26 -->
+
+# Phase 4: Security & Advanced Tools (The "Missing" Parts)
+- [x] Authentication System <!-- id: 27 -->
+    - [x] Backend: Users Table & JWT Auth API (Login/Me) <!-- id: 28 -->
+    - [x] Frontend: Login Page & AuthGuard <!-- id: 29 -->
+    - [x] RBAC Middleware (Protect Admin Routes) <!-- id: 30 -->
+- [x] Media/File Manager <!-- id: 31 -->
+    - [x] Backend: File Upload API (Multer) <!-- id: 32 -->
+    - [x] Frontend: Media Library UI (Grid selection) <!-- id: 33 -->
+- [x] Navigation Manager <!-- id: 34 -->
+    - [x] DB: Menus Table (JSON structure) <!-- id: 35 -->
+    - [x] Admin: Menu Builder UI <!-- id: 36 -->
+    - [x] Public: Dynamic Header Component <!-- id: 37 -->

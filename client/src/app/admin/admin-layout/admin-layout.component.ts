@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
-    selector: 'app-admin-layout',
-    standalone: true,
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
-    template: `
+  selector: 'app-admin-layout',
+  standalone: true,
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  template: `
     <div class="admin-container">
       <nav class="sidebar">
         <h2>CMS Admin</h2>
@@ -15,7 +16,12 @@ import { CommonModule } from '@angular/common';
           <li><a routerLink="languages" routerLinkActive="active">Languages</a></li>
           <li><a routerLink="translations" routerLinkActive="active">Translations</a></li>
           <li><a routerLink="pages" routerLinkActive="active">Pages</a></li>
+          <li><a routerLink="media" routerLinkActive="active">Media Library</a></li>
+          <li><a routerLink="menus" routerLinkActive="active">Menus</a></li>
         </ul>
+        <div class="user-actions" style="padding: 20px; text-align: center;">
+            <button (click)="logout()" style="padding: 8px 16px; background: #e74c3c; color: white; border: none; borderRadius: 4px; cursor: pointer;">Logout</button>
+        </div>
         <div class="footer">
             <a routerLink="/" target="_blank">View Site</a>
         </div>
@@ -25,7 +31,7 @@ import { CommonModule } from '@angular/common';
       </main>
     </div>
   `,
-    styles: [`
+  styles: [`
     .admin-container { display: flex; height: 100vh; }
     .sidebar { width: 250px; background: #2c3e50; color: white; display: flex; flex-direction: column; }
     .sidebar h2 { padding: 20px; margin: 0; background: #1a252f; text-align: center; }
@@ -37,4 +43,10 @@ import { CommonModule } from '@angular/common';
     .footer a { color: #bdc3c7; text-decoration: none; }
   `]
 })
-export class AdminLayoutComponent { }
+export class AdminLayoutComponent {
+  constructor(private authService: AuthService) { }
+
+  logout() {
+    this.authService.logout();
+  }
+}

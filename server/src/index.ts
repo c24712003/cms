@@ -23,6 +23,11 @@ let db: any;
     const schemaSql = fs.readFileSync(path.join(__dirname, 'db', 'schema.sql'), 'utf8');
     await db.exec(schemaSql);
     console.log('Database initialized');
+    // Seed Admin
+    const { seedAdmin } = require('./routes/auth');
+    await seedAdmin();
+    // Run schema again to ensure new tables if any
+    await db.exec(schemaSql);
 })();
 
 export const getDb = () => db;
@@ -32,8 +37,17 @@ import languagesRouter from './routes/languages';
 import translationsRouter from './routes/translations';
 import pagesRouter from './routes/pages';
 import sitemapRouter from './routes/sitemap';
+import authRouter, { seedAdmin } from './routes/auth';
+import mediaRouter from './routes/media';
+import menusRouter from './routes/menus';
+
+// Serve Uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Register Routes
+app.use('/api/auth', authRouter);
+app.use('/api/media', mediaRouter);
+app.use('/api/menus', menusRouter);
 app.use('/api/languages', languagesRouter);
 app.use('/api/translations', translationsRouter);
 app.use('/api/pages', pagesRouter);

@@ -46,12 +46,32 @@ CREATE TABLE IF NOT EXISTS page_contents (
     PRIMARY KEY(page_id, lang_code)
 );
 
+-- Users Table
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT DEFAULT 'admin'
+);
+
+-- Menus Table
+CREATE TABLE IF NOT EXISTS menus (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT UNIQUE NOT NULL, 
+    items_json TEXT NOT NULL -- JSON structure: [{ label: "Home", link: "/home", children: [] }]
+);
+
 -- Initial Seed Data
 INSERT OR IGNORE INTO languages (code, name, is_default) VALUES ('en', 'English', 1);
 INSERT OR IGNORE INTO languages (code, name, is_default) VALUES ('zh-TW', '繁體中文', 0);
 INSERT OR IGNORE INTO languages (code, name, is_default) VALUES ('jp', '日本語', 0);
 
+-- Default Admin (Password: admin123) - Using a simple hash for seed, ideally use bcrypt hash in production code
+-- $2b$10$X7... is 'admin123' hashed (example)
+-- For this demo we will insert via code on startup if not exists to ensure correct hashing
 INSERT OR IGNORE INTO translation_keys (key, namespace) VALUES ('NAV_HOME', 'common');
 INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_HOME', 'en', 'Home');
 INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_HOME', 'zh-TW', '首頁');
+
+INSERT OR IGNORE INTO menus (code, items_json) VALUES ('main', '[{"label": "Home", "link": "/home"}, {"label": "Contact", "link": "/contact"}]');
 INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_HOME', 'jp', 'ホーム');

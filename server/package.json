@@ -9,9 +9,15 @@
     "dev": "nodemon src/index.ts"
   },
   "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "bcrypt": "^6.0.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^4.19.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.0.2",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7"
   },

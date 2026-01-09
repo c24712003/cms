@@ -44,10 +44,17 @@ Implemented in `server/src/db/schema.sql`.
 
 ### Public Site
 - **Dynamic Routing**: `/:lang/:slug` loads content from the database.
+- **Dynamic Menu**: Header loads links from `menus` table (API).
 - **Fallback**: Redirects root `/` to `/:lang/home`.
 - **Contact**: Available at `/:lang/contact`.
 
+### Advanced Features (Phase 4)
+- **Auth**: JWT-based Authentication, RBAC Guard, Interceptor. Admin is protected.
+- **Media**: Image uploads via Multer. Grid view in Admin.
+- **Navigation**: JSON-based Menu builder in Admin. Dynamic Public Header.
+
 ## 5. Next Steps
-- Deploy to a Node.js hosting environment (DigitalOcean, Vercel, etc.).
-- Enhance Security (Add real Authentication to Admin routes).
+- Implement Drag & Drop for Menu Builder.
+- Integrate Media Picker into Page Editor (Rich Text).
+
 

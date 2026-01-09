@@ -3,6 +3,10 @@ import { App } from './app';
 
 export const routes: Routes = [
     {
+        path: 'admin/login',
+        loadComponent: () => import('./admin/login/login.component').then(m => m.LoginComponent)
+    },
+    {
         path: 'admin',
         loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)
     },

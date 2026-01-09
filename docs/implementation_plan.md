@@ -94,4 +94,26 @@ Refactor `server/src/index.ts` to use structured routes.
 - **Sitemap**: `server/src/routes/sitemap.ts` generates XML from DB.
 - **Robots.txt**: Serve static file.
 
+# Phase 4: Authentication & Tools
+
+## 1. Authentication System
+- **Backend**:
+  - `users` table: `id`, `username`, `password_hash`, `role`.
+  - `POST /api/auth/login`: Returns JWT.
+  - Middleware `authenticateToken`: Verifies JWT from `Authorization` header.
+- **Frontend**:
+  - `LoginComponent`: Form.
+  - `AuthService`: Manage Token & User state (Signal).
+  - `AuthGuard`: Protect `/admin/*`.
+  - `Interceptor`: Attach token to API requests.
+
+## 2. Media Manager
+- **Backend**:
+  - `multer` for file uploads to `server/uploads/`.
+  - `POST /api/media`: Upload file.
+  - `GET /api/media`: List files.
+- **Frontend**:
+  - `MediaPickerComponent`: Select image for Page Content.
+
+
 
