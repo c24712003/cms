@@ -617,3 +617,52 @@ SELECT id, 'en', 'Digital Transformation Solutions', 'digital-transformation', '
 ]',
 CURRENT_TIMESTAMP FROM pages WHERE slug_key = 'solutions/digital-transformation';
 
+
+-- ============================================
+-- DRAFT & WORKFLOW (Added 2026-01-10)
+-- ============================================
+
+-- Page Drafts (Work In Progress)
+CREATE TABLE IF NOT EXISTS page_drafts (
+    page_id INTEGER,
+    lang_code TEXT,
+    title TEXT,
+    slug_localized TEXT,
+    seo_title TEXT,
+    seo_desc TEXT,
+    content_json TEXT,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(page_id) REFERENCES pages(id),
+    FOREIGN KEY(lang_code) REFERENCES languages(code),
+    PRIMARY KEY(page_id, lang_code)
+);
+
+-- Page Content History (Versioning/Archive)
+CREATE TABLE IF NOT EXISTS page_content_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page_id INTEGER,
+    lang_code TEXT,
+    title TEXT,
+    slug_localized TEXT,
+    seo_title TEXT,
+    seo_desc TEXT,
+    content_json TEXT,
+    archived_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(page_id) REFERENCES pages(id),
+    FOREIGN KEY(lang_code) REFERENCES languages(code)
+);
+
+-- ============================================
+-- DAM ASSETS (Added 2026-01-10)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS assets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL,
+    original_name TEXT,
+    mimetype TEXT,
+    size INTEGER,
+    url TEXT NOT NULL,
+    alt_text TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

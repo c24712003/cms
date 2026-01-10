@@ -92,6 +92,9 @@ export class DynamicPageComponent implements OnInit {
       const lang = params.get('lang') || 'en';
       const slug = params.get('slug') || 'home';
 
+      // Sync I18n Service
+      this.i18n.setLanguage(lang);
+
       this.pageService.getPage(slug, lang).subscribe({
         next: (data) => {
           if (data && data.title) {

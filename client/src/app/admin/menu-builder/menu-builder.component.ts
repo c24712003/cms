@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { MenuService, MenuItem } from '../../core/services/menu.service';
 
 @Component({
@@ -11,7 +12,7 @@ import { MenuService, MenuItem } from '../../core/services/menu.service';
     <div>
       <!-- Page Header -->
       <div class="admin-page-header">
-        <h1 class="admin-page-title">Menu Builder</h1>
+        <h1 class="admin-page-title">{{ getTitle() }}</h1>
         <div class="flex gap-2">
           <button class="btn btn-secondary" (click)="reload()">Reload</button>
           <button class="btn btn-primary" (click)="save()">Save Menu</button>
@@ -58,15 +59,37 @@ import { MenuService, MenuItem } from '../../core/services/menu.service';
 })
 export class MenuBuilderComponent implements OnInit {
   items: MenuItem[] = [];
+  menuCode: string = 'main';
 
-  constructor(private menuService: MenuService) { }
+  constructor(
+    private menuService: MenuService,
+    private route: ActivatedRoute
+  ) { }
 
-  ngOnInit() { this.reload(); }
+  ngOnInit() {
+    this.route.params.subscribe(params => {
+      this.menuCode = params['code'] || 'main'; // Default to main if not provided (though route should enforce it)
+      this.reload();
+    });
+  }
+
+  getTitle(): string {
+    return this.menuCode === 'main' ? 'Header Menu' :
+      this.menuCode === 'footer' ? 'Footer Menu' :
+        'Menu Builder';
+  }
 
   reload() {
-    this.menuService.getMenu('main').subscribe({
+    this.menuService.getMenu(this.menuCode).subscribe({
       next: (menu) => { this.items = Array.isArray(menu.items_json) ? menu.items_json : []; },
-      error: () => { this.items = [{ label: 'Home', link: '/home' }, { label: 'Contact', link: '/contact' }]; }
+      error: () => {
+        // Default items for new menus
+        if (this.menuCode === 'main') {
+          this.items = [{ label: 'Home', link: '/home' }, { label: 'Contact', link: '/contact' }];
+        } else {
+          this.items = [];
+        }
+      }
     });
   }
 
@@ -78,5 +101,5 @@ export class MenuBuilderComponent implements OnInit {
       [this.items[index], this.items[newIndex]] = [this.items[newIndex], this.items[index]];
     }
   }
-  save() { this.menuService.saveMenu('main', this.items).subscribe(() => alert('Menu saved!')); }
+  save() { this.menuService.saveMenu(this.menuCode, this.items).subscribe(() => alert('Menu saved!')); }
 }

@@ -40,6 +40,7 @@ import sitemapRouter from './routes/sitemap';
 import authRouter, { seedAdmin } from './routes/auth';
 import mediaRouter from './routes/media';
 import menusRouter from './routes/menus';
+import deliveryRouter from './routes/delivery';
 
 // Serve Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -51,6 +52,7 @@ app.use('/api/menus', menusRouter);
 app.use('/api/languages', languagesRouter);
 app.use('/api/translations', translationsRouter);
 app.use('/api/pages', pagesRouter);
+app.use('/api/delivery', deliveryRouter);
 app.use('/', sitemapRouter); // Root level for /sitemap.xml
 
 app.listen(PORT, () => {

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 
 export interface MenuItem {
     label: string;
+    labelKey?: string;
     link: string;
     children?: MenuItem[];
 }

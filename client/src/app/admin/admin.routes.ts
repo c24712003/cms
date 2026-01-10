@@ -20,7 +20,7 @@ export const ADMIN_ROUTES: Routes = [
             { path: 'translations', component: TranslationEditorComponent },
             { path: 'pages', component: PageEditorComponent },
             { path: 'media', component: MediaManagerComponent },
-            { path: 'menus', loadComponent: () => import('./menu-builder/menu-builder.component').then(m => m.MenuBuilderComponent) }
+            { path: 'menus/:code', loadComponent: () => import('./menu-builder/menu-builder.component').then(m => m.MenuBuilderComponent) }
         ]
     }
 ];

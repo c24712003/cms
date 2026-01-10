@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { MenuService, MenuItem } from '../../core/services/menu.service';
 import { I18nService } from '../../core/services/i18n.service';
 
@@ -23,9 +23,9 @@ import { I18nService } from '../../core/services/i18n.service';
                [routerLink]="getLocalizedLink(item.link)" 
                routerLinkActive="text-blue-600 bg-blue-50" 
                [routerLinkActiveOptions]="{exact: true}"
-               class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
-               {{ item.label }}
-            </a>
+                class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
+                {{ i18n.translate(item.labelKey || item.label) }}
+             </a>
           </nav>
 
           <!-- Actions -->
@@ -35,7 +35,6 @@ import { I18nService } from '../../core/services/i18n.service';
               <option value="en">🇬🇧 EN</option>
               <option value="zh-TW">🇹🇼 中文</option>
             </select>
-            <a routerLink="/admin" class="btn btn-primary btn-sm">Admin</a>
           </div>
         </div>
       </div>
@@ -45,7 +44,11 @@ import { I18nService } from '../../core/services/i18n.service';
 export class SiteHeaderComponent implements OnInit {
   menuItems = signal<MenuItem[]>([]);
 
-  constructor(private menuService: MenuService, public i18n: I18nService) { }
+  constructor(
+    private menuService: MenuService,
+    public i18n: I18nService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.menuService.getMenu('main').subscribe({
@@ -60,8 +63,16 @@ export class SiteHeaderComponent implements OnInit {
 
   switchLang(event: any) {
     const lang = event.target.value;
-    const currentUrl = window.location.pathname;
+    const currentUrl = this.router.url;
+    // Replace the language segment in the URL
+    // Assumes URL structure is always /:lang/... or just /:lang
     const newUrl = currentUrl.replace(/^\/[a-z]{2}(?:-[a-zA-Z]{2})?/, `/${lang}`);
-    window.location.href = newUrl || `/${lang}/home`;
+
+    // If replacement didn't happen (e.g. root url), default to home
+    if (newUrl === currentUrl && !currentUrl.match(/^\/[a-z]{2}/)) {
+      this.router.navigate([`/${lang}/home`]);
+    } else {
+      this.router.navigateByUrl(newUrl);
+    }
   }
 }

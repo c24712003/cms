@@ -61,6 +61,20 @@ export const seedAdmin = async () => {
             await db.run('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)', ['admin', hash, 'admin']);
             console.log('Default Admin (admin/admin123) created.');
         }
+
+        const editor = await db.get('SELECT * FROM users WHERE username = ?', ['editor']);
+        if (!editor) {
+            const hash = await bcrypt.hash('editor123', SALT_ROUNDS);
+            await db.run('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)', ['editor', hash, 'editor']);
+            console.log('Test Editor (editor/editor123) created.');
+        }
+
+        const viewer = await db.get('SELECT * FROM users WHERE username = ?', ['viewer']);
+        if (!viewer) {
+            const hash = await bcrypt.hash('viewer123', SALT_ROUNDS);
+            await db.run('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)', ['viewer', hash, 'viewer']);
+            console.log('Test Viewer (viewer/viewer123) created.');
+        }
     } catch (e) {
         console.error('Seed Admin Error:', e);
     }

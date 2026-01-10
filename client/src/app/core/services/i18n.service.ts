@@ -57,4 +57,26 @@ export class I18nService {
     translate(key: string): string {
         return this.translations()[key] || key;
     }
+
+    loadTranslations(lang: string) {
+        return this.http.get<TranslationMap>(`/api/translations/${lang}`).pipe(
+            tap(data => {
+                this.translations.set(data);
+                this.currentLang.set(lang);
+                // Also update transfer state just in case
+                this.transferState.set(I18N_DATA_KEY, data);
+            })
+        );
+    }
+
+    setLanguage(lang: string) {
+        // Optimistic update or check if already loaded? 
+        // For now, always reload to ensure fresh data, or we could cache.
+        // Let's just load.
+        if (this.currentLang() === lang && Object.keys(this.translations()).length > 0) {
+            return;
+        }
+
+        this.loadTranslations(lang).subscribe();
+    }
 }

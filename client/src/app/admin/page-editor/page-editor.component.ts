@@ -7,15 +7,15 @@ import { MediaPickerComponent } from '../media-picker/media-picker.component';
 import { MediaFile } from '../../core/services/media.service';
 
 interface Block {
-    type: 'text' | 'image' | 'html';
-    content: string;
+  type: 'text' | 'image' | 'html';
+  content: string;
 }
 
 @Component({
-    selector: 'app-page-editor',
-    standalone: true,
-    imports: [CommonModule, FormsModule, MediaPickerComponent],
-    template: `
+  selector: 'app-page-editor',
+  standalone: true,
+  imports: [CommonModule, FormsModule, MediaPickerComponent],
+  template: `
     <div>
       <!-- Page Header -->
       <div class="admin-page-header">
@@ -117,10 +117,17 @@ interface Block {
             </div>
           </div>
 
-          <!-- Save Button -->
-          <div class="flex justify-end mt-8 pt-6 border-t border-slate-100">
-            <button class="btn btn-primary" (click)="save()">
-              Save {{ activeLang() | uppercase }} Version
+          <!-- Action Buttons -->
+          <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
+            <div class="mr-auto flex items-center text-sm text-slate-500 italic">
+                <span class="w-2 h-2 rounded-full bg-amber-400 mr-2"></span>
+                Editing Draft Version
+            </div>
+            <button class="btn btn-secondary" (click)="saveDraft()">
+              Save Draft
+            </button>
+            <button class="btn btn-primary" (click)="publish()">
+              Publish
             </button>
           </div>
         </div>
@@ -138,67 +145,81 @@ interface Block {
   `
 })
 export class PageEditorComponent {
-    pages = signal<any[]>([]);
-    languages = signal<Language[]>([]);
-    selectedPageSlug = signal('');
-    activeLang = signal('');
-    content: any = {};
-    pageId: number | null = null;
-    blocks: Block[] = [];
-    showPicker = false;
-    currentBlockIndex: number | null = null;
+  pages = signal<any[]>([]);
+  languages = signal<Language[]>([]);
+  selectedPageSlug = signal('');
+  activeLang = signal('');
+  content: any = {};
+  pageId: number | null = null;
+  blocks: Block[] = [];
+  showPicker = false;
+  currentBlockIndex: number | null = null;
 
-    constructor(private http: HttpClient) { this.init(); }
+  constructor(private http: HttpClient) { this.init(); }
 
-    init() {
-        this.http.get<any[]>('/api/pages').subscribe(p => this.pages.set(p));
-        this.http.get<Language[]>('/api/languages').subscribe(l => {
-            this.languages.set(l);
-            if (l.length > 0) this.activeLang.set(l[0].code);
-        });
+  init() {
+    this.http.get<any[]>('/api/pages').subscribe(p => this.pages.set(p));
+    this.http.get<Language[]>('/api/languages').subscribe(l => {
+      this.languages.set(l);
+      if (l.length > 0) this.activeLang.set(l[0].code);
+    });
+  }
+
+  loadPage(slug: string) {
+    this.selectedPageSlug.set(slug);
+    const p = this.pages().find(x => x.slug_key === slug);
+    if (p) this.pageId = p.id;
+    this.fetchContent();
+  }
+
+  switchLang(code: string) { this.activeLang.set(code); this.fetchContent(); }
+
+  fetchContent() {
+    if (!this.pageId || !this.activeLang()) return;
+    this.http.get<any>(`/api/pages/${this.pageId}/draft?lang=${this.activeLang()}`)
+      .subscribe(data => {
+        this.content = data.title ? data : { title: '', slug_localized: '', seo_title: '', seo_desc: '' };
+        const json = this.content.content_json;
+        this.blocks = (json && Array.isArray(json)) ? json : [];
+      });
+  }
+
+  addBlock(type: 'text' | 'image' | 'html') { this.blocks.push({ type, content: '' }); }
+  removeBlock(index: number) { this.blocks.splice(index, 1); }
+  moveBlock(index: number, direction: number) {
+    const newIndex = index + direction;
+    if (newIndex >= 0 && newIndex < this.blocks.length) {
+      [this.blocks[index], this.blocks[newIndex]] = [this.blocks[newIndex], this.blocks[index]];
     }
+  }
+  openPicker(index: number) { this.currentBlockIndex = index; this.showPicker = true; }
+  onImageSelected(file: MediaFile) {
+    if (this.currentBlockIndex !== null) this.blocks[this.currentBlockIndex].content = file.url;
+    this.showPicker = false; this.currentBlockIndex = null;
+  }
 
-    loadPage(slug: string) {
-        this.selectedPageSlug.set(slug);
-        const p = this.pages().find(x => x.slug_key === slug);
-        if (p) this.pageId = p.id;
-        this.fetchContent();
-    }
+  saveDraft() {
+    if (!this.pageId) return;
+    this.content.content_json = this.blocks;
+    this.http.post(`/api/pages/${this.pageId}/draft`, { lang: this.activeLang(), ...this.content })
+      .subscribe({
+        next: () => alert('Draft Saved! (Changes are NOT live)'),
+        error: (e) => alert('Error saving draft: ' + e.message)
+      });
+  }
 
-    switchLang(code: string) { this.activeLang.set(code); this.fetchContent(); }
+  publish() {
+    if (!this.pageId) return;
+    if (!confirm('Are you sure you want to publish these changes to the live website? This will backup the current version.')) return;
 
-    fetchContent() {
-        if (!this.selectedPageSlug() || !this.activeLang()) return;
-        this.http.get<any>(`/api/pages/${this.selectedPageSlug()}/content?lang=${this.activeLang()}`)
-            .subscribe(data => {
-                this.content = data.title ? data : { title: '', slug_localized: '', seo_title: '', seo_desc: '' };
-                const json = this.content.content_json;
-                this.blocks = (json && Array.isArray(json)) ? json : [];
-            });
-    }
-
-    addBlock(type: 'text' | 'image' | 'html') { this.blocks.push({ type, content: '' }); }
-    removeBlock(index: number) { this.blocks.splice(index, 1); }
-    moveBlock(index: number, direction: number) {
-        const newIndex = index + direction;
-        if (newIndex >= 0 && newIndex < this.blocks.length) {
-            [this.blocks[index], this.blocks[newIndex]] = [this.blocks[newIndex], this.blocks[index]];
-        }
-    }
-    openPicker(index: number) { this.currentBlockIndex = index; this.showPicker = true; }
-    onImageSelected(file: MediaFile) {
-        if (this.currentBlockIndex !== null) this.blocks[this.currentBlockIndex].content = file.url;
-        this.showPicker = false; this.currentBlockIndex = null;
-    }
-
-    save() {
-        if (!this.pageId) return;
-        this.content.content_json = this.blocks;
-        this.http.post(`/api/pages/${this.pageId}/content`, { lang: this.activeLang(), ...this.content })
-            .subscribe(() => alert('Saved!'));
-    }
-
-    createHome() {
-        this.http.post('/api/pages', { slug_key: 'home', template: 'home' }).subscribe(() => this.init());
-    }
+    this.content.content_json = this.blocks;
+    this.http.post(`/api/pages/${this.pageId}/publish`, { lang: this.activeLang(), ...this.content })
+      .subscribe({
+        next: () => alert('Published Successfully!'),
+        error: (e) => alert('Error publishing: ' + e.message)
+      });
+  }
+  createHome() {
+    this.http.post('/api/pages', { slug_key: 'home', template: 'home' }).subscribe(() => this.init());
+  }
 }
