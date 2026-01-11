@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ContentBlockManifest } from './block.types';
 
 @Component({
-    selector: 'app-content-with-image',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-content-with-image',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <section class="py-20 bg-white">
       <div class="max-w-6xl mx-auto px-6">
         <div class="grid md:grid-cols-2 gap-12 items-center" [class.md:flex-row-reverse]="imagePosition === 'left'">
@@ -37,19 +38,46 @@ import { CommonModule } from '@angular/common';
   `
 })
 export class ContentWithImageComponent {
-    @Input() title: string = '';
-    @Input() items: string[] = [];
-    @Input() image: string = '';
-    @Input() imagePosition: 'left' | 'right' = 'right';
-
-    getIcon(item: string): string {
-        // Extract emoji if it starts with one
-        const emojiMatch = item.match(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u);
-        return emojiMatch ? emojiMatch[0] : '•';
+  static manifest: ContentBlockManifest = {
+    type: 'content-with-image',
+    displayName: 'Content with Image',
+    category: 'Text & Content',
+    schema: {
+      properties: {
+        title: { type: 'string', title: 'Title' },
+        image: { type: 'string', title: 'Image', ui: { widget: 'image' } },
+        imagePosition: {
+          type: 'string',
+          title: 'Image Position',
+          enum: ['left', 'right'],
+          default: 'right'
+        },
+        items: {
+          type: 'array',
+          title: 'List Items',
+          items: {
+            type: 'string',
+            title: 'Item Text'
+          }
+        }
+      },
+      required: ['title']
     }
+  };
 
-    getText(item: string): string {
-        // Remove leading emoji if present
-        return item.replace(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]\s*/u, '');
-    }
+  @Input() title: string = '';
+  @Input() items: string[] = [];
+  @Input() image: string = '';
+  @Input() imagePosition: 'left' | 'right' = 'right';
+
+  getIcon(item: string): string {
+    // Extract emoji if it starts with one
+    const emojiMatch = item.match(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u);
+    return emojiMatch ? emojiMatch[0] : '•';
+  }
+
+  getText(item: string): string {
+    // Remove leading emoji if present
+    return item.replace(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]\s*/u, '');
+  }
 }

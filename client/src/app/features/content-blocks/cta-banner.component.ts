@@ -1,17 +1,18 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ContentBlockManifest } from './block.types';
 
 interface CTA {
-    text: string;
-    link: string;
+  text: string;
+  link: string;
 }
 
 @Component({
-    selector: 'app-cta-banner',
-    standalone: true,
-    imports: [CommonModule, RouterLink],
-    template: `
+  selector: 'app-cta-banner',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
     <section class="py-20 bg-slate-900">
       <div class="max-w-4xl mx-auto px-6 text-center">
         <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
@@ -43,8 +44,37 @@ interface CTA {
   `
 })
 export class CtaBannerComponent {
-    @Input() title: string = '';
-    @Input() description: string = '';
-    @Input() primaryCta?: CTA;
-    @Input() secondaryCta?: CTA;
+  static manifest: ContentBlockManifest = {
+    type: 'cta-banner',
+    displayName: 'CTA Banner',
+    category: 'Call to Action',
+    schema: {
+      properties: {
+        title: { type: 'string', title: 'Title' },
+        description: { type: 'string', title: 'Description', ui: { widget: 'textarea' } },
+        primaryCta: {
+          type: 'object',
+          title: 'Primary Button',
+          properties: {
+            text: { type: 'string', title: 'Label' },
+            link: { type: 'string', title: 'Link' }
+          }
+        },
+        secondaryCta: {
+          type: 'object',
+          title: 'Secondary Button',
+          properties: {
+            text: { type: 'string', title: 'Label' },
+            link: { type: 'string', title: 'Link' }
+          }
+        }
+      },
+      required: ['title']
+    }
+  };
+
+  @Input() title: string = '';
+  @Input() description: string = '';
+  @Input() primaryCta?: CTA;
+  @Input() secondaryCta?: CTA;
 }

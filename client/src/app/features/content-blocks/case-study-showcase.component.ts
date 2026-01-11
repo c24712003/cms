@@ -1,22 +1,23 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ContentBlockManifest } from './block.types';
 
 interface Case {
-    logo: string;
-    name: string;
-    industry: string;
-    challenge: string;
-    result: string;
-    quote: string;
-    link: string;
+  logo: string;
+  name: string;
+  industry: string;
+  challenge: string;
+  result: string;
+  quote: string;
+  link: string;
 }
 
 @Component({
-    selector: 'app-case-study-showcase',
-    standalone: true,
-    imports: [CommonModule, RouterLink],
-    template: `
+  selector: 'app-case-study-showcase',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
     <section class="py-20 bg-white">
       <div class="max-w-7xl mx-auto px-6">
         <h2 class="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-16">{{ title }}</h2>
@@ -77,8 +78,38 @@ interface Case {
   `
 })
 export class CaseStudyShowcaseComponent {
-    @Input() title: string = '';
-    @Input() cases: Case[] = [];
-    @Input() viewMoreText: string = '';
-    @Input() viewMoreLink: string = '';
+  static manifest: ContentBlockManifest = {
+    type: 'case-study-showcase',
+    displayName: 'Case Study Showcase',
+    category: 'Social Proof',
+    schema: {
+      properties: {
+        title: { type: 'string', title: 'Title' },
+        viewMoreText: { type: 'string', title: 'Button Text' },
+        viewMoreLink: { type: 'string', title: 'Button Link' },
+        cases: {
+          type: 'array',
+          title: 'Case Studies',
+          items: {
+            type: 'object',
+            properties: {
+              logo: { type: 'string', title: 'Logo URL', ui: { widget: 'image' } },
+              name: { type: 'string', title: 'Client Name' },
+              industry: { type: 'string', title: 'Industry' },
+              challenge: { type: 'string', title: 'Challenge', ui: { widget: 'textarea' } },
+              result: { type: 'string', title: 'Result' },
+              quote: { type: 'string', title: 'Quote', ui: { widget: 'textarea' } },
+              link: { type: 'string', title: 'Link' }
+            }
+          }
+        }
+      },
+      required: ['title']
+    }
+  };
+
+  @Input() title: string = '';
+  @Input() cases: Case[] = [];
+  @Input() viewMoreText: string = '';
+  @Input() viewMoreLink: string = '';
 }

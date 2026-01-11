@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ContentBlockManifest } from './block.types';
 
 interface Breadcrumb {
   label: string;
@@ -45,6 +46,31 @@ interface Breadcrumb {
   `
 })
 export class PageHeroComponent {
+  static manifest: ContentBlockManifest = {
+    type: 'page-hero',
+    displayName: 'Page Hero',
+    category: 'Hero & Headers',
+    schema: {
+      properties: {
+        title: { type: 'string', title: 'Title' },
+        subtitle: { type: 'string', title: 'Subtitle' },
+        breadcrumb: {
+          type: 'array',
+          title: 'Breadcrumbs',
+          items: {
+            type: 'object',
+            properties: {
+              label: { type: 'string', title: 'Label' },
+              link: { type: 'string', title: 'Link (Optional)' }
+            }
+          }
+        },
+        image: { type: 'string', title: 'Background Image', ui: { widget: 'image' } }
+      },
+      required: ['title']
+    }
+  };
+
   @Input() title: string = '';
   @Input() subtitle: string = '';
   @Input() breadcrumb: Breadcrumb[] = [];

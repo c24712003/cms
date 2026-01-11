@@ -1,19 +1,20 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ContentBlockManifest } from './block.types';
 
 interface Card {
-    image: string;
-    title: string;
-    summary: string;
-    link: string;
+  image: string;
+  title: string;
+  summary: string;
+  link: string;
 }
 
 @Component({
-    selector: 'app-card-carousel',
-    standalone: true,
-    imports: [CommonModule, RouterLink],
-    template: `
+  selector: 'app-card-carousel',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
     <section class="py-20 bg-slate-50">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-16">
@@ -56,7 +57,33 @@ interface Card {
   `
 })
 export class CardCarouselComponent {
-    @Input() title: string = '';
-    @Input() subtitle: string = '';
-    @Input() cards: Card[] = [];
+  static manifest: ContentBlockManifest = {
+    type: 'card-carousel',
+    displayName: 'Card Carousel',
+    category: 'Features',
+    schema: {
+      properties: {
+        title: { type: 'string', title: 'Title' },
+        subtitle: { type: 'string', title: 'Subtitle' },
+        cards: {
+          type: 'array',
+          title: 'Cards',
+          items: {
+            type: 'object',
+            properties: {
+              image: { type: 'string', title: 'Image', ui: { widget: 'image' } },
+              title: { type: 'string', title: 'Card Title' },
+              summary: { type: 'string', title: 'Summary', ui: { widget: 'textarea' } },
+              link: { type: 'string', title: 'Link' }
+            }
+          }
+        }
+      },
+      required: ['title']
+    }
+  };
+
+  @Input() title: string = '';
+  @Input() subtitle: string = '';
+  @Input() cards: Card[] = [];
 }

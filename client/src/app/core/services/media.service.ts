@@ -1,45 +1,59 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { tap } from 'rxjs';
 
-export interface MediaFile {
-    id: number;
+export interface MediaAsset {
+    id?: number;
+    type: 'image' | 'document' | 'video_url';
+    provider: 'local' | 'youtube';
     filename: string;
     url: string;
-    size?: number;
+    thumbnail_url?: string;
+    size_bytes?: number;
     alt_text?: string;
+    metadata?: any;
+    created_at?: string;
+    title?: string; // For external media preview
 }
 
 @Injectable({
     providedIn: 'root'
 })
 export class MediaService {
-    readonly files = signal<MediaFile[]>([]);
+    readonly assets = signal<MediaAsset[]>([]);
 
     constructor(private http: HttpClient) { }
 
-    loadFiles() {
-        this.http.get<MediaFile[]>('/api/media').subscribe(data => {
-            this.files.set(data);
+    loadAssets(typeFilter: string = 'all') {
+        let params = new HttpParams();
+        if (typeFilter !== 'all') {
+            params = params.set('type', typeFilter);
+        }
+
+        this.http.get<MediaAsset[]>('/api/media', { params }).subscribe(data => {
+            this.assets.set(data);
         });
     }
 
     upload(file: File) {
         const formData = new FormData();
         formData.append('file', file);
-        return this.http.post<MediaFile>('/api/media/upload', formData).pipe(
-            tap(newFile => {
-                this.files.update(files => [newFile, ...files]);
+        return this.http.post<MediaAsset>('/api/media/upload', formData).pipe(
+            tap(newAsset => {
+                this.assets.update(assets => [newAsset, ...assets]);
             })
         );
     }
 
-    updateMetadata(id: number, metadata: { alt_text?: string, original_name?: string }) {
-        return this.http.put(`/api/media/${id}`, metadata).pipe(
-            tap(() => {
-                this.files.update(files => files.map(f =>
-                    f.id === id ? { ...f, ...metadata } : f
-                ));
+    parseUrl(url: string) {
+        return this.http.post<Partial<MediaAsset>>('/api/media/parse-url', { url });
+    }
+
+    saveExternal(asset: Partial<MediaAsset>) {
+        return this.http.post<MediaAsset>('/api/media/external', asset).pipe(
+            tap(newAsset => {
+                // If the current list corresponds to the type or all, add it
+                this.assets.update(assets => [newAsset, ...assets]);
             })
         );
     }
@@ -47,7 +61,7 @@ export class MediaService {
     delete(id: number) {
         return this.http.delete(`/api/media/${id}`).pipe(
             tap(() => {
-                this.files.update(files => files.filter(f => f.id !== id));
+                this.assets.update(assets => assets.filter(a => a.id !== id));
             })
         );
     }

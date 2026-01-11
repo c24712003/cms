@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ContentBlockManifest } from './block.types';
 
 interface FormField {
   name: string;
@@ -115,6 +116,57 @@ interface FormField {
   `
 })
 export class ContactFormCtaComponent {
+  static manifest: ContentBlockManifest = {
+    type: 'contact-form-cta',
+    displayName: 'Contact Form',
+    category: 'Call to Action',
+    schema: {
+      properties: {
+        title: { type: 'string', title: 'Title' },
+        description: { type: 'string', title: 'Description', ui: { widget: 'textarea' } },
+        submitButton: { type: 'string', title: 'Button Text' },
+        privacy: { type: 'string', title: 'Privacy Text' },
+        fields: {
+          type: 'array',
+          title: 'Form Fields',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', title: 'Field Name (e.g. email)' },
+              label: { type: 'string', title: 'Label' },
+              type: {
+                type: 'string',
+                title: 'Type',
+                enum: ['text', 'email', 'tel', 'textarea', 'select'],
+                ui: { widget: 'select' }
+              },
+              required: { type: 'boolean', title: 'Required', ui: { widget: 'toggle' } },
+              options: { type: 'array', title: 'Options (Select only)', items: { type: 'string', title: 'Option' } }
+            }
+          }
+        },
+        contactInfo: {
+          type: 'array',
+          title: 'Contact Info',
+          items: {
+            type: 'object',
+            properties: {
+              icon: {
+                type: 'string',
+                title: 'Icon',
+                enum: ['email', 'phone', 'location', 'clock', 'other'],
+                ui: { widget: 'select' }
+              },
+              label: { type: 'string', title: 'Label' },
+              value: { type: 'string', title: 'Value' }
+            }
+          }
+        }
+      },
+      required: ['title']
+    }
+  };
+
   @Input() title: string = '';
   @Input() description: string = '';
   @Input() fields: FormField[] = [

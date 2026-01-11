@@ -61,6 +61,15 @@ import { AuthService } from '../../core/services/auth.service';
           Translations
         </a>
 
+        <div class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Administration</div>
+
+        <a routerLink="users" routerLinkActive="active" class="admin-sidebar-item group">
+          <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          Users
+        </a>
+
         <div class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">System</div>
         
         <a routerLink="menus/main" routerLinkActive="active" class="admin-sidebar-item group">

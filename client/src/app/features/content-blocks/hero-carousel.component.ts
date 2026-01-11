@@ -1,19 +1,20 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ContentBlockManifest } from './block.types';
 
 interface Slide {
-    title: string;
-    subtitle: string;
-    cta?: { text: string; link: string };
-    image: string;
+  title: string;
+  subtitle: string;
+  cta?: { text: string; link: string };
+  image: string;
 }
 
 @Component({
-    selector: 'app-hero-carousel',
-    standalone: true,
-    imports: [CommonModule, RouterLink],
-    template: `
+  selector: 'app-hero-carousel',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
     <section class="relative h-[600px] overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
       <!-- Background Image with Overlay -->
       <div class="absolute inset-0">
@@ -72,7 +73,7 @@ interface Slide {
       </button>
     </section>
   `,
-    styles: [`
+  styles: [`
     .btn-hero-primary {
       @apply inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition-all duration-300 hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5;
     }
@@ -86,14 +87,44 @@ interface Slide {
   `]
 })
 export class HeroCarouselComponent {
-    @Input() slides: Slide[] = [];
-    currentSlide = 0;
-
-    nextSlide() {
-        this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+  static manifest: ContentBlockManifest = {
+    type: 'hero-carousel',
+    displayName: 'Hero Carousel',
+    category: 'Hero & Headers',
+    schema: {
+      properties: {
+        slides: {
+          type: 'array',
+          title: 'Slides',
+          items: {
+            type: 'object',
+            properties: {
+              title: { type: 'string', title: 'Headline' },
+              subtitle: { type: 'string', title: 'Subtitle', ui: { widget: 'textarea' } },
+              image: { type: 'string', title: 'Background Image', ui: { widget: 'image' } },
+              cta: {
+                type: 'object',
+                title: 'Primary Button',
+                properties: {
+                  text: { type: 'string', title: 'Button Label' },
+                  link: { type: 'string', title: 'Button Link' }
+                }
+              }
+            }
+          }
+        }
+      }
     }
+  };
 
-    prevSlide() {
-        this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
-    }
+  @Input() slides: Slide[] = [];
+  currentSlide = 0;
+
+  nextSlide() {
+    this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+  }
+
+  prevSlide() {
+    this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+  }
 }

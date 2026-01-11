@@ -1,7 +1,7 @@
 
 import { Component, EventEmitter, Output, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MediaService, MediaFile } from '../../core/services/media.service';
+import { MediaService, MediaAsset } from '../../core/services/media.service';
 
 @Component({
   selector: 'app-media-picker',
@@ -20,7 +20,7 @@ import { MediaService, MediaFile } from '../../core/services/media.service';
         <!-- Toolbar -->
         <div class="px-6 py-3 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
             <div class="text-sm text-slate-500">
-                {{ mediaService.files().length }} assets found
+                {{ mediaService.assets().length }} assets found
             </div>
             <div>
                 <input type="file" #fileInput (change)="upload($event)" class="hidden" accept="image/*" />
@@ -33,16 +33,26 @@ import { MediaService, MediaFile } from '../../core/services/media.service';
         <!-- Grid -->
         <div class="flex-1 overflow-y-auto p-6 bg-slate-50/50">
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                <div *ngFor="let file of mediaService.files()" 
-                     (click)="select(file)"
+                <div *ngFor="let asset of mediaService.assets()" 
+                     (click)="select(asset)"
                      class="group relative aspect-square bg-white rounded-lg border border-slate-200 overflow-hidden cursor-pointer hover:border-blue-400 hover:shadow-md transition-all">
                     
-                    <img [src]="file.url" [alt]="file.alt_text || file.filename" class="w-full h-full object-cover" />
+                    <ng-container [ngSwitch]="asset.type">
+                        <!-- Video Placeholder -->
+                        <div *ngSwitchCase="'video_url'" class="w-full h-full bg-black flex items-center justify-center">
+                            <img [src]="asset.thumbnail_url" class="w-full h-full object-cover opacity-80" />
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="bg-red-600 text-white text-[10px] px-1 py-0.5 rounded">Video</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Image -->
+                        <img *ngSwitchDefault [src]="asset.url" [alt]="asset.alt_text || asset.filename" class="w-full h-full object-cover" />
+                    </ng-container>
                     
                     <!-- Hover Info -->
                     <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <p class="text-xs text-white truncate">{{ file.filename }}</p>
-                        <p class="text-[10px] text-white/80" *ngIf="file.alt_text">Alt: {{ file.alt_text }}</p>
+                        <p class="text-xs text-white truncate">{{ asset.filename }}</p>
                     </div>
                 </div>
             </div>
@@ -57,17 +67,17 @@ import { MediaService, MediaFile } from '../../core/services/media.service';
   `
 })
 export class MediaPickerComponent implements OnInit {
-  @Output() onSelect = new EventEmitter<MediaFile>();
+  @Output() onSelect = new EventEmitter<MediaAsset>();
   @Output() onCancel = new EventEmitter<void>();
 
   constructor(public mediaService: MediaService) { }
 
   ngOnInit() {
-    this.mediaService.loadFiles();
+    this.mediaService.loadAssets('image');
   }
 
-  select(file: MediaFile) {
-    this.onSelect.emit(file);
+  select(asset: MediaAsset) {
+    this.onSelect.emit(asset);
   }
 
   upload(event: any) {

@@ -180,8 +180,8 @@ router.post('/', async (req: Request, res: Response) => {
     const { slug_key, template } = req.body;
     try {
         const db = getDb();
-        await db.run('INSERT INTO pages (slug_key, template) VALUES (?, ?)', [slug_key, template]);
-        res.status(201).json({ success: true });
+        const result = await db.run('INSERT INTO pages (slug_key, template) VALUES (?, ?)', [slug_key, template]);
+        res.status(201).json({ success: true, id: result.lastID });
     } catch (e) {
         res.status(500).json({ error: String(e) });
     }

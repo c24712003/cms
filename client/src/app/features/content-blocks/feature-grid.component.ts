@@ -1,17 +1,18 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ContentBlockManifest } from './block.types';
 
 interface FeatureItem {
-    icon: string;
-    title: string;
-    description: string;
+  icon: string;
+  title: string;
+  description: string;
 }
 
 @Component({
-    selector: 'app-feature-grid',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-feature-grid',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <section class="py-20 bg-white">
       <div class="max-w-7xl mx-auto px-6">
         <h2 class="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-16">
@@ -44,6 +45,35 @@ interface FeatureItem {
   `
 })
 export class FeatureGridComponent {
-    @Input() title: string = '';
-    @Input() items: FeatureItem[] = [];
+  static manifest: ContentBlockManifest = {
+    type: 'feature-grid',
+    displayName: 'Feature Grid',
+    category: 'Features',
+    schema: {
+      properties: {
+        title: { type: 'string', title: 'Title' },
+        items: {
+          type: 'array',
+          title: 'Features',
+          items: {
+            type: 'object',
+            properties: {
+              icon: {
+                type: 'string',
+                title: 'Icon Type',
+                enum: ['icon-certified', 'icon-experience', 'icon-support', 'other'],
+                ui: { widget: 'select' }
+              },
+              title: { type: 'string', title: 'Feature Title' },
+              description: { type: 'string', title: 'Description', ui: { widget: 'textarea' } }
+            }
+          }
+        }
+      },
+      required: ['title']
+    }
+  };
+
+  @Input() title: string = '';
+  @Input() items: FeatureItem[] = [];
 }

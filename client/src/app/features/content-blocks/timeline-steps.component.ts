@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ContentBlockManifest } from './block.types';
 
 interface TimelineStep {
   number: string;
@@ -52,6 +53,32 @@ interface TimelineStep {
   `
 })
 export class TimelineStepsComponent {
+  static manifest: ContentBlockManifest = {
+    type: 'timeline-steps',
+    displayName: 'Timeline Steps',
+    category: 'Features',
+    schema: {
+      properties: {
+        title: { type: 'string', title: 'Title' },
+        subtitle: { type: 'string', title: 'Subtitle' },
+        steps: {
+          type: 'array',
+          title: 'Steps',
+          items: {
+            type: 'object',
+            properties: {
+              number: { type: 'string', title: 'Step Number (e.g. 01)' },
+              title: { type: 'string', title: 'Title' },
+              description: { type: 'string', title: 'Description', ui: { widget: 'textarea' } },
+              duration: { type: 'string', title: 'Duration (Optional)' }
+            }
+          }
+        }
+      },
+      required: ['title']
+    }
+  };
+
   @Input() title: string = '';
   @Input() subtitle: string = '';
   @Input() steps: TimelineStep[] = [];

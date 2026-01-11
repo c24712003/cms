@@ -19,13 +19,34 @@ import { I18nService } from '../../core/services/i18n.service';
 
           <!-- Desktop Nav -->
           <nav class="hidden md:flex items-center space-x-1">
-            <a *ngFor="let item of menuItems()" 
-               [routerLink]="getLocalizedLink(item.link)" 
-               routerLinkActive="text-blue-600 bg-blue-50" 
-               [routerLinkActiveOptions]="{exact: true}"
-                class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
-                {{ i18n.translate(item.labelKey || item.label) }}
-             </a>
+            <ng-container *ngFor="let item of menuItems()">
+                <!-- Single Link -->
+                <a *ngIf="!item.children || item.children.length === 0"
+                   [routerLink]="getLocalizedLink(item.link)" 
+                   routerLinkActive="text-blue-600 bg-blue-50" 
+                   [routerLinkActiveOptions]="{exact: true}"
+                   class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
+                    {{ i18n.translate(item.labelKey || item.label) }}
+                </a>
+
+                <!-- Dropdown -->
+                <div *ngIf="item.children && item.children.length > 0" class="relative group">
+                    <button class="flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors group-hover:text-blue-600">
+                        {{ i18n.translate(item.labelKey || item.label) }}
+                        <svg class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <!-- Dropdown Menu -->
+                    <div class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left z-50">
+                        <div class="py-1">
+                            <a *ngFor="let child of item.children"
+                               [routerLink]="getLocalizedLink(child.link)"
+                               class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-blue-600">
+                                {{ i18n.translate(child.labelKey || child.label) }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
           </nav>
 
           <!-- Actions -->
@@ -34,6 +55,8 @@ import { I18nService } from '../../core/services/i18n.service';
                 class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white text-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="en">🇬🇧 EN</option>
               <option value="zh-TW">🇹🇼 中文</option>
+              <option value="ja">🇯🇵 日本語</option>
+              <option value="ko">🇰🇷 한국어</option>
             </select>
           </div>
         </div>
@@ -52,7 +75,10 @@ export class SiteHeaderComponent implements OnInit {
 
   ngOnInit() {
     this.menuService.getMenu('main').subscribe({
-      next: (menu) => { if (Array.isArray(menu.items_json)) this.menuItems.set(menu.items_json); },
+      next: (menu) => {
+        // New Service returns { items: ... }
+        this.menuItems.set(menu.items || []);
+      },
       error: () => { this.menuItems.set([{ label: 'Home', link: '/home' }, { label: 'Contact', link: '/contact' }]); }
     });
   }
