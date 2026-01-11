@@ -60,6 +60,7 @@ import pagesRouter from './routes/pages';
 import sitemapRouter from './routes/sitemap';
 import robotsRouter from './routes/robots';
 import seoRouter from './routes/seo';
+import searchConsoleRouter from './routes/search-console';
 import authRouter, { seedAdmin } from './routes/auth';
 import mediaRouter from './routes/media';
 import menusRouter from './routes/menus';
@@ -85,6 +86,7 @@ app.use('/api/pages', pagesRouter);
 app.use('/api/delivery', deliveryRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/seo', seoRouter);
+app.use('/api/search-console', searchConsoleRouter);
 app.use('/', sitemapRouter); // Root level for /sitemap.xml
 app.use('/', robotsRouter);  // Root level for /robots.txt
 

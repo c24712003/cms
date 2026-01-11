@@ -120,7 +120,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST /api/media/upload - Local File Upload
+// POST /api/media/upload - Local File Upload with Image Processing
 router.post('/upload', authenticateToken, requireRole('editor'), upload.single('file'), async (req, res) => {
     if (!req.file) {
         res.status(400).json({ error: 'No file uploaded' });
@@ -131,12 +131,53 @@ router.post('/upload', authenticateToken, requireRole('editor'), upload.single('
         const db = getDb();
         const url = `/uploads/${req.file.filename}`;
         const type = getMediaType(req.file.mimetype);
-        const metadata = {}; // Could add image dimensions extraction later
+        let metadata: any = {};
+        let thumbnailUrl: string | null = null;
+        let webpUrl: string | null = null;
+
+        // Process images with sharp (if available)
+        if (type === 'image') {
+            try {
+                // Dynamic import to handle case where sharp is not installed
+                const { processImage, getImageMetadata } = await import('../utils/image-processor');
+
+                const inputPath = path.join(uploadDir, req.file.filename);
+                const processed = await processImage(inputPath, uploadDir, {
+                    generateWebP: true,
+                    generateThumbnail: true,
+                    generateResponsive: true,
+                    responsiveSizes: [320, 640, 1024, 1280]
+                });
+
+                if (processed.metadata) {
+                    metadata = {
+                        width: processed.metadata.width,
+                        height: processed.metadata.height,
+                        format: processed.metadata.format
+                    };
+                }
+
+                if (processed.thumbnail) {
+                    thumbnailUrl = processed.thumbnail;
+                }
+
+                if (processed.webp) {
+                    webpUrl = processed.webp;
+                }
+
+                if (processed.responsive && processed.responsive.length > 0) {
+                    metadata.responsive = processed.responsive;
+                }
+            } catch (e) {
+                console.warn('Sharp processing failed, continuing without optimization:', e);
+                // Fallback: just store the original without processing
+            }
+        }
 
         const result = await db.run(
             `INSERT INTO media_assets 
-            (type, provider, filename, original_name, mimetype, size_bytes, url, path, metadata_json, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+            (type, provider, filename, original_name, mimetype, size_bytes, url, path, thumbnail_url, metadata_json, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
             [
                 type,
                 'local',
@@ -146,6 +187,7 @@ router.post('/upload', authenticateToken, requireRole('editor'), upload.single('
                 req.file.size,
                 url,
                 url,
+                thumbnailUrl,
                 JSON.stringify(metadata)
             ]
         );
@@ -156,7 +198,10 @@ router.post('/upload', authenticateToken, requireRole('editor'), upload.single('
             provider: 'local',
             filename: req.file.filename,
             url: url,
-            size_bytes: req.file.size
+            thumbnail_url: thumbnailUrl,
+            webp_url: webpUrl,
+            size_bytes: req.file.size,
+            metadata
         });
     } catch (e) {
         res.status(500).json({ error: String(e) });

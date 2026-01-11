@@ -10,6 +10,8 @@ import { BlockRegistryService } from '../../features/content-blocks/block-regist
 import { DynamicBlockRendererComponent } from '../../features/content-blocks/dynamic-block-renderer.component';
 import { PropertyPanelComponent } from '../../features/content-blocks/editor/property-panel.component';
 import { BlockInstance, ContentBlockManifest } from '../../features/content-blocks/block.types';
+import { SeoPanelComponent } from '../components/seo-panel.component';
+import { SeoValidatorService } from '../services/seo-validator.service';
 
 @Component({
   selector: 'app-page-editor',
@@ -19,7 +21,8 @@ import { BlockInstance, ContentBlockManifest } from '../../features/content-bloc
     FormsModule,
     DragDropModule,
     DynamicBlockRendererComponent,
-    PropertyPanelComponent
+    PropertyPanelComponent,
+    SeoPanelComponent
   ],
   template: `
     <div class="flex flex-col h-screen bg-slate-50 overflow-hidden">
@@ -85,7 +88,15 @@ import { BlockInstance, ContentBlockManifest } from '../../features/content-bloc
             
             <!-- Metadata Card (Collapsible or Top) -->
             <div class="max-w-5xl mx-auto mb-8 bg-white rounded-xl border border-slate-200 p-6 shadow-sm group">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{{ i18n.translate('PAGE_SETTINGS_HEADER') }}</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ i18n.translate('PAGE_SETTINGS_HEADER') }}</h3>
+                    <button (click)="showSeoPanel = !showSeoPanel" 
+                            class="text-xs font-medium px-3 py-1 rounded-full transition-colors"
+                            [class.bg-blue-100]="showSeoPanel" [class.text-blue-700]="showSeoPanel"
+                            [class.bg-slate-100]="!showSeoPanel" [class.text-slate-600]="!showSeoPanel">
+                        <i class="fas fa-chart-line mr-1"></i> SEO Score: {{ seoScore }}
+                    </button>
+                </div>
                 <div class="grid grid-cols-2 gap-6">
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1">{{ i18n.translate('PAGE_TITLE_LABEL') }}</label>
@@ -99,6 +110,45 @@ import { BlockInstance, ContentBlockManifest } from '../../features/content-bloc
                         </div>
                     </div>
                 </div>
+                
+                <!-- SEO Fields -->
+                <div class="grid grid-cols-2 gap-6 mt-4 pt-4 border-t border-slate-100">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">SEO Title 
+                            <span class="font-normal text-slate-400">({{ content.seo_title?.length || 0 }}/60)</span>
+                        </label>
+                        <input [(ngModel)]="content.seo_title" 
+                               (ngModelChange)="updateSeoScore()"
+                               class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                               placeholder="SEO 標題（建議 50-60 字元）" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">OG Image URL</label>
+                        <input [(ngModel)]="content.og_image" 
+                               class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                               placeholder="https://example.com/image.jpg" />
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Meta Description 
+                        <span class="font-normal text-slate-400">({{ content.seo_desc?.length || 0 }}/160)</span>
+                    </label>
+                    <textarea [(ngModel)]="content.seo_desc" 
+                              (ngModelChange)="updateSeoScore()"
+                              rows="2" 
+                              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none" 
+                              placeholder="頁面描述（建議 120-160 字元）"></textarea>
+                </div>
+            </div>
+            
+            <!-- SEO Panel (Collapsible) -->
+            <div *ngIf="showSeoPanel" class="max-w-5xl mx-auto mb-8">
+                <app-seo-panel
+                    [title]="content.seo_title || content.title"
+                    [description]="content.seo_desc"
+                    [content]="blocks"
+                    [language]="activeLang()">
+                </app-seo-panel>
             </div>
 
             <!-- Block Canvas -->
@@ -282,6 +332,8 @@ export class PageEditorComponent {
   isSaving = false;
   showBlockPicker = false;
   showCreateModal = false;
+  showSeoPanel = false;
+  seoScore = 0;
 
   // UI Feedback
   toast = { message: '', type: 'success' as 'success' | 'error' | 'warning' };
@@ -297,7 +349,8 @@ export class PageEditorComponent {
     private http: HttpClient,
     private registry: BlockRegistryService,
     private cdr: ChangeDetectorRef,
-    public i18n: I18nService
+    public i18n: I18nService,
+    private seoValidator: SeoValidatorService
   ) { this.init(); }
 
   showToast(message: string, type: 'success' | 'error' | 'warning' = 'success') {
@@ -371,6 +424,16 @@ export class PageEditorComponent {
     this.activeLang.set(code);
     this.selectedBlock = null;
     this.fetchContent();
+  }
+
+  updateSeoScore() {
+    const result = this.seoValidator.validatePage({
+      title: this.content.seo_title || this.content.title,
+      description: this.content.seo_desc,
+      content: this.blocks,
+      language: this.activeLang()
+    });
+    this.seoScore = result.score;
   }
 
   fetchContent() {
