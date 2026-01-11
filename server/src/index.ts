@@ -23,6 +23,27 @@ let db: any;
     const schemaSql = fs.readFileSync(path.join(__dirname, 'db', 'schema.sql'), 'utf8');
     await db.exec(schemaSql);
     console.log('Database initialized');
+
+    // Load SEO Schema Extensions (safely ignore if columns already exist)
+    try {
+        const seoSchemaSql = fs.readFileSync(path.join(__dirname, 'db', 'schema_seo_update.sql'), 'utf8');
+        // Execute statement by statement to handle ALTER errors gracefully
+        const statements = seoSchemaSql.split(';').filter((s: string) => s.trim());
+        for (const stmt of statements) {
+            try {
+                await db.exec(stmt + ';');
+            } catch (e: any) {
+                // Ignore "duplicate column" errors
+                if (!e.message?.includes('duplicate column')) {
+                    console.warn('SEO schema statement warning:', e.message);
+                }
+            }
+        }
+        console.log('SEO schema extensions loaded');
+    } catch (e) {
+        console.log('SEO schema file not found or error, skipping');
+    }
+
     // Seed Admin
     const { seedAdmin } = require('./routes/auth');
     await seedAdmin();
@@ -37,14 +58,22 @@ import languagesRouter from './routes/languages';
 import translationsRouter from './routes/translations';
 import pagesRouter from './routes/pages';
 import sitemapRouter from './routes/sitemap';
+import robotsRouter from './routes/robots';
+import seoRouter from './routes/seo';
 import authRouter, { seedAdmin } from './routes/auth';
 import mediaRouter from './routes/media';
 import menusRouter from './routes/menus';
 import deliveryRouter from './routes/delivery';
 import usersRouter from './routes/users';
 
+// Import Middleware
+import redirectMiddleware from './middleware/redirects';
+
 // Serve Uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Apply Redirect Middleware (must be early to catch redirects)
+app.use(redirectMiddleware);
 
 // Register Routes
 app.use('/api/auth', authRouter);
@@ -55,8 +84,11 @@ app.use('/api/translations', translationsRouter);
 app.use('/api/pages', pagesRouter);
 app.use('/api/delivery', deliveryRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/seo', seoRouter);
 app.use('/', sitemapRouter); // Root level for /sitemap.xml
+app.use('/', robotsRouter);  // Root level for /robots.txt
 
 app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`CMS Server running on port ${PORT}`);
 });
+
