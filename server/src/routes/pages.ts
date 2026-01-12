@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { getDb } from '../index';
+import { logActivity } from './audit-logs';
 
 const router = express.Router();
 
@@ -169,6 +170,8 @@ router.post('/:id/publish', async (req: Request, res: Response) => {
                 updated_at = CURRENT_TIMESTAMP
         `, [id, lang, title, slug_localized, seo_title, seo_desc, JSON.stringify(content_json)]);
 
+        await logActivity('Page Published', `Published page: ${title} (${lang})`, 'content');
+
         res.json({ success: true, mode: 'published' });
     } catch (e) {
         res.status(500).json({ error: String(e) });
@@ -181,6 +184,7 @@ router.post('/', async (req: Request, res: Response) => {
     try {
         const db = getDb();
         const result = await db.run('INSERT INTO pages (slug_key, template) VALUES (?, ?)', [slug_key, template]);
+        await logActivity('Page Created', `Created new page: ${slug_key}`, 'content');
         res.status(201).json({ success: true, id: result.lastID });
     } catch (e) {
         res.status(500).json({ error: String(e) });

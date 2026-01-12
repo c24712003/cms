@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { MenuService, MenuItem } from '../../core/services/menu.service';
 import { I18nService } from '../../core/services/i18n.service';
+import { GlobalSearchInputComponent } from '../../shared/components/global-search-input/global-search-input.component';
 
 @Component({
   selector: 'app-site-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, GlobalSearchInputComponent],
   template: `
     <header class="bg-white/95 backdrop-blur-sm sticky top-0 z-50 border-b border-slate-200 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -51,6 +52,9 @@ import { I18nService } from '../../core/services/i18n.service';
 
           <!-- Actions -->
           <div class="flex items-center space-x-4">
+             <div class="w-48 sm:w-64">
+                <app-global-search-input mode="public" placeholder="Search..."></app-global-search-input>
+             </div>
             <select (change)="switchLang($event)" [value]="i18n.currentLang()" 
                 class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white text-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="en">🇬🇧 EN</option>

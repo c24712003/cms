@@ -14,42 +14,42 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
   standalone: true,
   imports: [CommonModule, FormsModule, DragDropModule, MenuItemEditorComponent],
   template: `
-    <div class="relative min-h-[calc(100vh-4rem)]">
+    <div class="relative min-h-[calc(100vh-4rem)] max-w-7xl mx-auto">
       <!-- Page Header -->
-      <div class="admin-page-header mb-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-           <h1 class="admin-page-title">{{ getTitle() }}</h1>
+           <h1 class="text-2xl font-bold text-slate-800">{{ getTitle() }}</h1>
            <p class="text-slate-500 text-sm mt-1">Manage your website navigation and links</p>
         </div>
-        <div class="flex gap-2 items-center">
+        <div class="flex flex-wrap gap-2 items-center w-full md:w-auto">
             <span *ngIf="saveStatus" 
                   [class.text-green-600]="saveStatus.type === 'success'"
                   [class.text-red-600]="saveStatus.type === 'error'"
-                  class="text-sm font-medium animate-fade-in-out">
+                  class="text-sm font-medium animate-fade-in-out mr-2 hidden sm:inline">
                 <i [class]="saveStatus.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
                 {{ saveStatus.message }}
             </span>
-          <button class="btn btn-secondary" (click)="reload()" [disabled]="loading">
+          <button class="btn btn-secondary flex-1 md:flex-none justify-center" (click)="reload()" [disabled]="loading">
              <i class="fas fa-sync-alt mr-2" [class.fa-spin]="loading"></i> Refresh
           </button>
-          <button class="btn btn-primary" (click)="save()" [disabled]="loading || saving">
+          <button class="btn btn-primary flex-1 md:flex-none justify-center" (click)="save()" [disabled]="loading || saving">
              {{ saving ? 'Saving...' : 'Save Changes' }}
           </button>
         </div>
       </div>
 
       <!-- Tabs -->
-      <div class="flex border-b border-slate-200 mb-6">
+      <div class="flex border-b border-slate-200 mb-6 overflow-x-auto no-scrollbar">
         <button (click)="activeTab = 'structure'" 
                 [class.border-blue-500]="activeTab === 'structure'" 
                 [class.text-blue-600]="activeTab === 'structure'"
-                class="px-6 py-3 border-b-2 border-transparent font-medium hover:text-blue-500 transition-colors">
+                class="px-4 sm:px-6 py-3 border-b-2 border-transparent font-medium hover:text-blue-500 transition-colors whitespace-nowrap">
             Menu Structure
         </button>
         <button (click)="activeTab = 'social'"
                 [class.border-blue-500]="activeTab === 'social'" 
                 [class.text-blue-600]="activeTab === 'social'"
-                class="px-6 py-3 border-b-2 border-transparent font-medium hover:text-blue-500 transition-colors">
+                class="px-4 sm:px-6 py-3 border-b-2 border-transparent font-medium hover:text-blue-500 transition-colors whitespace-nowrap">
             Social Links
         </button>
       </div>
@@ -64,7 +64,7 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
             </div>
          </div>
 
-         <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6 min-h-[400px]" [class.opacity-50]="loading" cdkDropListGroup>
+         <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6 min-h-[400px]" [class.opacity-50]="loading" cdkDropListGroup>
             
             <!-- Recursive Template for Menu Tree -->
             <ng-template #nodeTemplate let-nodes="nodes" let-level="level">
@@ -75,40 +75,40 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
                      class="min-h-[10px] space-y-2">
                     
                     <div *ngFor="let node of nodes; let i = index; trackBy: trackByNode" cdkDrag [cdkDragData]="node"
-                         class="bg-white border rounded-lg shadow-sm group">
+                         class="bg-white border rounded-lg shadow-sm group touch-manipulation">
                         
                         <!-- Drag Placeholder -->
                         <div *cdkDragPlaceholder class="min-h-[50px] bg-slate-100 border-2 border-dashed border-slate-300 rounded-lg"></div>
 
                         <!-- Node Heading -->
-                        <div class="p-3 flex items-center gap-3 bg-white hover:bg-slate-50 transition-colors rounded-lg">
-                            <span cdkDragHandle class="text-slate-400 cursor-grab active:cursor-grabbing p-2 hover:bg-slate-100 rounded"><i class="fas fa-grip-vertical"></i></span>
+                        <div class="p-3 flex flex-wrap sm:flex-nowrap items-center gap-3 bg-white hover:bg-slate-50 transition-colors rounded-lg">
+                            <span cdkDragHandle class="text-slate-400 cursor-grab active:cursor-grabbing p-2 hover:bg-slate-100 rounded touch-none"><i class="fas fa-grip-vertical text-lg"></i></span>
                             
                             <!-- Icon -->
-                            <span *ngIf="node.icon" class="text-slate-500 w-6 text-center"><i [class]="node.icon"></i></span>
+                            <span *ngIf="node.icon" class="text-slate-500 w-6 text-center hidden sm:block"><i [class]="node.icon"></i></span>
                             
                             <!-- Content -->
-                            <div class="flex-1">
-                                <span class="font-medium text-slate-800">{{ node.label || 'Untitled' }}</span>
-                                <span class="text-xs text-slate-400 ml-2 font-mono" *ngIf="node.link">
+                            <div class="flex-1 min-w-[150px]">
+                                <span class="font-medium text-slate-800 block sm:inline">{{ node.label || 'Untitled' }}</span>
+                                <span class="text-xs text-slate-400 sm:ml-2 font-mono block sm:inline" *ngIf="node.link">
                                     {{ node.link }} 
                                     <i *ngIf="node.link_type === 'external'" class="fas fa-external-link-alt ml-1 text-[10px]"></i>
                                 </span>
                             </div>
 
-                            <!-- Controls -->
-                            <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button (click)="editItem(node)" class="p-1.5 text-blue-500 hover:bg-blue-50 rounded" title="Edit">
+                            <!-- Controls: Always visible on mobile, hover on desktop -->
+                            <div class="flex gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ml-auto sm:ml-0">
+                                <button (click)="editItem(node)" class="p-2 text-blue-500 bg-blue-50 hover:bg-blue-100 rounded" title="Edit">
                                     <i class="fas fa-pencil-alt"></i>
                                 </button>
-                                <button (click)="remove(nodes, i, $event)" class="p-1.5 text-red-500 hover:bg-red-50 rounded" title="Delete">
+                                <button (click)="remove(nodes, i, $event)" class="p-2 text-red-500 bg-red-50 hover:bg-red-100 rounded" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Children (Nested) - Only if level < 3 -->
-                        <div class="pl-8 pr-3 pb-3" *ngIf="level < 3">
+                        <div class="pl-4 sm:pl-8 pr-2 sm:pr-3 pb-3" *ngIf="level < 3">
                             <ng-container *ngTemplateOutlet="nodeTemplate; context: { nodes: node.children, level: level + 1 }"></ng-container>
                         </div>
                     </div>
@@ -119,7 +119,7 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
             <ng-container *ngTemplateOutlet="nodeTemplate; context: { nodes: items, level: 1 }"></ng-container>
 
             <!-- Add Button -->
-            <button (click)="add()" class="mt-4 w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:border-blue-400 hover:text-blue-500 transition-colors font-medium flex items-center justify-center gap-2">
+            <button (click)="add()" class="mt-4 w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:border-blue-400 hover:text-blue-500 transition-colors font-medium flex items-center justify-center gap-2 active:bg-slate-50">
                 <i class="fas fa-plus"></i> Add Top Level Item
             </button>
          </div>
@@ -133,31 +133,35 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
       <div *ngIf="activeTab === 'social'" class="max-w-4xl">
          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Active Links -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
                 <h3 class="font-bold text-lg mb-4 text-slate-800">Active Social Links</h3>
                 <div cdkDropList (cdkDropListDropped)="dropSocial($event)" class="space-y-3">
-                    <div *ngFor="let link of socialLinks; let i = index; trackBy: trackByLink" cdkDrag class="flex items-center gap-3 p-3 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                        <span class="text-slate-400 cursor-grab"><i class="fas fa-grip-vertical"></i></span>
-                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-lg">
-                            <img *ngIf="link.icon_path" [src]="link.icon_path" class="w-6 h-6 object-contain">
-                            <i *ngIf="!link.icon_path" [class]="getIconClass(link.platform)"></i>
+                    <div *ngFor="let link of socialLinks; let i = index; trackBy: trackByLink" cdkDrag class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3">
+                             <span class="text-slate-400 cursor-grab touch-none"><i class="fas fa-grip-vertical text-lg"></i></span>
+                             <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-lg shrink-0">
+                                 <img *ngIf="link.icon_path" [src]="link.icon_path" class="w-6 h-6 object-contain">
+                                 <i *ngIf="!link.icon_path" [class]="getIconClass(link.platform)"></i>
+                             </div>
                         </div>
-                        <div class="flex-1">
-                             <input [(ngModel)]="link.url" placeholder="https://..." class="w-full text-sm border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 bg-transparent transition-colors" />
+                        
+                        <div class="flex-1 min-w-0">
+                             <input [(ngModel)]="link.url" placeholder="https://..." class="w-full text-sm border-0 border-b border-slate-200 focus:border-blue-500 focus:ring-0 px-0 py-1 bg-transparent transition-colors" />
                              <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">{{ link.platform }}</span>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center justify-between sm:justify-end gap-2 mt-2 sm:mt-0">
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" [(ngModel)]="link.is_active" class="sr-only peer">
-                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                <span class="mr-2 text-xs text-slate-500 sm:hidden">Active</span>
+                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] sm:after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
                             </label>
-                            <button (click)="removeSocial(i, $event)" class="text-red-400 hover:text-red-500 p-1"><i class="fas fa-times"></i></button>
+                            <button (click)="removeSocial(i, $event)" class="text-red-400 hover:text-red-500 p-2 bg-red-50 rounded-full"><i class="fas fa-times"></i></button>
                         </div>
                     </div>
                 </div>
                 
                 <div class="mt-4 pt-4 border-t border-slate-100">
-                    <button (click)="addSocial()" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-2">
+                    <button (click)="addSocial()" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-2 w-full justify-center sm:justify-start py-2 sm:py-0">
                         <i class="fas fa-plus-circle"></i> Add Another Link
                     </button>
                 </div>
@@ -209,7 +213,6 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
           </div>
         </div>
       </div>
-
     </div>
   `
 })

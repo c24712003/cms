@@ -44,6 +44,15 @@ let db: any;
         console.log('SEO schema file not found or error, skipping');
     }
 
+    // Load Audit Schema Extensions
+    try {
+        const auditSchemaSql = fs.readFileSync(path.join(__dirname, 'db', 'schema_audit_update.sql'), 'utf8');
+        await db.exec(auditSchemaSql);
+        console.log('Audit schema extensions loaded');
+    } catch (e) {
+        console.log('Audit schema file not found or error, skipping', e);
+    }
+
     // Seed Admin
     const { seedAdmin } = require('./routes/auth');
     await seedAdmin();
@@ -66,6 +75,9 @@ import mediaRouter from './routes/media';
 import menusRouter from './routes/menus';
 import deliveryRouter from './routes/delivery';
 import usersRouter from './routes/users';
+import searchRouter from './routes/search';
+import auditLogsRouter from './routes/audit-logs';
+import healthRouter from './routes/health';
 
 // Import Middleware
 import redirectMiddleware from './middleware/redirects';
@@ -87,6 +99,9 @@ app.use('/api/delivery', deliveryRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/seo', seoRouter);
 app.use('/api/search-console', searchConsoleRouter);
+app.use('/api/search', searchRouter);
+app.use('/api/audit-logs', auditLogsRouter);
+app.use('/api/health', healthRouter);
 app.use('/', sitemapRouter); // Root level for /sitemap.xml
 app.use('/', robotsRouter);  // Root level for /robots.txt
 

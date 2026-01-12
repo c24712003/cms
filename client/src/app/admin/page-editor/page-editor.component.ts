@@ -27,18 +27,19 @@ import { SeoValidatorService } from '../services/seo-validator.service';
   template: `
     <div class="flex flex-col h-screen bg-slate-50 overflow-hidden">
       <!-- Page Header (Toolbar) -->
-      <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shadow-sm z-30 shrink-0">
-        <div class="flex items-center gap-4">
-          <h1 class="font-bold text-slate-800 text-lg flex items-center gap-2">
-            <span class="text-slate-400">Pages /</span> 
+      <header class="h-auto min-h-[4rem] py-2 bg-white border-b border-slate-200 flex flex-wrap gap-y-2 items-center justify-between px-2 sm:px-4 shadow-sm z-20 shrink-0">
+        <!-- Left: Title, Selector, New Button -->
+        <div class="flex items-center gap-2 flex-grow sm:flex-grow-0">
+          <h1 class="font-bold text-slate-800 text-sm flex items-center gap-2 shrink-0">
+            <span class="text-slate-400 hidden sm:inline">Pages /</span> 
             Editor
           </h1>
           
           <!-- Page Selector -->
-          <div class="relative group">
+          <div class="relative group flex-grow sm:flex-grow-0 max-w-[140px] sm:max-w-none">
              <select [ngModel]="selectedPageSlug()" (ngModelChange)="loadPage($event)" 
-                     class="appearance-none pl-3 pr-8 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors cursor-pointer border-transparent focus:border-blue-500 focus:ring-0">
-                  <option value="">Select a page...</option>
+                     class="w-full appearance-none pl-3 pr-8 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors cursor-pointer border-transparent focus:border-blue-500 focus:ring-0 truncate">
+                  <option value="">Select...</option>
                   <option *ngFor="let p of pages()" [value]="p.slug_key">{{ p.slug_key }}</option>
              </select>
              <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
@@ -46,45 +47,55 @@ import { SeoValidatorService } from '../services/seo-validator.service';
              </div>
           </div>
           
-          <button class="btn btn-sm btn-ghost" (click)="openCreateModal()">+ New</button>
+          <button class="btn btn-sm btn-ghost px-2 sm:px-3" (click)="openCreateModal()">
+            <span class="sm:hidden text-xl leading-none">+</span>
+            <span class="hidden sm:inline">+ New</span>
+          </button>
         </div>
 
         <!-- Right Toolbar Actions -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 sm:gap-3 ml-auto">
              <!-- Language Tabs (Compact) -->
-             <div class="flex bg-slate-100 rounded-lg p-1 mr-4" *ngIf="languages().length > 0">
-                <button *ngFor="let lang of languages()" 
+             <div class="flex bg-slate-100 rounded-lg p-1" *ngIf="languages().length > 0">
+                <ng-container *ngFor="let lang of languages()">
+                    <!-- Mobile: Only show active language or compact toggle? For simplicity, show icons or code but keep compact -->
+                    <button 
                     (click)="switchLang(lang.code)"
                     [class.bg-white]="activeLang() === lang.code"
                     [class.shadow-sm]="activeLang() === lang.code"
                     [class.text-slate-900]="activeLang() === lang.code"
                     [class.text-slate-500]="activeLang() !== lang.code"
-                    class="px-3 py-1 text-xs font-semibold rounded-md transition-all">
+                    class="px-2 sm:px-3 py-1 text-xs font-semibold rounded-md transition-all">
                   {{ lang.code | uppercase }}
                 </button>
+                </ng-container>
              </div>
 
-            <div class="h-6 w-px bg-slate-200 mx-2"></div>
+            <div class="hidden sm:block h-6 w-px bg-slate-200 mx-1"></div>
 
-            <div class="flex items-center text-xs text-slate-500 italic mr-2" *ngIf="selectedPageSlug()">
+            <div class="hidden md:flex items-center text-xs text-slate-500 italic mr-2" *ngIf="selectedPageSlug()">
                 <span class="w-2 h-2 rounded-full bg-amber-400 mr-2"></span>
                 {{ i18n.translate('STATUS_DRAFT') }}
             </div>
 
-            <button class="btn btn-secondary btn-sm" (click)="saveDraft()" [disabled]="!selectedPageSlug() || isSaving">
-              {{ isSaving ? 'Saving...' : i18n.translate('BTN_SAVE_DRAFT') }}
+            <button class="btn btn-secondary btn-sm px-2 sm:px-4" (click)="saveDraft()" [disabled]="!selectedPageSlug() || isSaving" title="Save Draft">
+               <!-- Icon for Mobile -->
+               <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+               <span class="hidden sm:inline">{{ isSaving ? 'Saving...' : i18n.translate('BTN_SAVE_DRAFT') }}</span>
             </button>
-            <button class="btn btn-primary btn-sm" (click)="publish()" [disabled]="!selectedPageSlug() || isSaving">
-              {{ i18n.translate('BTN_DEPLOY_PUBLISH') }}
+            <button class="btn btn-primary btn-sm px-2 sm:px-4" (click)="publish()" [disabled]="!selectedPageSlug() || isSaving" title="Publish">
+              <!-- Icon for Mobile -->
+               <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+               <span class="hidden sm:inline">{{ i18n.translate('BTN_DEPLOY_PUBLISH') }}</span>
             </button>
         </div>
       </header>
 
       <!-- Main Workspace -->
-      <div class="flex-1 flex overflow-hidden" *ngIf="selectedPageSlug(); else noPageSelected">
+      <div class="flex-1 flex overflow-hidden relative" *ngIf="selectedPageSlug(); else noPageSelected">
         
         <!-- Left: Canvas -->
-        <main class="flex-1 overflow-y-auto bg-slate-100/50 p-8 relative" (click)="selectedBlock = null">
+        <main class="flex-1 overflow-y-auto bg-slate-100/50 relative" (click)="selectedBlock = null">
             
             <!-- Metadata Card (Collapsible or Top) -->
             <div class="max-w-5xl mx-auto mb-8 bg-white rounded-xl border border-slate-200 p-6 shadow-sm group">
@@ -198,10 +209,10 @@ import { SeoValidatorService } from '../services/seo-validator.service';
         </main>
 
         <!-- Right: Property Panel -->
-        <aside class="w-96 bg-white border-l border-slate-200 flex flex-col z-20 shadow-xl transition-transform duration-300"
+        <aside class="absolute inset-y-0 right-0 z-30 w-full md:w-96 bg-white border-l border-slate-200 flex flex-col shadow-xl transition-transform duration-300 lg:static lg:z-auto"
                [class.translate-x-0]="selectedBlock"
                [class.translate-x-full]="!selectedBlock"
-               [class.hidden]="!selectedBlock"> <!-- Use hidden/transform for better UX if desired, strictly mimicking requirements -->
+               [class.hidden]="!selectedBlock && !isMobile()"> <!-- Use hidden for space reclaiming on desktop -->
              
              <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/50">
                  <h3 class="font-bold text-slate-700 text-sm">Block Properties</h3>
@@ -638,5 +649,9 @@ export class PageEditorComponent {
         },
         error: (e) => this.showToast('Error: ' + e.message, 'error')
       });
+  }
+
+  isMobile(): boolean {
+    return window.innerWidth < 1024; // Simple check for lg breakpoint
   }
 }

@@ -14,49 +14,76 @@ interface TranslationKey {
     standalone: true,
     imports: [CommonModule, FormsModule],
     template: `
-    <div class="page-header">
-      <h1>Translations</h1>
-      <div class="controls">
-          <input [(ngModel)]="newKey" placeholder="Add new key name" />
-          <button class="btn-primary" (click)="addKey()">+ Add Key</button>
+    <div class="max-w-7xl mx-auto">
+      <!-- Page Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <h1 class="text-2xl font-bold text-slate-800">Translations</h1>
+        
+        <!-- Add Key Control -->
+        <div class="flex items-center gap-2 w-full md:w-auto bg-white p-1 rounded-xl border border-slate-200 shadow-sm md:border-none md:shadow-none md:bg-transparent">
+            <input [(ngModel)]="newKey" placeholder="new.key.name" 
+                   class="input-field flex-grow text-sm md:w-64" />
+            <button class="btn btn-primary whitespace-nowrap" (click)="addKey()">
+                 <svg class="w-4 h-4 mr-1 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                 <span class="hidden md:inline">+ Add Key</span>
+                 <span class="md:hidden">Add</span>
+            </button>
+        </div>
+      </div>
+
+      <!-- Desktop Matrix Table -->
+      <div class="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden overflow-x-auto">
+          <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-xs font-semibold">
+                  <tr>
+                      <th class="px-6 py-4 w-1/4 sticky left-0 bg-slate-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">Key</th>
+                      <th *ngFor="let lang of languages()" class="px-6 py-4 min-w-[200px]">{{ lang.name }} ({{ lang.code }})</th>
+                  </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                  <tr *ngFor="let k of keys()" class="hover:bg-slate-50 transition-colors">
+                      <td class="px-6 py-4 font-mono text-xs font-bold text-slate-600 sticky left-0 bg-white group-hover:bg-slate-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                          {{ k.key }}
+                      </td>
+                      <td *ngFor="let lang of languages()" class="px-6 py-4">
+                          <input 
+                              [ngModel]="getValue(k.key, lang.code)" 
+                              (change)="updateValue(k.key, lang.code, $event)"
+                              class="w-full bg-transparent border border-transparent hover:border-slate-200 focus:border-blue-500 rounded px-2 py-1 transition-colors focus:ring-1 focus:ring-blue-200 focus:bg-white"
+                              placeholder="..."
+                          />
+                      </td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="md:hidden space-y-4">
+        <div *ngFor="let k of keys()" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <div class="mb-3 font-mono text-xs font-bold text-slate-500 bg-slate-100 inline-block px-2 py-1 rounded">
+                {{ k.key }}
+            </div>
+            
+            <div class="space-y-3">
+                <div *ngFor="let lang of languages()" class="flex flex-col gap-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ lang.code }}</label>
+                    <input 
+                        [ngModel]="getValue(k.key, lang.code)" 
+                        (change)="updateValue(k.key, lang.code, $event)"
+                        class="input-field text-sm w-full"
+                        [placeholder]="'Translation for ' + lang.code"
+                    />
+                </div>
+            </div>
+        </div>
+      </div>
+      
+      <div class="p-8 text-center text-slate-400 bg-white rounded-xl border border-slate-200 border-dashed mt-4" *ngIf="keys().length === 0">
+          No translations found. Add your first key to start translating.
       </div>
     </div>
-
-    <!-- Edit Grid: Key | EN | ZHTW | ... -->
-    <div class="table-container">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Key</th>
-                    <th *ngFor="let lang of languages()">{{ lang.code }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let k of keys()">
-                    <td class="key-col">{{ k.key }}</td>
-                    <td *ngFor="let lang of languages()">
-                        <input 
-                            [ngModel]="getValue(k.key, lang.code)" 
-                            (change)="updateValue(k.key, lang.code, $event)"
-                            class="trans-input"
-                        />
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-  `,
-    styles: [`
-    .page-header { display: flex; justify-content: space-between; margin-bottom: 2rem; }
-    .table-container { overflow-x: auto; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .data-table { width: 100%; border-collapse: collapse; }
-    .data-table th, .data-table td { padding: 10px; border: 1px solid #eee; text-align: left; }
-    .data-table th { background: #f8f9fa; position: sticky; top: 0; }
-    .key-col { font-weight: bold; color: #555; background: #fafafa; }
-    .trans-input { width: 100%; border: 1px solid transparent; padding: 4px; border-radius: 4px; }
-    .trans-input:focus { border-color: #3498db; outline: none; background: #f0f8ff; }
-    .trans-input:hover { border-color: #ddd; }
-  `]
+  `
 })
 export class TranslationEditorComponent {
     languages = signal<Language[]>([]);
@@ -71,17 +98,17 @@ export class TranslationEditorComponent {
 
     loadData() {
         // 1. Get Languages
-        this.http.get<Language[]>('http://localhost:3000/api/languages').subscribe(langs => {
+        this.http.get<Language[]>('/api/languages').subscribe(langs => {
             this.languages.set(langs);
 
             // 2. Get Keys
-            this.http.get<TranslationKey[]>('http://localhost:3000/api/translations/keys').subscribe(keys => {
+            this.http.get<TranslationKey[]>('/api/translations/keys').subscribe(keys => {
                 this.keys.set(keys);
             });
 
             // 3. Get Values for each lang (Optimization: could be one big API call)
             langs.forEach(l => {
-                this.http.get<Record<string, string>>(`http://localhost:3000/api/translations/${l.code}`).subscribe(map => {
+                this.http.get<Record<string, string>>(`/api/translations/${l.code}`).subscribe(map => {
                     this.values.update(current => {
                         const next = { ...current };
                         // Merge logic
@@ -102,7 +129,7 @@ export class TranslationEditorComponent {
 
     updateValue(key: string, lang: string, event: Event) {
         const val = (event.target as HTMLInputElement).value;
-        this.http.put('http://localhost:3000/api/translations', { key, lang, value: val }).subscribe();
+        this.http.put('/api/translations', { key, lang, value: val }).subscribe();
 
         // Optimistic update
         this.values.update(current => {
@@ -115,7 +142,7 @@ export class TranslationEditorComponent {
 
     addKey() {
         if (!this.newKey) return;
-        this.http.post('http://localhost:3000/api/translations/keys', { key: this.newKey }).subscribe(() => {
+        this.http.post('/api/translations/keys', { key: this.newKey }).subscribe(() => {
             this.keys.update(k => [...k, { key: this.newKey }]);
             this.newKey = '';
         });

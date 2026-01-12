@@ -25,6 +25,27 @@ let db;
     const schemaSql = fs.readFileSync(path_1.default.join(__dirname, 'db', 'schema.sql'), 'utf8');
     await db.exec(schemaSql);
     console.log('Database initialized');
+    // Load SEO Schema Extensions (safely ignore if columns already exist)
+    try {
+        const seoSchemaSql = fs.readFileSync(path_1.default.join(__dirname, 'db', 'schema_seo_update.sql'), 'utf8');
+        // Execute statement by statement to handle ALTER errors gracefully
+        const statements = seoSchemaSql.split(';').filter((s) => s.trim());
+        for (const stmt of statements) {
+            try {
+                await db.exec(stmt + ';');
+            }
+            catch (e) {
+                // Ignore "duplicate column" errors
+                if (!e.message?.includes('duplicate column')) {
+                    console.warn('SEO schema statement warning:', e.message);
+                }
+            }
+        }
+        console.log('SEO schema extensions loaded');
+    }
+    catch (e) {
+        console.log('SEO schema file not found or error, skipping');
+    }
     // Seed Admin
     const { seedAdmin } = require('./routes/auth');
     await seedAdmin();
@@ -38,11 +59,21 @@ const languages_1 = __importDefault(require("./routes/languages"));
 const translations_1 = __importDefault(require("./routes/translations"));
 const pages_1 = __importDefault(require("./routes/pages"));
 const sitemap_1 = __importDefault(require("./routes/sitemap"));
+const robots_1 = __importDefault(require("./routes/robots"));
+const seo_1 = __importDefault(require("./routes/seo"));
+const search_console_1 = __importDefault(require("./routes/search-console"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const media_1 = __importDefault(require("./routes/media"));
 const menus_1 = __importDefault(require("./routes/menus"));
+const delivery_1 = __importDefault(require("./routes/delivery"));
+const users_1 = __importDefault(require("./routes/users"));
+const search_1 = __importDefault(require("./routes/search"));
+// Import Middleware
+const redirects_1 = __importDefault(require("./middleware/redirects"));
 // Serve Uploads
-app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, 'uploads')));
+app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../uploads')));
+// Apply Redirect Middleware (must be early to catch redirects)
+app.use(redirects_1.default);
 // Register Routes
 app.use('/api/auth', auth_1.default);
 app.use('/api/media', media_1.default);
@@ -50,7 +81,13 @@ app.use('/api/menus', menus_1.default);
 app.use('/api/languages', languages_1.default);
 app.use('/api/translations', translations_1.default);
 app.use('/api/pages', pages_1.default);
+app.use('/api/delivery', delivery_1.default);
+app.use('/api/users', users_1.default);
+app.use('/api/seo', seo_1.default);
+app.use('/api/search-console', search_console_1.default);
+app.use('/api/search', search_1.default);
 app.use('/', sitemap_1.default); // Root level for /sitemap.xml
-app.listen(PORT, () => {
+app.use('/', robots_1.default); // Root level for /robots.txt
+app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`CMS Server running on port ${PORT}`);
 });

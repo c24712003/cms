@@ -3,6 +3,7 @@ import express from 'express';
 import { getDb } from '../index';
 import { authenticateToken } from '../middleware/auth';
 import { randomUUID } from 'crypto';
+import { logActivity } from './audit-logs';
 
 const router = express.Router();
 
@@ -201,6 +202,9 @@ router.post('/:code', authenticateToken, async (req, res) => {
         // For now, let's just stick to relational.
 
         await db.run('COMMIT');
+
+        await logActivity('Menu Updated', `Updated menu: ${req.params.code}`, 'content');
+
         res.json({ success: true });
     } catch (e) {
         try {

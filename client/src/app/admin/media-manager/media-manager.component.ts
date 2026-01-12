@@ -9,7 +9,7 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="p-6 max-w-7xl mx-auto" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+    <div class="max-w-7xl mx-auto" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
       <!-- Page Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
