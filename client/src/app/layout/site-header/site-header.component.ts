@@ -57,10 +57,11 @@ import { GlobalSearchInputComponent } from '../../shared/components/global-searc
              </div>
             <select (change)="switchLang($event)" [value]="i18n.currentLang()" 
                 class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white text-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option value="en">🇬🇧 EN</option>
+              <option value="en-US">🇬🇧 EN</option>
               <option value="zh-TW">🇹🇼 中文</option>
+              <!-- Temporarily comment out unsupported languages or map strictly if needed
               <option value="ja">🇯🇵 日本語</option>
-              <option value="ko">🇰🇷 한국어</option>
+              <option value="ko">🇰🇷 한국어</option> -->
             </select>
           </div>
         </div>

@@ -95,7 +95,11 @@ import redirectMiddleware from './middleware/redirects';
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Apply Redirect Middleware (must be early to catch redirects)
+// Apply Redirect Middleware (must be early to catch redirects)
 app.use(redirectMiddleware);
+
+// Serve i18n files
+app.use('/i18n', express.static(path.join(__dirname, '../public/i18n')));
 
 // Register Routes
 app.use('/api/auth', authRouter);

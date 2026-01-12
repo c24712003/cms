@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS menus (
 -- ============================================
 
 -- Languages
-INSERT OR IGNORE INTO languages (code, name, is_default, enabled) VALUES ('en', 'English', 1, 1);
+INSERT OR IGNORE INTO languages (code, name, is_default, enabled) VALUES ('en-US', 'English', 1, 1);
 INSERT OR IGNORE INTO languages (code, name, is_default, enabled) VALUES ('zh-TW', '繁體中文', 0, 1);
 INSERT OR IGNORE INTO languages (code, name, is_default, enabled) VALUES ('ja', '日本語', 0, 1);
 INSERT OR IGNORE INTO languages (code, name, is_default, enabled) VALUES ('ko', '한국어', 0, 0);
@@ -87,18 +87,18 @@ INSERT OR IGNORE INTO translation_keys (key, namespace, description) VALUES ('FO
 INSERT OR IGNORE INTO translation_keys (key, namespace, description) VALUES ('FORM_MESSAGE', 'forms', 'Message field label');
 
 -- Translation Values (English)
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_HOME', 'en', 'Home');
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_ABOUT', 'en', 'About Us');
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_CONTACT', 'en', 'Contact');
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_SERVICES', 'en', 'Services');
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('BTN_SUBMIT', 'en', 'Submit');
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('BTN_CANCEL', 'en', 'Cancel');
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('FOOTER_COPYRIGHT', 'en', '© 2026 CMS Demo. All rights reserved.');
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('CONTACT_TITLE', 'en', 'Get in Touch');
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('CONTACT_SUBTITLE', 'en', 'We would love to hear from you');
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('FORM_NAME', 'en', 'Your Name');
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('FORM_EMAIL', 'en', 'Email Address');
-INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('FORM_MESSAGE', 'en', 'Your Message');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_HOME', 'en-US', 'Home');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_ABOUT', 'en-US', 'About Us');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_CONTACT', 'en-US', 'Contact');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_SERVICES', 'en-US', 'Services');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('BTN_SUBMIT', 'en-US', 'Submit');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('BTN_CANCEL', 'en-US', 'Cancel');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('FOOTER_COPYRIGHT', 'en-US', '© 2026 CMS Demo. All rights reserved.');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('CONTACT_TITLE', 'en-US', 'Get in Touch');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('CONTACT_SUBTITLE', 'en-US', 'We would love to hear from you');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('FORM_NAME', 'en-US', 'Your Name');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('FORM_EMAIL', 'en-US', 'Email Address');
+INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('FORM_MESSAGE', 'en-US', 'Your Message');
 
 -- Translation Values (繁體中文)
 INSERT OR IGNORE INTO translation_values (trans_key, lang_code, value) VALUES ('NAV_HOME', 'zh-TW', '首頁');

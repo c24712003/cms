@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { GlobalSearchInputComponent } from '../../shared/components/global-search-input/global-search-input.component';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 
@@ -11,7 +12,7 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, FormsModule, GlobalSearchInputComponent, TranslatePipe],
   template: `
-    <div class="flex h-screen bg-slate-50 overflow-hidden">
+    <div class="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden transition-colors duration-200">
       
       <!-- Mobile Sidebar Overlay -->
       <div 
@@ -173,13 +174,13 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
       <div class="flex-1 flex flex-col min-w-0 transition-all duration-300">
         
         <!-- Top Bar -->
-        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-10 shadow-sm">
+        <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 h-16 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-10 shadow-sm transition-colors duration-200">
           <div class="flex items-center gap-4">
             <!-- Mobile Toggle -->
             <!-- Mobile Toggle -->
             <button 
               (click)="toggleMobileMenu()"
-              class="sm:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors focus:ring-2 focus:ring-slate-200"
+              class="sm:hidden p-2 -ml-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-600"
             >
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -187,10 +188,10 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
             </button>
             
             <!-- Breadcrumbs (Simplified for now) -->
-            <nav class="hidden sm:flex text-sm font-medium text-slate-500">
-              <span class="hover:text-slate-800 cursor-pointer transition-colors">Admin</span>
-              <span class="mx-2 text-slate-300">/</span>
-              <span class="text-slate-800">Dashboard</span>
+            <nav class="hidden sm:flex text-sm font-medium text-slate-500 dark:text-slate-400">
+              <span class="hover:text-slate-800 dark:hover:text-white cursor-pointer transition-colors">Admin</span>
+              <span class="mx-2 text-slate-300 dark:text-slate-600">/</span>
+              <span class="text-slate-800 dark:text-white">Dashboard</span>
             </nav>
           </div>
 
@@ -200,23 +201,96 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
                <app-global-search-input mode="admin" placeholder="Global search..."></app-global-search-input>
             </div>
 
+            <!-- Theme Toggle Dropdown -->
+            <div class="relative">
+              <button 
+                (click)="toggleThemeMenu()" 
+                class="relative p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1"
+                [title]="getThemeTooltip()"
+              >
+                <!-- Sun Icon (shown in dark mode) -->
+                <svg *ngIf="themeService.effectiveTheme() === 'dark'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <!-- Moon Icon (shown in light mode) -->
+                <svg *ngIf="themeService.effectiveTheme() === 'light'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <!-- Dropdown Arrow -->
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              <!-- Theme Dropdown Menu -->
+              <div *ngIf="isThemeMenuOpen()" 
+                   class="absolute right-0 mt-2 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 py-2 z-50 animate-fade-in">
+                <button 
+                  (click)="setTheme('light')" 
+                  class="w-full px-4 py-2 text-left text-sm flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  [class.text-blue-600]="themeService.theme() === 'light'"
+                  [class.dark:text-blue-400]="themeService.theme() === 'light'"
+                  [class.text-slate-700]="themeService.theme() !== 'light'"
+                  [class.dark:text-slate-300]="themeService.theme() !== 'light'">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  {{ 'THEME_LIGHT' | translate }}
+                  <svg *ngIf="themeService.theme() === 'light'" class="w-4 h-4 ml-auto text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <button 
+                  (click)="setTheme('dark')" 
+                  class="w-full px-4 py-2 text-left text-sm flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  [class.text-blue-600]="themeService.theme() === 'dark'"
+                  [class.dark:text-blue-400]="themeService.theme() === 'dark'"
+                  [class.text-slate-700]="themeService.theme() !== 'dark'"
+                  [class.dark:text-slate-300]="themeService.theme() !== 'dark'">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                  {{ 'THEME_DARK' | translate }}
+                  <svg *ngIf="themeService.theme() === 'dark'" class="w-4 h-4 ml-auto text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <div class="border-t border-slate-100 dark:border-slate-700 my-1"></div>
+                <button 
+                  (click)="setTheme('system')" 
+                  class="w-full px-4 py-2 text-left text-sm flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  [class.text-blue-600]="themeService.theme() === 'system'"
+                  [class.dark:text-blue-400]="themeService.theme() === 'system'"
+                  [class.text-slate-700]="themeService.theme() !== 'system'"
+                  [class.dark:text-slate-300]="themeService.theme() !== 'system'">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  {{ 'THEME_SYSTEM' | translate }}
+                  <svg *ngIf="themeService.theme() === 'system'" class="w-4 h-4 ml-auto text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
             <!-- Notifications (Placeholder) -->
-            <button class="relative p-2 text-slate-400 hover:text-slate-600 transition-colors">
-              <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+            <button class="relative p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+              <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-800"></span>
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
               </svg>
             </button>
             
             <!-- User Avatar -->
-            <div class="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-500 font-bold text-xs ring-2 ring-transparent hover:ring-blue-100 transition-all cursor-pointer">
+            <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-600 border border-slate-300 dark:border-slate-500 flex items-center justify-center text-slate-500 dark:text-slate-300 font-bold text-xs ring-2 ring-transparent hover:ring-blue-100 dark:hover:ring-blue-900 transition-all cursor-pointer">
               A
             </div>
           </div>
         </header>
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 p-4 lg:p-8">
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 dark:bg-slate-900 p-4 lg:p-8 transition-colors duration-200">
           <div class="max-w-7xl mx-auto">
             <router-outlet></router-outlet>
           </div>
@@ -225,16 +299,44 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
     </div>
   `
 })
-export class AdminLayoutComponent {
+export class AdminLayoutComponent implements OnInit {
   isMobileMenuOpen = signal(false);
+  isThemeMenuOpen = signal(false);
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    public themeService: ThemeService
   ) { }
+
+  ngOnInit() {
+    this.themeService.initTheme();
+  }
 
   toggleMobileMenu() {
     this.isMobileMenuOpen.update(v => !v);
+  }
+
+  toggleThemeMenu() {
+    this.isThemeMenuOpen.update(v => !v);
+  }
+
+  setTheme(mode: 'light' | 'dark' | 'system') {
+    this.themeService.setTheme(mode);
+    this.isThemeMenuOpen.set(false);
+  }
+
+  toggleTheme() {
+    this.themeService.toggleLightDark();
+  }
+
+  getThemeTooltip(): string {
+    const theme = this.themeService.theme();
+    const effective = this.themeService.effectiveTheme();
+    if (theme === 'system') {
+      return `System (${effective})`;
+    }
+    return effective === 'dark' ? 'Dark mode' : 'Light mode';
   }
 
   logout() {

@@ -10,14 +10,16 @@
   "SAVE": "Save",
   "CANCEL": "Cancel",
   "DELETE": "Delete",
-
+  "BTN_ADD": "Add",
+  "BTN_SAVE": "Save",
+  "BTN_DELETE": "Delete",
   "EDIT": "Edit",
   "CREATE": "Create",
   "SEARCH": "Search...",
   "status": {
-      "DRAFT": "Draft",
-      "PUBLISHED": "Published",
-      "ARCHIVED": "Archived"
+    "DRAFT": "Draft",
+    "PUBLISHED": "Published",
+    "ARCHIVED": "Archived"
   },
   "STATUS_DRAFT": "Draft",
   "BTN_SAVE_DRAFT": "Save Draft",
@@ -29,6 +31,10 @@
   "ADD_BLOCK_DESC": "Choose a component to add to your page",
   "NAV_PAGES": "Pages",
   "NAV_EDITOR": "Editor",
+  "NAV_HOME": "Home",
+  "NAV_ABOUT": "About",
+  "NAV_SERVICES": "Services",
+  "NAV_CONTACT": "Contact",
   "ACTION_NEW": "+ New",
   "SELECT_PLACEHOLDER": "Select...",
   "EMPTY_TITLE": "Select a Page to Edit",
@@ -110,7 +116,6 @@
   "TITLE_CREATE_USER": "Create User",
   "TITLE_EDIT_USER": "Edit User",
   "MSG_ERROR_CREATE_USER": "Error creating user",
-  
   "MENU_HEADER_NAV": "Header Navigation",
   "MENU_FOOTER_NAV": "Footer Navigation",
   "MENU_EDITOR_TITLE": "Menu Editor",
@@ -142,7 +147,6 @@
   "PLACEHOLDER_NAV_LABEL": "e.g. Home",
   "PLACEHOLDER_ICON": "e.g. fas fa-home",
   " TIP_EXTERNAL_URL": "Must include http:// or https://",
-
   "BLOCK_PROP_HEADER": "Block Properties",
   "BLOCK_PROP_PANEL_HEADER": "Properties",
   "BLOCK_PROP_SAVE": "Save Changes",
@@ -152,7 +156,6 @@
   "BLOCK_PROP_ITEM_LABEL": "Item",
   "BLOCK_PROP_NO_ITEMS": "No items yet. Click Add Item to start.",
   "BLOCK_PROP_CLOSE": "Close",
-
   "Title": "Title",
   "Description": "Description",
   "Image": "Image",
@@ -172,7 +175,6 @@
   "Question": "Question",
   "Placeholder": "Placeholder",
   "Label": "Label",
-  
   "LANGUAGES_TITLE": "Languages",
   "TBL_CODE": "Code",
   "TBL_NAME": "Name",
@@ -182,12 +184,10 @@
   "STATUS_DISABLED": "Disabled",
   "MSG_NO_LANGS": "No languages configured. Add your first language above.",
   "MSG_CONFIRM_DELETE_LANG": "Delete this language?",
-  
   "TRANSLATIONS_TITLE": "Translations",
   "BTN_ADD_KEY": "Add Key",
   "TBL_KEY": "Key",
   "MSG_NO_KEYS": "No translations found. Add your first key to start translating.",
-  
   "AUDIT_LOGS_TITLE": "Audit Logs",
   "AUDIT_LOGS_SUBTITLE": "Track system activities and user operations",
   "FILTER_BY_ACTION": "Filter by Action",
@@ -216,5 +216,28 @@
   "MSG_CONFIRM_DELETE": "Are you sure you want to delete this asset?",
   "MSG_URL_COPIED": "URL Copied!",
   "MSG_ENTER_PASSWORD": "Enter new password for",
-  "MSG_PASSWORD_UPDATED": "Password updated successfully"
+  "MSG_PASSWORD_UPDATED": "Password updated successfully",
+  "LOGIN_WELCOME": "Welcome back! Please sign in to continue.",
+  "LOGIN_USERNAME_PLACEHOLDER": "Enter your username",
+  "LOGIN_PASSWORD_PLACEHOLDER": "Enter your password",
+  "LOGIN_SIGN_IN": "Sign In",
+  "LOGIN_SIGNING_IN": "Signing in...",
+  "LOGIN_BACK_TO_SITE": "Back to public site",
+  "THEME_LIGHT": "Light",
+  "THEME_DARK": "Dark",
+  "THEME_SYSTEM": "System",
+  "THEME_TOGGLE": "Toggle theme",
+  "NAV_WEB_DEV": "Web Development",
+  "NAV_MOBILE_APPS": "Mobile Apps",
+  "NAV_PRIVACY": "Privacy Policy",
+  "NAV_TERMS": "Terms of Service",
+  "FOOTER_DESC": "Empowering your digital presence with modern CMS solutions.",
+  "FOOTER_LINKS": "Quick Links",
+  "FOOTER_CONTACT": "Contact Us",
+  "FOOTER_COPYRIGHT": "© 2026 CMS Demo. All rights reserved.",
+  "BTN_UPLOAD": "Upload File",
+  "BTN_ADD_VIDEO": "Add Video",
+  "SEARCH_FILES": "Search Files...",
+  "TIP_EXTERNAL_URL": "Include http: or https",
+  "VIEW_GRID": "View Grid"
 }

@@ -19,8 +19,8 @@ import { I18nService } from '../../core/services/i18n.service';
       <!-- Page Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-           <h1 class="text-2xl font-bold text-slate-800">{{ getTitle() | translate }}</h1>
-           <p class="text-slate-500 text-sm mt-1">{{ 'MENU_SUBTITLE' | translate }}</p>
+           <h1 class="text-2xl font-bold text-slate-800 dark:text-white">{{ getTitle() | translate }}</h1>
+           <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">{{ 'MENU_SUBTITLE' | translate }}</p>
         </div>
         <div class="flex flex-wrap gap-2 items-center w-full md:w-auto">
             <span *ngIf="saveStatus" 
@@ -40,17 +40,17 @@ import { I18nService } from '../../core/services/i18n.service';
       </div>
 
       <!-- Tabs -->
-      <div class="flex border-b border-slate-200 mb-6 overflow-x-auto no-scrollbar">
+      <div class="flex border-b border-slate-200 dark:border-slate-700 mb-6 overflow-x-auto no-scrollbar">
         <button (click)="activeTab = 'structure'" 
                 [class.border-blue-500]="activeTab === 'structure'" 
                 [class.text-blue-600]="activeTab === 'structure'"
-                class="px-4 sm:px-6 py-3 border-b-2 border-transparent font-medium hover:text-blue-500 transition-colors whitespace-nowrap">
+                class="px-4 sm:px-6 py-3 border-b-2 border-transparent font-medium hover:text-blue-500 transition-colors whitespace-nowrap text-slate-600 dark:text-slate-300">
             {{ 'TAB_STRUCTURE' | translate }}
         </button>
         <button (click)="activeTab = 'social'"
                 [class.border-blue-500]="activeTab === 'social'" 
                 [class.text-blue-600]="activeTab === 'social'"
-                class="px-4 sm:px-6 py-3 border-b-2 border-transparent font-medium hover:text-blue-500 transition-colors whitespace-nowrap">
+                class="px-4 sm:px-6 py-3 border-b-2 border-transparent font-medium hover:text-blue-500 transition-colors whitespace-nowrap text-slate-600 dark:text-slate-300">
             {{ 'TAB_SOCIAL' | translate }}
         </button>
       </div>
@@ -58,14 +58,14 @@ import { I18nService } from '../../core/services/i18n.service';
       <!-- TAB: Menu Structure -->
       <div *ngIf="activeTab === 'structure'" class="max-w-4xl relative">
          <!-- Loading Overlay -->
-         <div *ngIf="loading" class="absolute inset-0 bg-white/80 z-10 flex items-center justify-center rounded-lg border border-slate-100 min-h-[400px]">
+         <div *ngIf="loading" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 z-10 flex items-center justify-center rounded-lg border border-slate-100 dark:border-slate-700 min-h-[400px]">
             <div class="flex flex-col items-center gap-3">
                 <i class="fas fa-circle-notch fa-spin text-3xl text-blue-500"></i>
-                <span class="text-slate-500 font-medium">{{ 'LOADING_DATA' | translate }}</span>
+                <span class="text-slate-500 dark:text-slate-400 font-medium">{{ 'LOADING_DATA' | translate }}</span>
             </div>
          </div>
 
-         <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6 min-h-[400px]" [class.opacity-50]="loading" cdkDropListGroup>
+         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-6 min-h-[400px]" [class.opacity-50]="loading" cdkDropListGroup>
             
             <!-- Recursive Template for Menu Tree -->
             <ng-template #nodeTemplate let-nodes="nodes" let-level="level">
@@ -76,21 +76,21 @@ import { I18nService } from '../../core/services/i18n.service';
                      class="min-h-[10px] space-y-2">
                     
                     <div *ngFor="let node of nodes; let i = index; trackBy: trackByNode" cdkDrag [cdkDragData]="node"
-                         class="bg-white border rounded-lg shadow-sm group touch-manipulation">
+                         class="bg-white dark:bg-slate-700 border dark:border-slate-600 rounded-lg shadow-sm group touch-manipulation">
                         
                         <!-- Drag Placeholder -->
-                        <div *cdkDragPlaceholder class="min-h-[50px] bg-slate-100 border-2 border-dashed border-slate-300 rounded-lg"></div>
+                        <div *cdkDragPlaceholder class="min-h-[50px] bg-slate-100 dark:bg-slate-700 border-2 border-dashed border-slate-300 dark:border-slate-500 rounded-lg"></div>
 
                         <!-- Node Heading -->
-                        <div class="p-3 flex flex-wrap sm:flex-nowrap items-center gap-3 bg-white hover:bg-slate-50 transition-colors rounded-lg">
-                            <span cdkDragHandle class="text-slate-400 cursor-grab active:cursor-grabbing p-2 hover:bg-slate-100 rounded touch-none"><i class="fas fa-grip-vertical text-lg"></i></span>
+                        <div class="p-3 flex flex-wrap sm:flex-nowrap items-center gap-3 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors rounded-lg">
+                            <span cdkDragHandle class="text-slate-400 dark:text-slate-500 cursor-grab active:cursor-grabbing p-2 hover:bg-slate-100 dark:hover:bg-slate-600 rounded touch-none"><i class="fas fa-grip-vertical text-lg"></i></span>
                             
                             <!-- Icon -->
-                            <span *ngIf="node.icon" class="text-slate-500 w-6 text-center hidden sm:block"><i [class]="node.icon"></i></span>
+                            <span *ngIf="node.icon" class="text-slate-500 dark:text-slate-400 w-6 text-center hidden sm:block"><i [class]="node.icon"></i></span>
                             
                             <!-- Content -->
                             <div class="flex-1 min-w-[150px]">
-                                <span class="font-medium text-slate-800 block sm:inline">{{ node.label || 'Untitled' }}</span>
+                                <span class="font-medium text-slate-800 dark:text-white block sm:inline">{{ node.label || 'Untitled' }}</span>
                                 <span class="text-xs text-slate-400 sm:ml-2 font-mono block sm:inline" *ngIf="node.link">
                                     {{ node.link }} 
                                     <i *ngIf="node.link_type === 'external'" class="fas fa-external-link-alt ml-1 text-[10px]"></i>
@@ -99,10 +99,10 @@ import { I18nService } from '../../core/services/i18n.service';
 
                             <!-- Controls: Always visible on mobile, hover on desktop -->
                             <div class="flex gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ml-auto sm:ml-0">
-                                <button (click)="editItem(node)" class="p-2 text-blue-500 bg-blue-50 hover:bg-blue-100 rounded" title="Edit">
+                                <button (click)="editItem(node)" class="p-2 text-blue-500 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded" title="Edit">
                                     <i class="fas fa-pencil-alt"></i>
                                 </button>
-                                <button (click)="remove(nodes, i, $event)" class="p-2 text-red-500 bg-red-50 hover:bg-red-100 rounded" title="Delete">
+                                <button (click)="remove(nodes, i, $event)" class="p-2 text-red-500 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -120,12 +120,12 @@ import { I18nService } from '../../core/services/i18n.service';
             <ng-container *ngTemplateOutlet="nodeTemplate; context: { nodes: items, level: 1 }"></ng-container>
 
             <!-- Add Button -->
-            <button (click)="add()" class="mt-4 w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:border-blue-400 hover:text-blue-500 transition-colors font-medium flex items-center justify-center gap-2 active:bg-slate-50">
+            <button (click)="add()" class="mt-4 w-full py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-500 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500 transition-colors font-medium flex items-center justify-center gap-2 active:bg-slate-50 dark:active:bg-slate-700">
                 <i class="fas fa-plus"></i> {{ 'BTN_ADD_TOP_LEVEL' | translate }}
             </button>
          </div>
          
-         <div class="mt-4 bg-blue-50 border border-blue-200 rounded-md p-4 text-sm text-blue-700">
+         <div class="mt-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md p-4 text-sm text-blue-700 dark:text-blue-300">
             <p><i class="fas fa-info-circle mr-2"></i> {{ 'TIP_NESTING' | translate }}</p>
          </div>
       </div>
@@ -134,20 +134,20 @@ import { I18nService } from '../../core/services/i18n.service';
       <div *ngIf="activeTab === 'social'" class="max-w-4xl">
          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Active Links -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
-                <h3 class="font-bold text-lg mb-4 text-slate-800">{{ 'TAB_SOCIAL' | translate }}</h3>
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
+                <h3 class="font-bold text-lg mb-4 text-slate-800 dark:text-white">{{ 'TAB_SOCIAL' | translate }}</h3>
                 <div cdkDropList (cdkDropListDropped)="dropSocial($event)" class="space-y-3">
-                    <div *ngFor="let link of socialLinks; let i = index; trackBy: trackByLink" cdkDrag class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div *ngFor="let link of socialLinks; let i = index; trackBy: trackByLink" cdkDrag class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 bg-white dark:bg-slate-700 border dark:border-slate-600 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex items-center gap-3">
-                             <span class="text-slate-400 cursor-grab touch-none"><i class="fas fa-grip-vertical text-lg"></i></span>
-                             <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-lg shrink-0">
+                             <span class="text-slate-400 dark:text-slate-500 cursor-grab touch-none"><i class="fas fa-grip-vertical text-lg"></i></span>
+                             <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-600 flex items-center justify-center text-slate-600 dark:text-slate-300 text-lg shrink-0">
                                  <img *ngIf="link.icon_path" [src]="link.icon_path" class="w-6 h-6 object-contain">
                                  <i *ngIf="!link.icon_path" [class]="getIconClass(link.platform)"></i>
                              </div>
                         </div>
                         
                         <div class="flex-1 min-w-0">
-                             <input [(ngModel)]="link.url" placeholder="https://..." class="w-full text-sm border-0 border-b border-slate-200 focus:border-blue-500 focus:ring-0 px-0 py-1 bg-transparent transition-colors" />
+                             <input [(ngModel)]="link.url" placeholder="https://..." class="w-full text-sm border-0 border-b border-slate-200 dark:border-slate-600 focus:border-blue-500 focus:ring-0 px-0 py-1 bg-transparent transition-colors text-slate-800 dark:text-white" />
                              <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">{{ link.platform }}</span>
                         </div>
                         <div class="flex items-center justify-between sm:justify-end gap-2 mt-2 sm:mt-0">
@@ -161,7 +161,7 @@ import { I18nService } from '../../core/services/i18n.service';
                     </div>
                 </div>
                 
-                <div class="mt-4 pt-4 border-t border-slate-100">
+                <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
                     <button (click)="addSocial()" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-2 w-full justify-center sm:justify-start py-2 sm:py-0">
                         <i class="fas fa-plus-circle"></i> {{ 'BTN_ADD_LINK' | translate }}
                     </button>
@@ -170,12 +170,12 @@ import { I18nService } from '../../core/services/i18n.service';
 
             <!-- Preview / Instructions -->
             <div class="space-y-6">
-                <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-6">
-                    <h4 class="font-bold text-indigo-900 mb-2">{{ 'LABEL_SUPPORTED_PLATFORMS' | translate }}</h4>
+                <div class="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 rounded-lg p-6">
+                    <h4 class="font-bold text-indigo-900 dark:text-indigo-300 mb-2">{{ 'LABEL_SUPPORTED_PLATFORMS' | translate }}</h4>
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-2 py-1 bg-white rounded text-xs text-slate-600 border" *ngFor="let p of ['facebook','twitter','instagram','linkedin','youtube','github']">{{p}}</span>
+                        <span class="px-2 py-1 bg-white dark:bg-slate-700 rounded text-xs text-slate-600 dark:text-slate-300 border dark:border-slate-600" *ngFor="let p of ['facebook','twitter','instagram','linkedin','youtube','github']">{{p}}</span>
                     </div>
-                    <p class="text-sm text-indigo-700 mt-3">{{ 'TIP_PLATFORMS' | translate }}</p>
+                    <p class="text-sm text-indigo-700 dark:text-indigo-400 mt-3">{{ 'TIP_PLATFORMS' | translate }}</p>
                 </div>
             </div>
          </div>
@@ -189,21 +189,21 @@ import { I18nService } from '../../core/services/i18n.service';
       </app-menu-item-editor>
 
       <!-- Custom Confirmation Modal -->
-      <div *ngIf="deleteState" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
-        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 animate-scale-in">
+        <div *ngIf="deleteState" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
+          <div class="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-sm w-full p-6 animate-scale-in">
           <div class="flex items-center gap-3 text-red-600 mb-4">
              <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                <i class="fas fa-exclamation-triangle"></i>
              </div>
-             <h3 class="text-lg font-bold text-slate-800">{{ 'DIALOG_CONFIRM_DELETE' | translate }}</h3>
+             <h3 class="text-lg font-bold text-slate-800 dark:text-white">{{ 'DIALOG_CONFIRM_DELETE' | translate }}</h3>
           </div>
           
-          <p class="text-slate-600 mb-6 text-sm">
+          <p class="text-slate-600 dark:text-slate-400 mb-6 text-sm">
              {{ (deleteState.type === 'item' ? 'MSG_CONFIRM_DELETE_ITEM' : 'MSG_CONFIRM_DELETE_GENERIC') | translate }}
           </p>
 
           <div class="flex gap-2 justify-end">
-            <button (click)="cancelDelete()" class="px-4 py-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md font-medium transition-colors">
+            <button (click)="cancelDelete()" class="px-4 py-2 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-md font-medium transition-colors">
               {{ 'BTN_CANCEL' | translate }}
             </button>
             <button (click)="confirmDelete()" class="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-md font-medium transition-colors shadow-sm">

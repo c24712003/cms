@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { ActivatedRoute } from '@angular/router';
 
 import { Language } from '../../core/models/language.model';
 import { I18nService } from '../../core/services/i18n.service';
@@ -28,24 +29,24 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
     TranslatePipe
   ],
   template: `
-    <div class="flex flex-col h-screen bg-slate-50 overflow-hidden">
+    <div class="flex flex-col h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden transition-colors">
       <!-- Page Header (Toolbar) -->
-      <header class="h-auto min-h-[4rem] py-2 bg-white border-b border-slate-200 flex flex-wrap gap-y-2 items-center justify-between px-2 sm:px-4 shadow-sm z-20 shrink-0">
+      <header class="h-auto min-h-[4rem] py-2 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex flex-wrap gap-y-2 items-center justify-between px-2 sm:px-4 shadow-sm z-20 shrink-0 transition-colors">
         <!-- Left: Title, Selector, New Button -->
         <div class="flex items-center gap-2 flex-grow sm:flex-grow-0">
-          <h1 class="font-bold text-slate-800 text-sm flex items-center gap-2 shrink-0">
-            <span class="text-slate-400 hidden sm:inline">{{ 'NAV_PAGES' | translate }} /</span> 
+          <h1 class="font-bold text-slate-800 dark:text-white text-sm flex items-center gap-2 shrink-0">
+            <span class="text-slate-400 dark:text-slate-500 hidden sm:inline">{{ 'NAV_PAGES' | translate }} /</span> 
             {{ 'NAV_EDITOR' | translate }}
           </h1>
           
           <!-- Page Selector -->
           <div class="relative group flex-grow sm:flex-grow-0 max-w-[140px] sm:max-w-none">
              <select [ngModel]="selectedPageSlug()" (ngModelChange)="loadPage($event)" 
-                     class="w-full appearance-none pl-3 pr-8 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors cursor-pointer border-transparent focus:border-blue-500 focus:ring-0 truncate">
+                     class="w-full appearance-none pl-3 pr-8 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors cursor-pointer border-transparent focus:border-blue-500 focus:ring-0 truncate">
                   <option value="">{{ 'SELECT_PLACEHOLDER' | translate }}</option>
                   <option *ngFor="let p of pages()" [value]="p.slug_key">{{ p.slug_key }}</option>
              </select>
-             <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+             <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 dark:text-slate-400">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
              </div>
           </div>
@@ -59,24 +60,27 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
         <!-- Right Toolbar Actions -->
         <div class="flex items-center gap-2 sm:gap-3 ml-auto">
              <!-- Language Tabs (Compact) -->
-             <div class="flex bg-slate-100 rounded-lg p-1" *ngIf="languages().length > 0">
+             <div class="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1" *ngIf="languages().length > 0">
                 <ng-container *ngFor="let lang of languages()">
                     <!-- Mobile: Only show active language or compact toggle? For simplicity, show icons or code but keep compact -->
                     <button 
                     (click)="switchLang(lang.code)"
                     [class.bg-white]="activeLang() === lang.code"
+                    [class.dark:bg-slate-600]="activeLang() === lang.code"
                     [class.shadow-sm]="activeLang() === lang.code"
                     [class.text-slate-900]="activeLang() === lang.code"
+                    [class.dark:text-white]="activeLang() === lang.code"
                     [class.text-slate-500]="activeLang() !== lang.code"
+                    [class.dark:text-slate-400]="activeLang() !== lang.code"
                     class="px-2 sm:px-3 py-1 text-xs font-semibold rounded-md transition-all">
                   {{ lang.code | uppercase }}
                 </button>
                 </ng-container>
              </div>
 
-            <div class="hidden sm:block h-6 w-px bg-slate-200 mx-1"></div>
+            <div class="hidden sm:block h-6 w-px bg-slate-200 dark:bg-slate-600 mx-1"></div>
 
-            <div class="hidden md:flex items-center text-xs text-slate-500 italic mr-2" *ngIf="selectedPageSlug()">
+            <div class="hidden md:flex items-center text-xs text-slate-500 dark:text-slate-400 italic mr-2" *ngIf="selectedPageSlug()">
                 <span class="w-2 h-2 rounded-full bg-amber-400 mr-2"></span>
                 {{ 'STATUS_DRAFT' | translate }}
             </div>
@@ -98,59 +102,59 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
       <div class="flex-1 flex overflow-hidden relative" *ngIf="selectedPageSlug(); else noPageSelected">
         
         <!-- Left: Canvas -->
-        <main class="flex-1 overflow-y-auto bg-slate-100/50 relative" (click)="selectedBlock = null">
+        <main class="flex-1 overflow-y-auto bg-slate-100/50 dark:bg-slate-900 relative transition-colors" (click)="selectedBlock = null">
             
             <!-- Metadata Card (Collapsible or Top) -->
-            <div class="max-w-5xl mx-auto mb-8 bg-white rounded-xl border border-slate-200 p-6 shadow-sm group">
+            <div class="max-w-5xl mx-auto mb-8 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm group transition-colors">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ 'PAGE_SETTINGS_HEADER' | translate }}</h3>
+                    <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{{ 'PAGE_SETTINGS_HEADER' | translate }}</h3>
                     <button (click)="showSeoPanel = !showSeoPanel" 
                             class="text-xs font-medium px-3 py-1 rounded-full transition-colors"
-                            [class.bg-blue-100]="showSeoPanel" [class.text-blue-700]="showSeoPanel"
-                            [class.bg-slate-100]="!showSeoPanel" [class.text-slate-600]="!showSeoPanel">
+                            [class.bg-blue-100]="showSeoPanel" [class.dark:bg-blue-900]="showSeoPanel" [class.text-blue-700]="showSeoPanel" [class.dark:text-blue-300]="showSeoPanel"
+                            [class.bg-slate-100]="!showSeoPanel" [class.dark:bg-slate-700]="!showSeoPanel" [class.text-slate-600]="!showSeoPanel" [class.dark:text-slate-300]="!showSeoPanel">
                         <i class="fas fa-chart-line mr-1"></i> SEO Score: {{ seoScore }}
                     </button>
                 </div>
                 <div class="grid grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">{{ 'PAGE_TITLE_LABEL' | translate }}</label>
-                        <input [(ngModel)]="content.title" class="w-full text-lg font-bold border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 transition-all placeholder:text-slate-300" placeholder="Page Title" />
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ 'PAGE_TITLE_LABEL' | translate }}</label>
+                        <input [(ngModel)]="content.title" class="w-full text-lg font-bold border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 bg-transparent text-slate-900 dark:text-white" placeholder="Page Title" />
                     </div>
                      <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">{{ 'PAGE_URL_SLUG_LABEL' | translate }}</label>
-                        <div class="flex items-baseline text-slate-500">
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ 'PAGE_URL_SLUG_LABEL' | translate }}</label>
+                        <div class="flex items-baseline text-slate-500 dark:text-slate-400">
                              <span class="text-sm">/{{ activeLang() }}/</span>
-                             <input [(ngModel)]="content.slug_localized" class="flex-1 bg-transparent border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 text-sm font-mono text-slate-700" />
+                             <input [(ngModel)]="content.slug_localized" class="flex-1 bg-transparent border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 text-sm font-mono text-slate-700 dark:text-slate-300" />
                         </div>
                     </div>
                 </div>
                 
                 <!-- SEO Fields -->
-                <div class="grid grid-cols-2 gap-6 mt-4 pt-4 border-t border-slate-100">
+                <div class="grid grid-cols-2 gap-6 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">SEO Title 
-                            <span class="font-normal text-slate-400">({{ content.seo_title?.length || 0 }}/60)</span>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">SEO Title 
+                            <span class="font-normal text-slate-400 dark:text-slate-500">({{ content.seo_title?.length || 0 }}/60)</span>
                         </label>
                         <input [(ngModel)]="content.seo_title" 
                                (ngModelChange)="updateSeoScore()"
-                               class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                               class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
                                placeholder="SEO 標題（建議 50-60 字元）" />
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">OG Image URL</label>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">OG Image URL</label>
                         <input [(ngModel)]="content.og_image" 
-                               class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                               class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
                                placeholder="https://example.com/image.jpg" />
                     </div>
                 </div>
                 <div class="mt-4">
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Meta Description 
-                        <span class="font-normal text-slate-400">({{ content.seo_desc?.length || 0 }}/160)</span>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Meta Description 
+                        <span class="font-normal text-slate-400 dark:text-slate-500">({{ content.seo_desc?.length || 0 }}/160)</span>
                     </label>
                     <textarea [(ngModel)]="content.seo_desc" 
                               (ngModelChange)="updateSeoScore()"
                               rows="2" 
-                              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none" 
+                              class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
                               placeholder="頁面描述（建議 120-160 字元）"></textarea>
                 </div>
             </div>
@@ -172,19 +176,19 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
                  
                  <div *ngFor="let block of blocks; trackBy: trackBlockId" 
                       cdkDrag
-                      class="group relative bg-white rounded-xl border-2 border-transparent transition-all shadow-sm hover:shadow-md cursor-pointer"
+                      class="group relative bg-white dark:bg-slate-800 rounded-xl border-2 border-transparent transition-all shadow-sm hover:shadow-md cursor-pointer"
                       [class.border-blue-500]="selectedBlock === block"
                       [class.ring-4]="selectedBlock === block"
                       [class.ring-blue-500/10]="selectedBlock === block"
                       (click)="selectBlock(block, $event)">
                     
                     <!-- Drag Handle (Left) -->
-                    <div class="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-move z-20 hover:bg-slate-50 rounded-l-xl transition-all" cdkDragHandle>
+                    <div class="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-move z-20 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-l-xl transition-all" cdkDragHandle>
                         <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor"><path d="M7 19h2v2H7zM7 15h2v2H7zM7 11h2v2H7zM7 7h2v2H7zM11 19h2v2h-2zM11 15h2v2h-2zM11 11h2v2h-2zM11 7h2v2h-2zM15 19h2v2h-2zM15 15h2v2h-2zM15 11h2v2h-2zM15 7h2v2h-2z"/></svg>
                     </div>
 
                     <!-- Remove Button (Right) -->
-                    <button (click)="removeBlock(block, $event)" class="absolute -right-3 -top-3 bg-white text-slate-400 hover:text-red-500 shadow-sm border border-slate-200 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-30 hover:scale-110">
+                    <button (click)="removeBlock(block, $event)" class="absolute -right-3 -top-3 bg-white dark:bg-slate-700 text-slate-400 hover:text-red-500 shadow-sm border border-slate-200 dark:border-slate-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-30 hover:scale-110">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
 
@@ -195,13 +199,13 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
                  </div>
 
                  <!-- Drop Zone / Empty State -->
-                 <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer"
+                 <div class="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer"
                       (click)="showBlockPicker = true">
-                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 mb-3">
+                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 mb-3">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                      </div>
-                     <h3 class="font-bold text-slate-700">{{ 'ADD_BLOCK_TITLE' | translate }}</h3>
-                     <p class="text-sm text-slate-500">{{ 'ADD_BLOCK_DESC' | translate }}</p>
+                     <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ 'ADD_BLOCK_TITLE' | translate }}</h3>
+                     <p class="text-sm text-slate-500 dark:text-slate-400">{{ 'ADD_BLOCK_DESC' | translate }}</p>
                  </div>
             </div>
 
@@ -212,14 +216,14 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
         </main>
 
         <!-- Right: Property Panel -->
-        <aside class="absolute inset-y-0 right-0 z-30 w-full md:w-96 bg-white border-l border-slate-200 flex flex-col shadow-xl transition-transform duration-300 lg:static lg:z-auto"
+        <aside class="absolute inset-y-0 right-0 z-30 w-full md:w-96 bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 flex flex-col shadow-xl transition-transform duration-300 lg:static lg:z-auto"
                [class.translate-x-0]="selectedBlock"
                [class.translate-x-full]="!selectedBlock"
                [class.hidden]="!selectedBlock && !isMobile()"> <!-- Use hidden for space reclaiming on desktop -->
              
-             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/50">
-                 <h3 class="font-bold text-slate-700 text-sm">{{ 'BLOCK_PROP_HEADER' | translate }}</h3>
-                 <button (click)="selectedBlock = null" class="btn btn-xs btn-ghost text-slate-400 hover:text-slate-600">{{ 'BLOCK_PROP_CLOSE' | translate }}</button>
+             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                 <h3 class="font-bold text-slate-700 dark:text-white text-sm">{{ 'BLOCK_PROP_HEADER' | translate }}</h3>
+                 <button (click)="selectedBlock = null" class="btn btn-xs btn-ghost text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">{{ 'BLOCK_PROP_CLOSE' | translate }}</button>
              </div>
 
              <div class="flex-1 overflow-y-auto">
@@ -236,13 +240,13 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
 
       <!-- No Page Selected State -->
       <ng-template #noPageSelected>
-          <div class="flex-1 flex items-center justify-center bg-slate-50">
+          <div class="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-900">
              <div class="text-center max-w-md">
-                 <div class="inline-block p-6 rounded-full bg-blue-50 text-blue-500 mb-6">
+                 <div class="inline-block p-6 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 mb-6">
                     <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                  </div>
-                 <h2 class="text-2xl font-bold text-slate-800 mb-2">{{ 'EMPTY_TITLE' | translate }}</h2>
-                 <p class="text-slate-500 mb-8">{{ 'EMPTY_DESC' | translate }}</p>
+                 <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">{{ 'EMPTY_TITLE' | translate }}</h2>
+                 <p class="text-slate-500 dark:text-slate-400 mb-8">{{ 'EMPTY_DESC' | translate }}</p>
                  <button class="btn btn-primary" (click)="openCreateModal()">{{ 'BTN_CREATE_NEW' | translate }}</button>
              </div>
           </div>
@@ -250,28 +254,28 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
 
       <!-- Block Picker Modal -->
       <div *ngIf="showBlockPicker" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-[800px] max-w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-[800px] max-w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
                 <div>
-                    <h3 class="text-xl font-bold text-slate-800">{{ 'ADD_BLOCK_TITLE' | translate }}</h3>
-                    <p class="text-sm text-slate-500">{{ 'ADD_BLOCK_DESC' | translate }}</p>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white">{{ 'ADD_BLOCK_TITLE' | translate }}</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ 'ADD_BLOCK_DESC' | translate }}</p>
                 </div>
                 <button (click)="showBlockPicker = false" class="btn btn-circle btn-ghost btn-sm text-slate-400">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-6 bg-slate-50">
+            <div class="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900">
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <button *ngFor="let def of availableBlocks" 
                             (click)="addBlock(def.type)"
-                            class="group relative bg-white p-5 rounded-xl border border-slate-200 hover:border-blue-500 hover:shadow-lg transition-all text-left flex flex-col">
-                        <div class="mb-3 w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            class="group relative bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:shadow-lg transition-all text-left flex flex-col">
+                        <div class="mb-3 w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
                              <!-- Icon placeholder based on category or type -->
                              <span class="text-lg font-bold">{{ def.displayName.charAt(0) }}</span>
                         </div>
-                        <h4 class="font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">{{ def.displayName }}</h4>
-                        <p class="text-xs text-slate-500 line-clamp-2">Category: {{ def.category || 'General' }}</p>
+                        <h4 class="font-bold text-slate-800 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ def.displayName }}</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">Category: {{ def.category || 'General' }}</p>
                     </button>
                 </div>
             </div>
@@ -280,14 +284,14 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
 
       <!-- Create Page Modal -->
         <div *ngIf="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-96">
-            <h3 class="text-lg font-bold mb-4">{{ 'MODAL_CREATE_TITLE' | translate }}</h3>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 w-96">
+            <h3 class="text-lg font-bold mb-4 text-slate-900 dark:text-white">{{ 'MODAL_CREATE_TITLE' | translate }}</h3>
             
             <div class="space-y-4">
                 <div>
                     <label class="form-label">{{ 'PAGE_URL_SLUG_LABEL' | translate }}</label>
                     <input [(ngModel)]="newPageSlug" class="input-field" placeholder="e.g. services" />
-                    <p class="text-xs text-slate-500 mt-1">Unique identifier for the URL.</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Unique identifier for the URL.</p>
                 </div>
                 <div>
                     <label class="form-label">Template</label>
@@ -317,9 +321,9 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
 
       <!-- Confirmation Modal -->
       <div *ngIf="showConfirmModal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-96 max-w-full">
-            <h3 class="text-lg font-bold text-slate-800 mb-2">Confirm Action</h3>
-            <p class="text-slate-600 mb-6">{{ confirmMessage }}</p>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 w-96 max-w-full">
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Confirm Action</h3>
+            <p class="text-slate-600 dark:text-slate-300 mb-6">{{ confirmMessage }}</p>
             <div class="flex justify-end gap-3">
                 <button class="btn btn-ghost" (click)="showConfirmModal = false">Cancel</button>
                 <button class="btn btn-primary" (click)="confirmAction()">Confirm</button>
@@ -364,7 +368,8 @@ export class PageEditorComponent {
     private registry: BlockRegistryService,
     private cdr: ChangeDetectorRef,
     public i18n: I18nService,
-    private seoValidator: SeoValidatorService
+    private seoValidator: SeoValidatorService,
+    private route: ActivatedRoute
   ) { this.init(); }
 
   showToast(message: string, type: 'success' | 'error' | 'warning' = 'success') {
@@ -420,6 +425,13 @@ export class PageEditorComponent {
     this.http.get<Language[]>('/api/languages').subscribe(l => {
       this.languages.set(l);
       if (l.length > 0 && !this.activeLang()) this.activeLang.set(l[0].code);
+    });
+
+    // Check for query params (e.g., action=create)
+    this.route.queryParams.subscribe((params: any) => {
+      if (params['action'] === 'create') {
+        setTimeout(() => this.openCreateModal(), 100);
+      }
     });
   }
 

@@ -10,14 +10,14 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
-    <div class="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col"
+    <div class="fixed inset-y-0 right-0 w-96 bg-white dark:bg-slate-800 shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col"
          [class.translate-x-0]="isOpen"
          [class.translate-x-full]="!isOpen">
       
       <!-- Header -->
-      <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-        <h3 class="font-bold text-lg text-slate-800">{{ 'MENU_ITEM_EDIT_TITLE' | translate }}</h3>
-        <button (click)="close()" class="text-slate-400 hover:text-slate-600 transition-colors">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+        <h3 class="font-bold text-lg text-slate-800 dark:text-white">{{ 'MENU_ITEM_EDIT_TITLE' | translate }}</h3>
+        <button (click)="close()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -29,19 +29,19 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
         
         <!-- Label -->
         <div class="form-group">
-          <label class="block text-sm font-medium text-slate-700 mb-1">{{ 'LABEL_NAV_LABEL' | translate }}</label>
-          <input [(ngModel)]="item.label" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all" [placeholder]="'PLACEHOLDER_NAV_LABEL' | translate">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ 'LABEL_NAV_LABEL' | translate }}</label>
+          <input [(ngModel)]="item.label" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all bg-white dark:bg-slate-700 text-slate-800 dark:text-white" [placeholder]="'PLACEHOLDER_NAV_LABEL' | translate">
         </div>
 
         <!-- Link Type -->
         <div class="form-group">
-          <label class="block text-sm font-medium text-slate-700 mb-1">{{ 'LABEL_LINK_TYPE' | translate }}</label>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ 'LABEL_LINK_TYPE' | translate }}</label>
           <div class="flex gap-4">
-            <label class="flex items-center gap-2 cursor-pointer">
+            <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
               <input type="radio" [(ngModel)]="item.link_type" value="internal" class="text-blue-600 focus:ring-blue-500">
               <span>{{ 'LABEL_INTERNAL_PAGE' | translate }}</span>
             </label>
-            <label class="flex items-center gap-2 cursor-pointer">
+            <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
               <input type="radio" [(ngModel)]="item.link_type" value="external" class="text-blue-600 focus:ring-blue-500">
               <span>{{ 'LABEL_EXTERNAL_URL' | translate }}</span>
             </label>
@@ -50,13 +50,13 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
 
         <!-- Link / URL -->
         <div class="form-group">
-          <label class="block text-sm font-medium text-slate-700 mb-1">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
             {{ (item.link_type === 'external' ? 'LABEL_EXTERNAL_URL' : 'LABEL_INTERNAL_PATH') | translate }}
           </label>
           <input [(ngModel)]="item.link" 
                  [placeholder]="item.link_type === 'external' ? 'https://example.com' : '/about'"
-                 class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all font-mono text-sm text-blue-600">
-          <p class="mt-1 text-xs text-slate-500" *ngIf="item.link_type === 'external'">{{ 'TIP_EXTERNAL_URL' | translate }}</p>
+                 class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all font-mono text-sm text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-700">
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" *ngIf="item.link_type === 'external'">{{ 'TIP_EXTERNAL_URL' | translate }}</p>
         </div>
 
         <!-- Target -->
@@ -66,20 +66,20 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
                    [checked]="item.target === '_blank'" 
                    (change)="item.target = $any($event.target).checked ? '_blank' : '_self'"
                    class="rounded text-blue-600 focus:ring-blue-500">
-            <span class="text-sm font-medium text-slate-700">{{ 'LABEL_OPEN_NEW_TAB' | translate }}</span>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ 'LABEL_OPEN_NEW_TAB' | translate }}</span>
           </label>
         </div>
         
         <!-- Icon (Optional) -->
         <div class="form-group">
-          <label class="block text-sm font-medium text-slate-700 mb-1">{{ 'LABEL_ICON_CODE' | translate }}</label>
-          <input [(ngModel)]="item.icon" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all" [placeholder]="'PLACEHOLDER_ICON' | translate">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ 'LABEL_ICON_CODE' | translate }}</label>
+          <input [(ngModel)]="item.icon" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all bg-white dark:bg-slate-700 text-slate-800 dark:text-white" [placeholder]="'PLACEHOLDER_ICON' | translate">
         </div>
 
         <!-- Visibility -->
         <div class="form-group text-right">
-           <label class="inline-flex items-center gap-2 cursor-pointer bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200 transition-colors">
-            <span class="text-sm font-medium text-slate-700">{{ 'LABEL_VISIBLE' | translate }}</span>
+           <label class="inline-flex items-center gap-2 cursor-pointer bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ 'LABEL_VISIBLE' | translate }}</span>
             <div class="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in">
                 <input type="checkbox" [(ngModel)]="item.is_visible" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer text-blue-500"/>
                 <label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
@@ -90,8 +90,8 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
       </div>
 
       <!-- Footer -->
-      <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-2">
-        <button (click)="close()" class="px-4 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 transition-colors font-medium">{{ 'BTN_DONE' | translate }}</button>
+      <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex justify-end gap-2">
+        <button (click)="close()" class="px-4 py-2 bg-slate-800 dark:bg-blue-600 text-white rounded-md hover:bg-slate-700 dark:hover:bg-blue-700 transition-colors font-medium">{{ 'BTN_DONE' | translate }}</button>
       </div>
     </div>
     

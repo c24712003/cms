@@ -85,7 +85,7 @@ router.get('/sitemap.xml', async (req, res) => {
                 });
 
                 // x-default for language negotiation fallback
-                const defaultPage = pageVersions.find((p: any) => p.lang_code === 'en') || pageVersions[0];
+                const defaultPage = pageVersions.find((p: any) => p.lang_code === 'en-US') || pageVersions[0];
                 if (defaultPage) {
                     const defaultSlug = defaultPage.slug_localized || defaultPage.slug_key || '';
                     const defaultLoc = defaultSlug === 'home' || defaultSlug === ''

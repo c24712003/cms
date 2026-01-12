@@ -1,13 +1,13 @@
-import { Injectable, signal, computed, PLATFORM_ID, Inject, makeStateKey, TransferState } from '@angular/core';
+import { Injectable, signal, PLATFORM_ID, Inject, makeStateKey, TransferState } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Language, TranslationMap } from '../models/language.model';
+import { TranslationMap } from '../models/language.model';
 import { tap, catchError, of, Observable } from 'rxjs';
 
 export const I18N_DATA_KEY = makeStateKey<TranslationMap>('I18N_DATA');
 export const LANG_KEY = makeStateKey<string>('I18N_LANG');
 
-const SUPPORTED_LANGS = ['en-US', 'zh-TW'];
+const SUPPORTED_LANGS = ['en-US', 'zh-TW', 'ja', 'ko'];
 const DEFAULT_LANG = 'en-US';
 
 @Injectable({
@@ -39,37 +39,53 @@ export class I18nService {
 
             // 2. Browser Detection
             const detected = this.detectBrowserLanguage();
-            this.loadTranslations(detected).subscribe();
+            const normalized = this.normalizeLanguage(detected);
+            this.loadTranslations(normalized).subscribe();
         } else {
-            // Server-side default (could be improved with request headers if using SSR)
+            // Server-side default
             this.loadTranslations(DEFAULT_LANG).subscribe();
         }
     }
 
     private detectBrowserLanguage(): string {
         const browserLang = navigator.language; // e.g., 'en-US', 'zh-TW', 'en-GB'
+        return this.normalizeLanguage(browserLang);
+    }
 
-        // Exact match
-        if (SUPPORTED_LANGS.includes(browserLang)) {
-            return browserLang;
+    private normalizeLanguage(lang: string): string {
+        // 1. Exact match Check
+        if (SUPPORTED_LANGS.includes(lang)) {
+            return lang;
         }
 
-        // Partial match (e.g., 'en-GB' -> 'en-US')
-        const prefix = browserLang.split('-')[0];
-        const partialMatch = SUPPORTED_LANGS.find(lang => lang.startsWith(prefix));
+        // 2. Normalize input (lowercase, handle variants)
+        const lower = lang.toLowerCase();
 
-        return partialMatch || DEFAULT_LANG;
+        // Map common variants to our supported formats
+        if (lower.startsWith('en')) return 'en-US';
+        if (lower === 'zh-tw' || lower === 'zh-hant') return 'zh-TW';
+        if (lower.startsWith('zh')) return 'zh-TW'; // Default zh to TW for now
+
+        // 3. Partial/Prefix match from supported list
+        // This handles cases where we might support 'fr-FR' and user has 'fr'
+        const prefix = lang.split('-')[0];
+        const partialMatch = SUPPORTED_LANGS.find(l => l.startsWith(prefix));
+        if (partialMatch) return partialMatch;
+
+        return DEFAULT_LANG;
     }
 
     setServerState(lang: string, data: TranslationMap) {
-        this.setLanguageState(lang, data);
-        this.transferState.set(LANG_KEY, lang);
+        const normalized = this.normalizeLanguage(lang);
+        this.setLanguageState(normalized, data);
+        this.transferState.set(LANG_KEY, normalized);
         this.transferState.set(I18N_DATA_KEY, data);
     }
 
     switchLanguage(lang: string) {
-        if (lang === this.currentLang()) return;
-        this.loadTranslations(lang).subscribe();
+        const normalized = this.normalizeLanguage(lang);
+        if (normalized === this.currentLang()) return;
+        this.loadTranslations(normalized).subscribe();
     }
 
     /**
@@ -77,6 +93,10 @@ export class I18nService {
      */
     setLanguage(lang: string) {
         this.switchLanguage(lang);
+    }
+
+    refresh() {
+        this.loadTranslations(this.currentLang()).subscribe();
     }
 
     translate(key: string): string {
@@ -87,13 +107,17 @@ export class I18nService {
     }
 
     private loadTranslations(lang: string): Observable<TranslationMap> {
+        // Ensure we are loading a supported language
+        const targetLang = this.normalizeLanguage(lang);
+
         // Load from static assets in public/i18n
-        return this.http.get<TranslationMap>(`/i18n/${lang}.json`).pipe(
-            tap(data => this.setLanguageState(lang, data)),
+        // Since Admin now writes directly to these files, they are the single source of truth.
+        return this.http.get<TranslationMap>(`/i18n/${targetLang}.json`).pipe(
+            tap(data => this.setLanguageState(targetLang, data)),
             catchError(err => {
-                console.error(`Failed to load translations for ${lang}`, err);
+                console.error(`Failed to load translations for ${targetLang}`, err);
                 // Fallback to default if loading fails and we aren't already on it
-                if (lang !== DEFAULT_LANG) {
+                if (targetLang !== DEFAULT_LANG) {
                     return this.loadTranslations(DEFAULT_LANG);
                 }
                 return of({});

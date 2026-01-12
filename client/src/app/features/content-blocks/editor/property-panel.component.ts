@@ -30,7 +30,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
                    <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
                  </label>
                  <textarea [id]="key" [formControlName]="key" class="textarea textarea-bordered w-full h-24"></textarea>
-                 <p *ngIf="schema?.properties?.[key]?.description" class="text-xs text-slate-500 mt-1">{{ schema?.properties?.[key]?.description | translate }}</p>
+                 <p *ngIf="schema?.properties?.[key]?.description" class="text-xs text-slate-500 mt-1">{{ (schema?.properties?.[key]?.description || '') | translate }}</p>
               </div>
 
                <!-- Image Widget (Simplistic for now) -->

@@ -65,7 +65,7 @@ router.get('/public', async (req: Request, res: Response) => {
     }
 
     const query = `%${q}%`;
-    const langCode = typeof lang === 'string' ? lang : 'en'; // Default or required?
+    const langCode = typeof lang === 'string' ? lang : 'en-US'; // Default or required?
     const db = getDb();
 
     try {

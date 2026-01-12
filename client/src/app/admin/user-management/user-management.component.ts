@@ -20,7 +20,7 @@ interface User {
   template: `
     <div class="max-w-7xl mx-auto">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <h1 class="text-2xl font-bold text-slate-800">{{ 'USER_MANAGEMENT' | translate }}</h1>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">{{ 'USER_MANAGEMENT' | translate }}</h1>
         <button (click)="openCreateModal()" class="btn btn-primary w-full md:w-auto flex justify-center items-center">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             {{ 'BTN_ADD_USER' | translate }}
@@ -28,9 +28,9 @@ interface User {
       </div>
 
       <!-- Desktop Table View -->
-      <div class="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="hidden md:block bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
         <table class="w-full text-left text-sm">
-          <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-xs font-semibold">
+          <thead class="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 uppercase text-xs font-semibold">
             <tr>
               <th class="px-6 py-4">{{ 'TBL_ID' | translate }}</th>
               <th class="px-6 py-4">{{ 'TBL_USERNAME' | translate }}</th>
@@ -39,18 +39,18 @@ interface User {
               <th class="px-6 py-4 text-right">{{ 'TBL_ACTIONS' | translate }}</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr *ngFor="let user of users()" class="hover:bg-slate-50 transition-colors">
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+            <tr *ngFor="let user of users()" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
               <td class="px-6 py-4 text-xs font-mono text-slate-400">#{{ user.id }}</td>
-              <td class="px-6 py-4 font-bold text-slate-700">{{ user.username }}</td>
+              <td class="px-6 py-4 font-bold text-slate-700 dark:text-white">{{ user.username }}</td>
               <td class="px-6 py-4">
                 <span [class]="getRoleBadgeClass(user.role)" class="px-2 py-1 rounded text-xs font-bold uppercase tracking-wide">
                   {{ ('ROLE_' + (user.role | uppercase)) | translate }}
                 </span>
               </td>
               <td class="px-6 py-4">
-                <span [class.bg-green-100]="user.is_active" [class.text-green-700]="user.is_active" 
-                      [class.bg-red-100]="!user.is_active" [class.text-red-700]="!user.is_active"
+                <span [class.bg-green-100]="user.is_active" [class.dark:bg-green-900/30]="user.is_active" [class.text-green-700]="user.is_active" [class.dark:text-green-400]="user.is_active" 
+                      [class.bg-red-100]="!user.is_active" [class.dark:bg-red-900/30]="!user.is_active" [class.text-red-700]="!user.is_active" [class.dark:text-red-400]="!user.is_active"
                       class="px-2 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1">
                   <span class="w-1.5 h-1.5 rounded-full" [class.bg-green-500]="user.is_active" [class.bg-red-500]="!user.is_active"></span>
                   {{ (user.is_active ? 'STATUS_ACTIVE' : 'STATUS_INACTIVE') | translate }}
@@ -60,7 +60,7 @@ interface User {
                 <button (click)="resetPassword(user)" class="text-slate-400 hover:text-blue-600 font-medium text-xs transition-colors" [title]="'BTN_RESET_PASSWORD' | translate">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11.536 9.636a1.003 1.003 0 00-.454-.242l-2.646-.882a6 6 0 00-7.072 6.641l1.635-1.19a4 4 0 005.656 0L15 7z"/></svg>
                 </button>
-                <button (click)="editUser(user)" class="text-blue-600 hover:text-blue-800 font-medium text-xs transition-colors bg-blue-50 px-3 py-1 rounded-md">{{ 'EDIT' | translate }}</button>
+                <button (click)="editUser(user)" class="text-blue-600 hover:text-blue-800 font-medium text-xs transition-colors bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-md">{{ 'EDIT' | translate }}</button>
               </td>
             </tr>
           </tbody>
@@ -69,14 +69,14 @@ interface User {
 
       <!-- Mobile Card View -->
       <div class="md:hidden space-y-4">
-        <div *ngFor="let user of users()" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div *ngFor="let user of users()" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4">
             <div class="flex justify-between items-start mb-3">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-lg">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 font-bold text-lg">
                         {{ user.username.charAt(0).toUpperCase() }}
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-800">{{ user.username }}</h3>
+                        <h3 class="font-bold text-slate-800 dark:text-white">{{ user.username }}</h3>
                         <span class="text-xs text-slate-400">ID: #{{ user.id }}</span>
                     </div>
                 </div>
@@ -85,7 +85,7 @@ interface User {
                 </span>
             </div>
             
-            <div class="flex items-center justify-between pt-3 border-t border-slate-50">
+            <div class="flex items-center justify-between pt-3 border-t border-slate-50 dark:border-slate-700">
                  <span [class.text-green-600]="user.is_active" [class.text-red-500]="!user.is_active" class="text-xs font-bold flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full" [class.bg-green-500]="user.is_active" [class.bg-red-500]="!user.is_active"></span>
                     {{ (user.is_active ? 'STATUS_ACTIVE' : 'STATUS_INACTIVE') | translate }}
@@ -103,8 +103,8 @@ interface User {
 
       <!-- Create/Edit Modal (Responsive) -->
       <div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
-            <h3 class="text-lg font-bold mb-4">{{ (isEditing ? 'TITLE_EDIT_USER' : 'TITLE_CREATE_USER') | translate }}</h3>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 w-full max-w-sm">
+            <h3 class="text-lg font-bold mb-4 text-slate-900 dark:text-white">{{ (isEditing ? 'TITLE_EDIT_USER' : 'TITLE_CREATE_USER') | translate }}</h3>
             
             <div class="space-y-4">
                 <div>
@@ -126,9 +126,9 @@ interface User {
                     </select>
                 </div>
 
-                <div *ngIf="isEditing" class="flex items-center gap-2 mt-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                <div *ngIf="isEditing" class="flex items-center gap-2 mt-2 bg-slate-50 dark:bg-slate-700 p-3 rounded-lg border border-slate-100 dark:border-slate-600">
                     <input type="checkbox" [(ngModel)]="formData.is_active" id="isActive" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-                    <label for="isActive" class="text-sm font-medium text-slate-700">{{ 'LABEL_ACCOUNT_ACTIVE' | translate }}</label>
+                    <label for="isActive" class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ 'LABEL_ACCOUNT_ACTIVE' | translate }}</label>
                 </div>
             </div>
 
@@ -159,9 +159,9 @@ export class UserManagementComponent implements OnInit {
 
   getRoleBadgeClass(role: string): string {
     switch (role) {
-      case 'admin': return 'bg-purple-100 text-purple-700';
-      case 'editor': return 'bg-blue-100 text-blue-700';
-      default: return 'bg-slate-100 text-slate-700';
+      case 'admin': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400';
+      case 'editor': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400';
+      default: return 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300';
     }
   }
 

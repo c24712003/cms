@@ -7,7 +7,7 @@ const router = express.Router();
 // Headless API to get page content without admin metadata
 router.get('/pages/:slug', async (req: Request, res: Response) => {
     const { slug } = req.params;
-    const lang = (req.query.lang as string) || 'en';
+    const lang = (req.query.lang as string) || 'en-US';
 
     try {
         const db = getDb();

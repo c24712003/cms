@@ -8,5 +8,10 @@
         "target": "http://localhost:3000",
         "secure": false,
         "changeOrigin": true
+    },
+    "/i18n": {
+        "target": "http://localhost:3000",
+        "secure": false,
+        "changeOrigin": true
     }
 }

@@ -23,8 +23,8 @@ import { I18nService } from '../../../core/services/i18n.service';
           [placeholder]="placeholder"
           class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm transition-all outline-none"
           [ngClass]="{
-            'bg-slate-50 border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500': mode === 'admin',
-            'bg-slate-100 border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500': mode === 'public'
+            'bg-slate-50 text-slate-900 border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white': mode === 'admin',
+            'bg-slate-100 text-slate-900 border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500': mode === 'public'
           }"
         >
         <!-- Icon -->
