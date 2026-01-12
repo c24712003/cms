@@ -233,14 +233,16 @@
   "THEME_DARK": "다크 모드",
   "THEME_SYSTEM": "시스템 설정",
   "THEME_TOGGLE": "테마 전환",
-
   "NAV_WEB_DEV": "웹 개발",
   "NAV_MOBILE_APPS": "모바일 앱",
   "NAV_PRIVACY": "개인정보처리방침",
   "NAV_TERMS": "이용약관",
-
   "FOOTER_DESC": "모던 CMS 솔루션으로 디지털 존재감을 강화합니다.",
   "FOOTER_LINKS": "빠른 링크",
   "FOOTER_CONTACT": "문의하기",
-  "FOOTER_COPYRIGHT": "© 2026 CMS Demo. All rights reserved."
+  "FOOTER_COPYRIGHT": "© 2026 CMS Demo. All rights reserved.",
+  "BLOCK_TOOLBAR_SETTINGS": "블록 설정",
+  "BLOCK_TAB_CONTENT": "콘텐츠",
+  "BLOCK_TAB_STYLES": "스타일",
+  "BLOCK_TAB_SETTINGS": "설정"
 }

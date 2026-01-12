@@ -216,4 +216,39 @@ router.post('/', async (req: Request, res: Response) => {
     }
 });
 
+// PATCH /api/pages/:id - Update Page Metadata (Theme, etc.)
+router.patch('/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { theme_id, template } = req.body;
+
+    try {
+        const db = getDb();
+        const updates = [];
+        const params = [];
+
+        if (theme_id !== undefined) {
+            updates.push('theme_id = ?');
+            params.push(theme_id);
+        }
+
+        if (template !== undefined) {
+            updates.push('template = ?');
+            params.push(template);
+        }
+
+        if (updates.length === 0) {
+            res.json({ success: true, message: 'No changes' });
+            return;
+        }
+
+        params.push(id);
+        await db.run(`UPDATE pages SET ${updates.join(', ')} WHERE id = ?`, params);
+
+        await logActivity('Page Updated', `Updated page metadata for ID ${id}`, 'content');
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: String(e) });
+    }
+});
+
 export default router;

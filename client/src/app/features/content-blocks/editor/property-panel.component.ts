@@ -80,7 +80,46 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
                 <input type="text" [id]="key" [formControlName]="key" class="input input-bordered w-full" />
               </div>
               
-            </ng-container>
+              <!-- Color Widget -->
+              <div *ngSwitchCase="'color'">
+                 <label [for]="key" class="label">
+                   <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
+                 </label>
+                 <div class="flex items-center gap-3">
+                   <input type="color" [id]="key" [formControlName]="key" class="h-10 w-10 p-1 rounded cursor-pointer bg-white border border-slate-200">
+                   <input type="text" [formControlName]="key" class="input input-bordered flex-1 h-10 font-mono text-sm" placeholder="#000000">
+                 </div>
+              </div>
+
+               <!-- Select Widget -->
+               <div *ngSwitchCase="'select'">
+                 <label [for]="key" class="label">
+                   <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
+                 </label>
+                 <select [id]="key" [formControlName]="key" class="select select-bordered w-full">
+                     <option [ngValue]="null">Select...</option>
+                     <option *ngFor="let opt of schema?.properties?.[key]?.enum" [value]="opt">{{ opt }}</option>
+                 </select>
+               </div>
+
+                <!-- Range Widget -->
+               <div *ngSwitchCase="'range'">
+                 <label [for]="key" class="label">
+                   <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
+                   <span class="label-text-alt">{{ form!.get(key)?.value }}</span>
+                 </label>
+                 <input type="range" [id]="key" [formControlName]="key" class="range range-primary range-sm" min="0" max="100" step="1">
+               </div>
+
+               <!-- Rich Text Widget (Basic for now) -->
+               <div *ngSwitchCase="'rich-text'">
+                 <label [for]="key" class="label">
+                   <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
+                 </label>
+                 <textarea [id]="key" [formControlName]="key" class="textarea textarea-bordered w-full h-32 font-serif text-lg leading-relaxed" placeholder="Type your content here..."></textarea>
+               </div>
+
+              </ng-container>
           </div>
         </form>
       </div>

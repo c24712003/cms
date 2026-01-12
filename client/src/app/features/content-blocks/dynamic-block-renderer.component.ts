@@ -1,8 +1,8 @@
-import { Component, Input, ViewChild, ViewContainerRef, OnChanges, SimpleChanges, ComponentRef } from '@angular/core';
+import { Component, Input, ViewChild, ViewContainerRef, OnChanges, SimpleChanges, ComponentRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BlockRegistryService } from './block-registry.service';
+import { StyleInjectorService } from './style-injector.service';
 import { BlockInstance } from './block.types';
-
 @Component({
     selector: 'app-dynamic-block-renderer',
     standalone: true,
@@ -14,13 +14,17 @@ import { BlockInstance } from './block.types';
     </div>
   `
 })
-export class DynamicBlockRendererComponent implements OnChanges {
+
+export class DynamicBlockRendererComponent implements OnChanges, OnDestroy {
     @Input() block: BlockInstance | undefined;
     @ViewChild('container', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
 
     componentRef: ComponentRef<any> | undefined;
 
-    constructor(private registry: BlockRegistryService) { }
+    constructor(
+        private registry: BlockRegistryService,
+        private styleInjector: StyleInjectorService
+    ) { }
 
     ngOnChanges(changes: SimpleChanges): void {
         const blockChange = changes['block'];
@@ -35,6 +39,17 @@ export class DynamicBlockRendererComponent implements OnChanges {
                 // Same component type, just update data inputs
                 this.updateInputs();
             }
+
+            // Inject Styles
+            if (curr.styles) {
+                this.styleInjector.injectBlockStyles(curr);
+            }
+        }
+    }
+
+    ngOnDestroy(): void {
+        if (this.block) {
+            this.styleInjector.removeBlockStyles(this.block.id);
         }
     }
 
@@ -48,6 +63,11 @@ export class DynamicBlockRendererComponent implements OnChanges {
                 ref.setInput(key, this.block.data[key]);
             }
         });
+
+        // Also pass styles as an input if the component accepts it
+        if (this.block.styles) {
+            ref.setInput('styles', this.block.styles);
+        }
 
         // Manually trigger change detection for the child component
         // This ensures OnPush components or detached views update immediately

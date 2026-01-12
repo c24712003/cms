@@ -1,0 +1,287 @@
+[
+    {
+        "name": "Modern Tech",
+        "description": "A cutting-edge tech theme showcasing the power of the new block system.",
+        "version": "1.1.0",
+        "pages": [
+            {
+                "title": "Home",
+                "slug": "home",
+                "blocks": [
+                    {
+                        "type": "parallax-hero",
+                        "id": "hero-1",
+                        "data": {
+                            "title": "Building the Future of Web",
+                            "subtitle": "Experience the next generation of content management with our powerful block system.",
+                            "bgImage": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop",
+                            "overlayColor": "#1a103c",
+                            "overlayOpacity": 0.6,
+                            "showButtons": true,
+                            "primaryBtnText": "Get Started",
+                            "secondaryBtnText": "View Features"
+                        },
+                        "styles": {
+                            "desktop": {
+                                "size": {
+                                    "height": "90vh"
+                                },
+                                "typography": {
+                                    "textAlign": "center"
+                                }
+                            },
+                            "mobile": {
+                                "size": {
+                                    "height": "100vh"
+                                },
+                                "typography": {
+                                    "textAlign": "left"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "stats-counter",
+                        "id": "stats-home",
+                        "data": {
+                            "header": {
+                                "title": "Trusted by Leaders"
+                            },
+                            "stats": [
+                                {
+                                    "value": "10k+",
+                                    "label": "Active Users"
+                                },
+                                {
+                                    "value": "99.9%",
+                                    "label": "Uptime"
+                                },
+                                {
+                                    "value": "24/7",
+                                    "label": "Support"
+                                },
+                                {
+                                    "value": "500+",
+                                    "label": "Integrations"
+                                }
+                            ]
+                        },
+                        "styles": {
+                            "desktop": {
+                                "background": {
+                                    "color": "#f8fafc"
+                                },
+                                "typography": {
+                                    "color": "#0f172a",
+                                    "highlightColor": "#3b82f6"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "feature-grid",
+                        "id": "features-1",
+                        "data": {
+                            "headline": "Core Capabilities",
+                            "subheadline": "Everything you need to build world-class applications.",
+                            "columns": 3,
+                            "gap": "2rem",
+                            "features": [
+                                {
+                                    "icon": "fas fa-bolt",
+                                    "title": "Lightning Fast",
+                                    "description": "Optimized for speed with server-side rendering and efficient code splitting."
+                                },
+                                {
+                                    "icon": "fas fa-shield-alt",
+                                    "title": "Secure by Design",
+                                    "description": "Built with security best practices to protect your data and users."
+                                },
+                                {
+                                    "icon": "fas fa-magic",
+                                    "title": "AI Powered",
+                                    "description": "Leverage the power of artificial intelligence to automate your workflows."
+                                }
+                            ]
+                        },
+                        "styles": {
+                            "desktop": {
+                                "spacing": {
+                                    "padding": "6rem 2rem"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "faq-accordion",
+                        "id": "faq-home",
+                        "data": {
+                            "title": "Frequent Questions",
+                            "items": [
+                                {
+                                    "question": "Is there a free trial?",
+                                    "answer": "Yes, we offer a 14-day free trial on all plans."
+                                },
+                                {
+                                    "question": "Can I cancel anytime?",
+                                    "answer": "Absolutely. There are no lock-in contracts."
+                                },
+                                {
+                                    "question": "Do you offer support?",
+                                    "answer": "We provide 24/7 email and chat support for all customers."
+                                }
+                            ]
+                        },
+                        "styles": {
+                            "desktop": {
+                                "spacing": {
+                                    "padding": "4rem 2rem"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "title": "Components Showcase",
+                "slug": "components",
+                "blocks": [
+                    {
+                        "type": "parallax-hero",
+                        "id": "showcase-hero",
+                        "data": {
+                            "title": "Block Components",
+                            "subtitle": "A gallery of all available building blocks.",
+                            "bgImage": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop",
+                            "overlayColor": "#000000",
+                            "overlayOpacity": 0.7,
+                            "showButtons": false
+                        },
+                        "styles": {
+                            "desktop": {
+                                "size": {
+                                    "height": "50vh"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "text-block",
+                        "id": "showcase-intro",
+                        "data": {
+                            "content": "<div style='text-align: center; max-width: 800px; margin: 0 auto;'><h3>Explore the Library</h3><p>This page demonstrates the versatility of our block system. Each section below represents a different block type configured with custom styles.</p></div>"
+                        },
+                        "styles": {
+                            "desktop": {
+                                "spacing": {
+                                    "padding": "4rem 2rem"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "stats-counter",
+                        "id": "showcase-stats",
+                        "data": {
+                            "header": {
+                                "title": "Performance Metrics"
+                            },
+                            "stats": [
+                                {
+                                    "value": "100ms",
+                                    "label": "Latency"
+                                },
+                                {
+                                    "value": "5x",
+                                    "label": "Faster Dev"
+                                },
+                                {
+                                    "value": "100%",
+                                    "label": "Customizable"
+                                },
+                                {
+                                    "value": "Zero",
+                                    "label": "Bloat"
+                                }
+                            ]
+                        },
+                        "styles": {
+                            "desktop": {
+                                "background": {
+                                    "color": "#0f172a"
+                                },
+                                "typography": {
+                                    "color": "#ffffff",
+                                    "highlightColor": "#38bdf8"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "feature-grid",
+                        "id": "showcase-grid",
+                        "data": {
+                            "headline": "Grid Layouts",
+                            "subheadline": "Flexible column systems that adapt to any device.",
+                            "columns": 4,
+                            "gap": "1.5rem",
+                            "features": [
+                                {
+                                    "icon": "fas fa-cube",
+                                    "title": "Modular",
+                                    "description": "Combine blocks freely."
+                                },
+                                {
+                                    "icon": "fas fa-layer-group",
+                                    "title": "Stackable",
+                                    "description": "Layer content seamlessly."
+                                },
+                                {
+                                    "icon": "fas fa-expand",
+                                    "title": "Responsive",
+                                    "description": "Fluid widths everywhere."
+                                },
+                                {
+                                    "icon": "fas fa-palette",
+                                    "title": "Themable",
+                                    "description": "Global style support."
+                                }
+                            ]
+                        },
+                        "styles": {
+                            "desktop": {
+                                "background": {
+                                    "color": "#ffffff"
+                                },
+                                "spacing": {
+                                    "padding": "5rem 2rem"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "faq-accordion",
+                        "id": "showcase-faq",
+                        "data": {
+                            "title": "Implementation Details",
+                            "items": [
+                                {
+                                    "question": "How do I add new blocks?",
+                                    "answer": "Simply use the 'Add Block' button in the editor and select from the library."
+                                },
+                                {
+                                    "question": "Can I style each block individually?",
+                                    "answer": "Yes, click the 'Styles' tab on any selected block to customize colors, spacing, and typography."
+                                },
+                                {
+                                    "question": " Is it SEO friendly?",
+                                    "answer": "All blocks render semantic HTML and are fully optimized for search engines."
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]

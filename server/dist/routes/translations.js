@@ -42,9 +42,10 @@ const path = __importStar(require("path"));
 const router = express_1.default.Router();
 // Path to the i18n directory relative to the server root (process.cwd() is server/)
 // Adjust if your deployment structure differs
-const I18N_DIR = path.resolve(process.cwd(), '../client/public/i18n');
-// Supported language files
-const SUPPORTED_LANGS = ['en-US', 'zh-TW'];
+// Path to the i18n directory relative to the server root
+const I18N_DIR = path.resolve(process.cwd(), 'public/i18n');
+// Supported language files (must match actual files in i18n directory)
+const SUPPORTED_LANGS = ['en-US', 'zh-TW', 'ja', 'ko'];
 // Helper: Get file path for a language
 function getJsonPath(lang) {
     return path.join(I18N_DIR, `${lang}.json`);

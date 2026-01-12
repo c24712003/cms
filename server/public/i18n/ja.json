@@ -233,14 +233,16 @@
   "THEME_DARK": "ダークモード",
   "THEME_SYSTEM": "システム設定",
   "THEME_TOGGLE": "テーマ切替",
-
   "NAV_WEB_DEV": "ウェブ開発",
   "NAV_MOBILE_APPS": "モバイルアプリ",
   "NAV_PRIVACY": "プライバシーポリシー",
   "NAV_TERMS": "利用規約",
-
   "FOOTER_DESC": "モダンなCMSソリューションでデジタルプレゼンスを強化します。",
   "FOOTER_LINKS": "クイックリンク",
   "FOOTER_CONTACT": "お問い合わせ",
-  "FOOTER_COPYRIGHT": "© 2026 CMS Demo. All rights reserved."
+  "FOOTER_COPYRIGHT": "© 2026 CMS Demo. All rights reserved.",
+  "BLOCK_TOOLBAR_SETTINGS": "ブロック設定",
+  "BLOCK_TAB_CONTENT": "コンテンツ",
+  "BLOCK_TAB_STYLES": "スタイル",
+  "BLOCK_TAB_SETTINGS": "設定"
 }

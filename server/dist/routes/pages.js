@@ -8,10 +8,18 @@ const index_1 = require("../index");
 const audit_logs_1 = require("./audit-logs");
 const router = express_1.default.Router();
 // GET /api/pages - List all pages (metadata)
+// If 'public' query is present, only return pages from ACTIVE theme
 router.get('/', async (req, res) => {
     try {
         const db = (0, index_1.getDb)();
-        const pages = await db.all('SELECT * FROM pages ORDER BY id ASC');
+        const { public: isPublic } = req.query;
+        let query = 'SELECT p.* FROM pages p';
+        const params = [];
+        if (isPublic) {
+            query += ' JOIN themes t ON p.theme_id = t.id WHERE t.is_active = 1';
+        }
+        query += ' ORDER BY p.id ASC';
+        const pages = await db.all(query, params);
         res.json(pages);
     }
     catch (e) {
@@ -29,9 +37,20 @@ router.get('/:slug/content', async (req, res) => {
     }
     try {
         const db = (0, index_1.getDb)();
-        const page = await db.get('SELECT id FROM pages WHERE slug_key = ?', slug);
+        // Updated to check for Active Theme
+        const page = await db.get(`
+            SELECT p.id 
+            FROM pages p 
+            JOIN themes t ON p.theme_id = t.id
+            WHERE p.slug_key = ? AND t.is_active = 1
+        `, slug);
         if (!page) {
-            res.status(404).json({ error: 'Page not found' });
+            // Check if it's an "orphan" page (no theme) for backward compatibility?
+            // Or just return 404. Stricter is better for "Theme Mode".
+            // But let's allow "no theme" pages if NO themes are active? 
+            // Better constraint: If themes exist, must be active.
+            // For now, let's enforce: MUST be in active theme.
+            res.status(404).json({ error: 'Page not found or not part of active theme' });
             return;
         }
         const content = await db.get('SELECT * FROM page_contents WHERE page_id = ? AND lang_code = ?', [page.id, lang]);
@@ -159,6 +178,35 @@ router.post('/', async (req, res) => {
         const result = await db.run('INSERT INTO pages (slug_key, template) VALUES (?, ?)', [slug_key, template]);
         await (0, audit_logs_1.logActivity)('Page Created', `Created new page: ${slug_key}`, 'content');
         res.status(201).json({ success: true, id: result.lastID });
+    }
+    catch (e) {
+        res.status(500).json({ error: String(e) });
+    }
+});
+// PATCH /api/pages/:id - Update Page Metadata (Theme, etc.)
+router.patch('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { theme_id, template } = req.body;
+    try {
+        const db = (0, index_1.getDb)();
+        const updates = [];
+        const params = [];
+        if (theme_id !== undefined) {
+            updates.push('theme_id = ?');
+            params.push(theme_id);
+        }
+        if (template !== undefined) {
+            updates.push('template = ?');
+            params.push(template);
+        }
+        if (updates.length === 0) {
+            res.json({ success: true, message: 'No changes' });
+            return;
+        }
+        params.push(id);
+        await db.run(`UPDATE pages SET ${updates.join(', ')} WHERE id = ?`, params);
+        await (0, audit_logs_1.logActivity)('Page Updated', `Updated page metadata for ID ${id}`, 'content');
+        res.json({ success: true });
     }
     catch (e) {
         res.status(500).json({ error: String(e) });

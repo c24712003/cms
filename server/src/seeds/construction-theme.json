@@ -1,0 +1,508 @@
+[
+    {
+        "name": "營建工程",
+        "description": "專業營建公司網站主題，展示工程實績、服務項目及團隊陣容。",
+        "version": "1.0.0",
+        "pages": [
+            {
+                "title": "首頁",
+                "slug": "construction-home",
+                "blocks": [
+                    {
+                        "type": "video-hero",
+                        "id": "construction-hero",
+                        "data": {
+                            "title": "建築您的未來",
+                            "subtitle": "43年專業經驗，打造堅固安全的建築工程。從住宅到商業大樓，我們是您值得信賴的建築夥伴。",
+                            "posterImage": "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2076&auto=format&fit=crop",
+                            "videoUrl": "",
+                            "overlayOpacity": 70,
+                            "autoplay": false,
+                            "loop": true,
+                            "muted": true,
+                            "cta": {
+                                "text": "免費諮詢",
+                                "link": "/contact"
+                            }
+                        }
+                    },
+                    {
+                        "type": "stats-counter",
+                        "id": "construction-stats",
+                        "data": {
+                            "stats": [
+                                {
+                                    "value": "43+",
+                                    "label": "年專業經驗"
+                                },
+                                {
+                                    "value": "500+",
+                                    "label": "完工專案"
+                                },
+                                {
+                                    "value": "98%",
+                                    "label": "客戶滿意度"
+                                },
+                                {
+                                    "value": "50+",
+                                    "label": "專業團隊"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "split-hero",
+                        "id": "about-section",
+                        "data": {
+                            "title": "專業、誠信、品質",
+                            "subtitle": "自1982年創立以來，我們秉持著「品質第一、安全至上」的理念，為客戶打造每一個建築作品。無論是住宅、商業建築或公共工程，我們都以最高標準完成。",
+                            "image": "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop",
+                            "mediaPosition": "right",
+                            "features": [
+                                {
+                                    "icon": "check",
+                                    "text": "ISO 9001 品質認證"
+                                },
+                                {
+                                    "icon": "check",
+                                    "text": "甲級營造廠資格"
+                                },
+                                {
+                                    "icon": "check",
+                                    "text": "公共工程金質獎得主"
+                                },
+                                {
+                                    "icon": "check",
+                                    "text": "綠建築設計施工"
+                                }
+                            ],
+                            "cta": {
+                                "text": "了解更多",
+                                "link": "/about"
+                            }
+                        }
+                    },
+                    {
+                        "type": "feature-grid",
+                        "id": "services-grid",
+                        "data": {
+                            "headline": "服務項目",
+                            "subheadline": "專業營建服務，滿足您各類建築需求",
+                            "features": [
+                                {
+                                    "icon": "🏠",
+                                    "title": "住宅工程",
+                                    "description": "透天別墅、公寓大樓、社區開發，打造舒適安全的居家環境。"
+                                },
+                                {
+                                    "icon": "🏢",
+                                    "title": "商業建築",
+                                    "description": "辦公大樓、購物中心、廠房建設，滿足各類商業需求。"
+                                },
+                                {
+                                    "icon": "🏛️",
+                                    "title": "公共工程",
+                                    "description": "學校、醫院、政府機關，承接各級政府公共建設案件。"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "masonry-gallery",
+                        "id": "project-gallery",
+                        "data": {
+                            "title": "工程實績",
+                            "subtitle": "近期完工與進行中的精選專案",
+                            "columns": 3,
+                            "gap": "md",
+                            "enableLightbox": true,
+                            "images": [
+                                {
+                                    "src": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop",
+                                    "alt": "商業大樓",
+                                    "caption": "信義區A級辦公大樓"
+                                },
+                                {
+                                    "src": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070&auto=format&fit=crop",
+                                    "alt": "住宅社區",
+                                    "caption": "新莊頭前重劃區住宅"
+                                },
+                                {
+                                    "src": "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2031&auto=format&fit=crop",
+                                    "alt": "建築設計",
+                                    "caption": "台中綠美圖公共工程"
+                                },
+                                {
+                                    "src": "https://images.unsplash.com/photo-1590659762788-9201512c9e5d?q=80&w=2073&auto=format&fit=crop",
+                                    "alt": "工業廠房",
+                                    "caption": "桃園科技廠房"
+                                },
+                                {
+                                    "src": "https://images.unsplash.com/photo-1448630360428-65456885c650?q=80&w=2067&auto=format&fit=crop",
+                                    "alt": "都市更新",
+                                    "caption": "板橋都更案"
+                                },
+                                {
+                                    "src": "https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?q=80&w=2070&auto=format&fit=crop",
+                                    "alt": "景觀建築",
+                                    "caption": "北投溫泉飯店"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "testimonial-slider",
+                        "id": "testimonials",
+                        "data": {
+                            "title": "客戶見證",
+                            "autoRotate": true,
+                            "rotateInterval": 6,
+                            "testimonials": [
+                                {
+                                    "quote": "從規劃到完工，團隊展現了高度的專業與效率。工程品質超乎預期，非常推薦！",
+                                    "author": "林董事長",
+                                    "role": "總經理",
+                                    "company": "台灣科技股份有限公司",
+                                    "rating": 5
+                                },
+                                {
+                                    "quote": "配合度極高，遇到問題總能即時解決。這是我們第三次合作了，未來還會繼續。",
+                                    "author": "陳建築師",
+                                    "role": "主持建築師",
+                                    "company": "創意建築事務所",
+                                    "rating": 5
+                                },
+                                {
+                                    "quote": "工地管理嚴謹，安全衛生做得很到位。是值得長期合作的營建夥伴。",
+                                    "author": "王處長",
+                                    "role": "工程處處長",
+                                    "company": "新北市政府",
+                                    "rating": 5
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "team-grid",
+                        "id": "leadership",
+                        "data": {
+                            "title": "專業團隊",
+                            "subtitle": "經驗豐富的領導團隊，帶領公司邁向卓越",
+                            "columns": 4,
+                            "cardStyle": "minimal",
+                            "members": [
+                                {
+                                    "name": "張志明",
+                                    "role": "董事長",
+                                    "photo": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=987&auto=format&fit=crop",
+                                    "bio": "40年營建業經驗，帶領公司完成500+專案"
+                                },
+                                {
+                                    "name": "李淑芬",
+                                    "role": "總經理",
+                                    "photo": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=988&auto=format&fit=crop",
+                                    "bio": "專精財務管理與企業策略規劃"
+                                },
+                                {
+                                    "name": "王建國",
+                                    "role": "工程總監",
+                                    "photo": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop",
+                                    "bio": "土木技師，專責工程品質與進度管控"
+                                },
+                                {
+                                    "name": "陳美玲",
+                                    "role": "設計總監",
+                                    "photo": "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1061&auto=format&fit=crop",
+                                    "bio": "建築師，專注綠建築與永續設計"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "contact-form-cta",
+                        "id": "contact-cta",
+                        "data": {
+                            "title": "立即諮詢",
+                            "description": "告訴我們您的建築需求，我們將在24小時內與您聯繫",
+                            "fields": [
+                                "name",
+                                "email",
+                                "phone",
+                                "message"
+                            ],
+                            "submitButton": {
+                                "text": "送出諮詢",
+                                "style": "primary"
+                            },
+                            "contactInfo": {
+                                "phone": "02-2345-6789",
+                                "email": "info@construction.com.tw",
+                                "address": "台北市信義區建國路100號"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "title": "工程實績",
+                "slug": "construction-projects",
+                "blocks": [
+                    {
+                        "type": "page-hero",
+                        "id": "projects-hero",
+                        "data": {
+                            "title": "工程實績",
+                            "subtitle": "四十餘年來，我們完成超過500項各類建築工程，涵蓋住宅、商業、工業及公共建設。",
+                            "breadcrumb": [
+                                {
+                                    "label": "首頁",
+                                    "link": "/"
+                                },
+                                {
+                                    "label": "工程實績"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "image-comparison",
+                        "id": "renovation-compare",
+                        "data": {
+                            "title": "都市更新案例",
+                            "beforeImage": "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?q=80&w=2070&auto=format&fit=crop",
+                            "afterImage": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop",
+                            "beforeLabel": "更新前",
+                            "afterLabel": "更新後",
+                            "startPosition": 50,
+                            "orientation": "horizontal"
+                        }
+                    },
+                    {
+                        "type": "card-carousel",
+                        "id": "featured-projects",
+                        "data": {
+                            "title": "精選專案",
+                            "subtitle": "近年代表性工程作品",
+                            "cards": [
+                                {
+                                    "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop",
+                                    "title": "信義金融中心",
+                                    "summary": "地上32層、地下5層的A級辦公大樓，獲得綠建築鑽石級認證。",
+                                    "link": "/projects/xinyi-finance"
+                                },
+                                {
+                                    "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070&auto=format&fit=crop",
+                                    "title": "新莊靜心苑",
+                                    "summary": "256戶精品住宅社區，配備智慧型社區管理系統。",
+                                    "link": "/projects/xinzhuang-residence"
+                                },
+                                {
+                                    "image": "https://images.unsplash.com/photo-1590659762788-9201512c9e5d?q=80&w=2073&auto=format&fit=crop",
+                                    "title": "桃園科技園區廠房",
+                                    "summary": "30,000坪高科技無塵室廠房，符合國際半導體製造規範。",
+                                    "link": "/projects/taoyuan-factory"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "timeline-steps",
+                        "id": "process-timeline",
+                        "data": {
+                            "title": "工程流程",
+                            "subtitle": "從規劃到交屋的完整服務",
+                            "steps": [
+                                {
+                                    "title": "需求訪談",
+                                    "description": "深入了解業主需求，提供專業建議"
+                                },
+                                {
+                                    "title": "規劃設計",
+                                    "description": "整合建築、結構、機電各項設計"
+                                },
+                                {
+                                    "title": "工程施作",
+                                    "description": "嚴格品管，確保施工品質與進度"
+                                },
+                                {
+                                    "title": "驗收交屋",
+                                    "description": "完整驗收程序，提供保固服務"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "title": "服務方案",
+                "slug": "construction-services",
+                "blocks": [
+                    {
+                        "type": "page-hero",
+                        "id": "services-hero",
+                        "data": {
+                            "title": "服務方案",
+                            "subtitle": "依據不同規模需求，提供客製化的工程服務方案",
+                            "breadcrumb": [
+                                {
+                                    "label": "首頁",
+                                    "link": "/"
+                                },
+                                {
+                                    "label": "服務方案"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "pricing-table",
+                        "id": "service-packages",
+                        "data": {
+                            "title": "服務方案比較",
+                            "subtitle": "選擇最適合您專案規模的服務",
+                            "currency": "",
+                            "plans": [
+                                {
+                                    "name": "標準方案",
+                                    "price": "洽詢",
+                                    "period": "專案",
+                                    "description": "適合中小型住宅或商業建築",
+                                    "highlighted": false,
+                                    "features": [
+                                        {
+                                            "text": "專案規模 500坪以下",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "標準設計規劃",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "基礎工程監造",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "一年保固服務",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "專屬客服經理",
+                                            "included": false
+                                        },
+                                        {
+                                            "text": "智慧建築整合",
+                                            "included": false
+                                        }
+                                    ],
+                                    "cta": {
+                                        "text": "立即諮詢",
+                                        "link": "/contact"
+                                    }
+                                },
+                                {
+                                    "name": "專業方案",
+                                    "price": "洽詢",
+                                    "period": "專案",
+                                    "description": "適合中大型建築或商業開發",
+                                    "highlighted": true,
+                                    "features": [
+                                        {
+                                            "text": "專案規模 500-3000坪",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "客製化設計服務",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "全程工程監造",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "三年保固服務",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "專屬客服經理",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "智慧建築整合",
+                                            "included": false
+                                        }
+                                    ],
+                                    "cta": {
+                                        "text": "立即諮詢",
+                                        "link": "/contact"
+                                    }
+                                },
+                                {
+                                    "name": "企業方案",
+                                    "price": "洽詢",
+                                    "period": "專案",
+                                    "description": "適合大型開發案或統包工程",
+                                    "highlighted": false,
+                                    "features": [
+                                        {
+                                            "text": "專案規模 3000坪以上",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "統包設計施工",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "BIM 建築資訊模型",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "五年保固服務",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "專屬客服經理",
+                                            "included": true
+                                        },
+                                        {
+                                            "text": "智慧建築整合",
+                                            "included": true
+                                        }
+                                    ],
+                                    "cta": {
+                                        "text": "立即諮詢",
+                                        "link": "/contact"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "faq-accordion",
+                        "id": "services-faq",
+                        "data": {
+                            "title": "常見問題",
+                            "items": [
+                                {
+                                    "question": "工程報價需要多久時間？",
+                                    "answer": "一般案件約需5-7個工作天完成初步評估與報價。大型複雜案件可能需要2-3週進行詳細評估。"
+                                },
+                                {
+                                    "question": "可以承接外縣市的工程嗎？",
+                                    "answer": "是的，我們在全台各地皆有承接經驗，包含離島地區的工程案件。"
+                                },
+                                {
+                                    "question": "工程保固期間有哪些服務？",
+                                    "answer": "保固期間內提供結構、防水、機電等主要項目的免費維修服務。客戶專線24小時受理報修。"
+                                },
+                                {
+                                    "question": "是否提供分期付款方案？",
+                                    "answer": "我們提供工程進度付款方式，依各階段完工比例請款，減輕業主資金壓力。"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]

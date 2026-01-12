@@ -59,7 +59,7 @@ router.get('/public', async (req, res) => {
         return res.json({ pages: [] });
     }
     const query = `%${q}%`;
-    const langCode = typeof lang === 'string' ? lang : 'en'; // Default or required?
+    const langCode = typeof lang === 'string' ? lang : 'en-US'; // Default or required?
     const db = (0, index_1.getDb)();
     try {
         // Search Published Pages Only

@@ -2,17 +2,14 @@ import { Component, signal, ViewChild, ElementRef, OnInit, ChangeDetectorRef } f
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ActivatedRoute } from '@angular/router';
 
 import { Language } from '../../core/models/language.model';
 import { I18nService } from '../../core/services/i18n.service';
-import { BlockRegistryService } from '../../features/content-blocks/block-registry.service';
-import { DynamicBlockRendererComponent } from '../../features/content-blocks/dynamic-block-renderer.component';
-import { PropertyPanelComponent } from '../../features/content-blocks/editor/property-panel.component';
-import { BlockInstance, ContentBlockManifest } from '../../features/content-blocks/block.types';
+import { BlockInstance } from '../../features/content-blocks/block.types';
 import { SeoPanelComponent } from '../components/seo-panel.component';
 import { SeoValidatorService } from '../services/seo-validator.service';
+import { EditorCanvasComponent } from '../components/editor-canvas/editor-canvas.component';
 
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 
@@ -22,10 +19,8 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
   imports: [
     CommonModule,
     FormsModule,
-    DragDropModule,
-    DynamicBlockRendererComponent,
-    PropertyPanelComponent,
     SeoPanelComponent,
+    EditorCanvasComponent,
     TranslatePipe
   ],
   template: `
@@ -62,7 +57,6 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
              <!-- Language Tabs (Compact) -->
              <div class="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1" *ngIf="languages().length > 0">
                 <ng-container *ngFor="let lang of languages()">
-                    <!-- Mobile: Only show active language or compact toggle? For simplicity, show icons or code but keep compact -->
                     <button 
                     (click)="switchLang(lang.code)"
                     [class.bg-white]="activeLang() === lang.code"
@@ -101,141 +95,122 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
       <!-- Main Workspace -->
       <div class="flex-1 flex overflow-hidden relative" *ngIf="selectedPageSlug(); else noPageSelected">
         
-        <!-- Left: Canvas -->
-        <main class="flex-1 overflow-y-auto bg-slate-100/50 dark:bg-slate-900 relative transition-colors" (click)="selectedBlock = null">
+        <!-- Left: Canvas Wrapper -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-slate-100/50 dark:bg-slate-900 relative transition-colors">
             
-            <!-- Metadata Card (Collapsible or Top) -->
-            <div class="max-w-5xl mx-auto mb-8 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm group transition-colors">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{{ 'PAGE_SETTINGS_HEADER' | translate }}</h3>
-                    <button (click)="showSeoPanel = !showSeoPanel" 
-                            class="text-xs font-medium px-3 py-1 rounded-full transition-colors"
-                            [class.bg-blue-100]="showSeoPanel" [class.dark:bg-blue-900]="showSeoPanel" [class.text-blue-700]="showSeoPanel" [class.dark:text-blue-300]="showSeoPanel"
-                            [class.bg-slate-100]="!showSeoPanel" [class.dark:bg-slate-700]="!showSeoPanel" [class.text-slate-600]="!showSeoPanel" [class.dark:text-slate-300]="!showSeoPanel">
-                        <i class="fas fa-chart-line mr-1"></i> SEO Score: {{ seoScore }}
-                    </button>
-                </div>
-                <div class="grid grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ 'PAGE_TITLE_LABEL' | translate }}</label>
-                        <input [(ngModel)]="content.title" class="w-full text-lg font-bold border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 bg-transparent text-slate-900 dark:text-white" placeholder="Page Title" />
+            <!-- Metadata Headers (Sticky or Top) -->
+            <div class="shrink-0 max-w-5xl mx-auto w-full p-6 pb-0 z-10">
+                <!-- Metadata Card (Collapsible or Top) -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm group transition-colors mb-6 overflow-hidden">
+                    <!-- Card Header -->
+                    <div class="px-6 py-4 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50 cursor-pointer select-none border-b border-transparent"
+                         [class.border-slate-100]="isSettingsExpanded"
+                         [class.dark:border-slate-700]="isSettingsExpanded"
+                         (click)="isSettingsExpanded = !isSettingsExpanded">
+                        <div class="flex items-center gap-3">
+                             <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors transform duration-200"
+                                     [class.rotate-180]="!isSettingsExpanded">
+                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                             </button>
+                             <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ 'PAGE_SETTINGS_HEADER' | translate }}</h3>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                             <!-- SEO Score Badge (Click to toggle details below, stop propagation to prevent card toggle) -->
+                            <button (click)="$event.stopPropagation(); showSeoPanel = !showSeoPanel" 
+                                    class="text-xs font-bold px-3 py-1.5 rounded-full transition-colors flex items-center gap-2"
+                                    [class.bg-emerald-100]="seoScore >= 80" [class.text-emerald-700]="seoScore >= 80"
+                                    [class.dark:bg-emerald-900/30]="seoScore >= 80" [class.dark:text-emerald-400]="seoScore >= 80"
+                                    [class.bg-amber-100]="seoScore < 80 && seoScore >= 50" [class.text-amber-700]="seoScore < 80 && seoScore >= 50"
+                                    [class.dark:bg-amber-900/30]="seoScore < 80 && seoScore >= 50" [class.dark:text-amber-400]="seoScore < 80 && seoScore >= 50"
+                                    [class.bg-red-100]="seoScore < 50" [class.text-red-700]="seoScore < 50"
+                                    [class.dark:bg-red-900/30]="seoScore < 50" [class.dark:text-red-400]="seoScore < 50">
+                                <span class="w-2 h-2 rounded-full" 
+                                      [class.bg-emerald-500]="seoScore >= 80"
+                                      [class.bg-amber-500]="seoScore < 80 && seoScore >= 50"
+                                      [class.bg-red-500]="seoScore < 50"></span>
+                                SEO Score: {{ seoScore }}
+                            </button>
+                        </div>
                     </div>
-                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ 'PAGE_URL_SLUG_LABEL' | translate }}</label>
-                        <div class="flex items-baseline text-slate-500 dark:text-slate-400">
-                             <span class="text-sm">/{{ activeLang() }}/</span>
-                             <input [(ngModel)]="content.slug_localized" class="flex-1 bg-transparent border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 text-sm font-mono text-slate-700 dark:text-slate-300" />
+
+                    <!-- Card Body -->
+                    <div *ngIf="isSettingsExpanded" class="p-6 pt-4 animate-slide-down">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ 'PAGE_TITLE_LABEL' | translate }}</label>
+                                <input [(ngModel)]="content.title" class="w-full text-lg font-bold border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 bg-transparent text-slate-900 dark:text-white" placeholder="Page Title" />
+                            </div>
+                                <div>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ 'PAGE_URL_SLUG_LABEL' | translate }}</label>
+                                <div class="flex items-baseline text-slate-500 dark:text-slate-400">
+                                        <span class="text-sm">/{{ activeLang() }}/</span>
+                                        <input [(ngModel)]="content.slug_localized" class="flex-1 bg-transparent border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 text-sm font-mono text-slate-700 dark:text-slate-300" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-6 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Theme</label>
+                                <select [(ngModel)]="activeThemeId" 
+                                        class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white appearance-none">
+                                    <option [ngValue]="null">No Theme (Default)</option>
+                                    <option *ngFor="let t of themes()" [value]="t.id">
+                                        {{ t.name }} {{ t.is_active ? '(Active)' : '' }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">SEO Title 
+                                    <span class="font-normal text-slate-400 dark:text-slate-500">({{ content.seo_title?.length || 0 }}/60)</span>
+                                </label>
+                                <input [(ngModel)]="content.seo_title" 
+                                        (ngModelChange)="updateSeoScore()"
+                                        class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
+                                        placeholder="SEO 標題（建議 50-60 字元）" />
+                            </div>
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">OG Image URL</label>
+                                <input [(ngModel)]="content.og_image" 
+                                        class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
+                                        placeholder="https://example.com/image.jpg" />
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Meta Description 
+                                <span class="font-normal text-slate-400 dark:text-slate-500">({{ content.seo_desc?.length || 0 }}/160)</span>
+                            </label>
+                            <textarea [(ngModel)]="content.seo_desc" 
+                                        (ngModelChange)="updateSeoScore()"
+                                        rows="2" 
+                                        class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
+                                        placeholder="頁面描述（建議 120-160 字元）"></textarea>
                         </div>
                     </div>
                 </div>
                 
-                <!-- SEO Fields -->
-                <div class="grid grid-cols-2 gap-6 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">SEO Title 
-                            <span class="font-normal text-slate-400 dark:text-slate-500">({{ content.seo_title?.length || 0 }}/60)</span>
-                        </label>
-                        <input [(ngModel)]="content.seo_title" 
-                               (ngModelChange)="updateSeoScore()"
-                               class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
-                               placeholder="SEO 標題（建議 50-60 字元）" />
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">OG Image URL</label>
-                        <input [(ngModel)]="content.og_image" 
-                               class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
-                               placeholder="https://example.com/image.jpg" />
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Meta Description 
-                        <span class="font-normal text-slate-400 dark:text-slate-500">({{ content.seo_desc?.length || 0 }}/160)</span>
-                    </label>
-                    <textarea [(ngModel)]="content.seo_desc" 
-                              (ngModelChange)="updateSeoScore()"
-                              rows="2" 
-                              class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
-                              placeholder="頁面描述（建議 120-160 字元）"></textarea>
+                <!-- SEO Panel (Collapsible) -->
+                <div *ngIf="showSeoPanel" class="max-w-5xl mx-auto mb-6">
+                    <app-seo-panel
+                        [title]="content.seo_title || content.title"
+                        [description]="content.seo_desc"
+                        [content]="blocks"
+                        [language]="activeLang()">
+                    </app-seo-panel>
                 </div>
             </div>
-            
-            <!-- SEO Panel (Collapsible) -->
-            <div *ngIf="showSeoPanel" class="max-w-5xl mx-auto mb-8">
-                <app-seo-panel
-                    [title]="content.seo_title || content.title"
-                    [description]="content.seo_desc"
-                    [content]="blocks"
-                    [language]="activeLang()">
-                </app-seo-panel>
-            </div>
 
-            <!-- Block Canvas -->
-            <div cdkDropList 
-                 (cdkDropListDropped)="drop($event)"
-                 class="max-w-5xl mx-auto space-y-6 pb-32 min-h-[400px]">
-                 
-                 <div *ngFor="let block of blocks; trackBy: trackBlockId" 
-                      cdkDrag
-                      class="group relative bg-white dark:bg-slate-800 rounded-xl border-2 border-transparent transition-all shadow-sm hover:shadow-md cursor-pointer"
-                      [class.border-blue-500]="selectedBlock === block"
-                      [class.ring-4]="selectedBlock === block"
-                      [class.ring-blue-500/10]="selectedBlock === block"
-                      (click)="selectBlock(block, $event)">
-                    
-                    <!-- Drag Handle (Left) -->
-                    <div class="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-move z-20 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-l-xl transition-all" cdkDragHandle>
-                        <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor"><path d="M7 19h2v2H7zM7 15h2v2H7zM7 11h2v2H7zM7 7h2v2H7zM11 19h2v2h-2zM11 15h2v2h-2zM11 11h2v2h-2zM11 7h2v2h-2zM15 19h2v2h-2zM15 15h2v2h-2zM15 11h2v2h-2zM15 7h2v2h-2z"/></svg>
-                    </div>
+            <!-- Editor Canvas (Flex 1 to fill remaining space) -->
+            <!-- EditorCanvas handles its own scrolling via :host styles now -->
+            <app-editor-canvas
+                class="flex-1"
+                [blocks]="blocks"
+                (blocksChange)="blocks = $event"
+                [(selectedBlock)]="selectedBlock">
+            </app-editor-canvas>
 
-                    <!-- Remove Button (Right) -->
-                    <button (click)="removeBlock(block, $event)" class="absolute -right-3 -top-3 bg-white dark:bg-slate-700 text-slate-400 hover:text-red-500 shadow-sm border border-slate-200 dark:border-slate-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-30 hover:scale-110">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-
-                    <!-- Block Renderer -->
-                    <div class="pointer-events-none">
-                        <app-dynamic-block-renderer [block]="block"></app-dynamic-block-renderer>
-                    </div>
-                 </div>
-
-                 <!-- Drop Zone / Empty State -->
-                 <div class="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer"
-                      (click)="showBlockPicker = true">
-                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 mb-3">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                     </div>
-                     <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ 'ADD_BLOCK_TITLE' | translate }}</h3>
-                     <p class="text-sm text-slate-500 dark:text-slate-400">{{ 'ADD_BLOCK_DESC' | translate }}</p>
-                 </div>
-            </div>
-
-            <!-- Floating Add Button (Mobile/Quick) -->
-            <button class="fixed bottom-8 right-8 md:hidden btn btn-circle btn-primary shadow-xl" (click)="showBlockPicker = true">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            </button>
         </main>
-
-        <!-- Right: Property Panel -->
-        <aside class="absolute inset-y-0 right-0 z-30 w-full md:w-96 bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 flex flex-col shadow-xl transition-transform duration-300 lg:static lg:z-auto"
-               [class.translate-x-0]="selectedBlock"
-               [class.translate-x-full]="!selectedBlock"
-               [class.hidden]="!selectedBlock && !isMobile()"> <!-- Use hidden for space reclaiming on desktop -->
-             
-             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-                 <h3 class="font-bold text-slate-700 dark:text-white text-sm">{{ 'BLOCK_PROP_HEADER' | translate }}</h3>
-                 <button (click)="selectedBlock = null" class="btn btn-xs btn-ghost text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">{{ 'BLOCK_PROP_CLOSE' | translate }}</button>
-             </div>
-
-             <div class="flex-1 overflow-y-auto">
-                 <app-property-panel 
-                    *ngIf="selectedBlock"
-                    [schema]="getBlockSchema(selectedBlock.type)"
-                    [model]="selectedBlock.data"
-                    (modelChange)="updateBlockData($event)">
-                 </app-property-panel>
-             </div>
-        </aside>
-
       </div>
 
       <!-- No Page Selected State -->
@@ -251,36 +226,6 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
              </div>
           </div>
       </ng-template>
-
-      <!-- Block Picker Modal -->
-      <div *ngIf="showBlockPicker" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-[800px] max-w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-800 dark:text-white">{{ 'ADD_BLOCK_TITLE' | translate }}</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ 'ADD_BLOCK_DESC' | translate }}</p>
-                </div>
-                <button (click)="showBlockPicker = false" class="btn btn-circle btn-ghost btn-sm text-slate-400">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900">
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <button *ngFor="let def of availableBlocks" 
-                            (click)="addBlock(def.type)"
-                            class="group relative bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:shadow-lg transition-all text-left flex flex-col">
-                        <div class="mb-3 w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                             <!-- Icon placeholder based on category or type -->
-                             <span class="text-lg font-bold">{{ def.displayName.charAt(0) }}</span>
-                        </div>
-                        <h4 class="font-bold text-slate-800 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ def.displayName }}</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">Category: {{ def.category || 'General' }}</p>
-                    </button>
-                </div>
-            </div>
-        </div>
-      </div>
 
       <!-- Create Page Modal -->
         <div *ngIf="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -338,9 +283,11 @@ export class PageEditorComponent {
 
   // State
   pages = signal<any[]>([]);
+  themes = signal<any[]>([]);
   languages = signal<Language[]>([]);
   selectedPageSlug = signal('');
   activeLang = signal('');
+  activeThemeId: number | null = null;
 
   content: any = {};
   blocks: BlockInstance[] = [];
@@ -348,9 +295,9 @@ export class PageEditorComponent {
 
   pageId: number | null = null;
   isSaving = false;
-  showBlockPicker = false;
   showCreateModal = false;
   showSeoPanel = false;
+  isSettingsExpanded = true;
   seoScore = 0;
 
   // UI Feedback
@@ -363,9 +310,11 @@ export class PageEditorComponent {
   newPageSlug = '';
   newPageTemplate = 'default';
 
+  // NOTE: showBlockPicker moved to EditorCanvasComponent
+  // Blocks logic moved to EditorCanvasComponent
+
   constructor(
     private http: HttpClient,
-    private registry: BlockRegistryService,
     private cdr: ChangeDetectorRef,
     public i18n: I18nService,
     private seoValidator: SeoValidatorService,
@@ -395,33 +344,9 @@ export class PageEditorComponent {
     this.pendingAction = null;
   }
 
-  get availableBlocks(): ContentBlockManifest[] {
-    // Get all registered definitions
-    // In a real scenario, registry should expose a method to get getAllDefinitions()
-    // For now, we can iterate known types or usage the registry internal map if exposed, 
-    // OR better, BlockRegistryService should definitely have a getManifests() method. 
-    // *Wait*, I implemented BlockRegistryService earlier. Let's assume I missed `getAll` method or similar.
-    // Re-checking BlockRegistryService implementation in thought...
-    // It has `getDefinition`. 
-    // I will implement a quick helper here or use what's available. 
-    // Actually, for this prototype, I'll assume the registry has a public `definitions` map or method.
-    // If not, I'll need to update the Registry service. 
-    // Let's assume I can access the registry map values.
-    // *Correction*: I should verify `BlockRegistryService`. 
-    // But to proceed fast: I will rely on a hardcoded list of types retrieved from registry 
-    // OR better, update `BlockRegistryService` to expose a list.
-    // For this step, I will use a getter that calls `getDefinition` on known types.
-    const types = [
-      'page-hero', 'timeline-steps', 'case-study-showcase',
-      'hero-carousel', 'feature-grid', 'card-carousel',
-      'stats-counter', 'cta-banner', 'faq-accordion',
-      'contact-form-cta', 'content-with-image'
-    ];
-    return types.map(t => this.registry.getDefinition(t)?.manifest).filter(Boolean) as ContentBlockManifest[];
-  }
-
   init() {
     this.http.get<any[]>('/api/pages').subscribe(p => this.pages.set(p));
+    this.http.get<any[]>('/api/themes').subscribe(t => this.themes.set(t));
     this.http.get<Language[]>('/api/languages').subscribe(l => {
       this.languages.set(l);
       if (l.length > 0 && !this.activeLang()) this.activeLang.set(l[0].code);
@@ -440,8 +365,13 @@ export class PageEditorComponent {
   loadPage(slug: string) {
     this.selectedPageSlug.set(slug);
     const p = this.pages().find(x => x.slug_key === slug);
-    if (p) this.pageId = p.id;
-    else this.pageId = null;
+    if (p) {
+      this.pageId = p.id;
+      this.activeThemeId = p.theme_id || null;
+    } else {
+      this.pageId = null;
+      this.activeThemeId = null;
+    }
     this.selectedBlock = null;
     this.fetchContent();
   }
@@ -513,76 +443,14 @@ export class PageEditorComponent {
           } else {
             this.blocks = [];
           }
+          this.updateSeoScore(); // Recalculate score after load
           this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Failed to fetch content:', err);
-          // Optional: alert('Failed to load content for this language.');
           this.cdr.detectChanges();
         }
       });
-  }
-
-  // --- Block Actions ---
-
-  addBlock(type: string) {
-    const newBlock: BlockInstance = {
-      id: Math.random().toString(36).substr(2, 9),
-      type: type,
-      data: {} // In future: SchemaFormBuilder.createDefault(schema)
-    };
-    this.blocks.push(newBlock);
-    this.selectedBlock = newBlock;
-    this.showBlockPicker = false;
-  }
-
-  removeBlock(block: BlockInstance, event?: Event) {
-    if (event) event.stopPropagation();
-    const index = this.blocks.indexOf(block);
-    if (index > -1) {
-      this.blocks.splice(index, 1);
-      if (this.selectedBlock === block) this.selectedBlock = null;
-    }
-  }
-
-  selectBlock(block: BlockInstance, event: MouseEvent) {
-    event.stopPropagation();
-    this.selectedBlock = block;
-  }
-
-  drop(event: CdkDragDrop<BlockInstance[]>) {
-    moveItemInArray(this.blocks, event.previousIndex, event.currentIndex);
-  }
-
-  getBlockSchema(type: string) {
-    return this.registry.getDefinition(type)?.manifest.schema;
-  }
-
-  trackBlockId(index: number, block: BlockInstance) {
-    return block.id;
-  }
-
-  updateBlockData(newData: any) {
-    if (this.selectedBlock) {
-      // Create new immutable reference with updated data
-      const updatedBlock = {
-        ...this.selectedBlock,
-        data: { ...newData }
-      };
-
-      // Update in array to trigger OnChanges in DynamicBlockRenderer
-      const index = this.blocks.findIndex(b => b.id === updatedBlock.id);
-      if (index > -1) {
-        this.blocks[index] = updatedBlock;
-        // IMPORTANT: Reassign to trigger Angular detection of array change if needed, 
-        // though index assignment works with Default IterableDiffer if ref changes.
-        // But to be safe and clean with signals/future:
-        // this.blocks = [...this.blocks]; // Optional but safer for Observables
-      }
-
-      // Update active selection reference
-      this.selectedBlock = updatedBlock;
-    }
   }
 
   // --- Persistence ---
@@ -608,6 +476,21 @@ export class PageEditorComponent {
     return true;
   }
 
+  savePageMetadata() {
+    if (!this.pageId) return;
+    this.http.patch(`/api/pages/${this.pageId}`, {
+      theme_id: this.activeThemeId
+    }).subscribe({
+      next: () => {
+        // Update local state so it persists if we switch away and back
+        this.pages.update(pages => pages.map(p =>
+          p.id === this.pageId ? { ...p, theme_id: this.activeThemeId } : p
+        ));
+      },
+      error: (e) => console.error('Failed to update page metadata', e)
+    });
+  }
+
   saveDraft() {
     if (!this.pageId) return;
     if (!this.validatePage()) return;
@@ -616,6 +499,7 @@ export class PageEditorComponent {
     this.http.post(`/api/pages/${this.pageId}/draft`, this.prepareSavePayload())
       .subscribe({
         next: () => {
+          this.savePageMetadata(); // Also save theme/template
           this.isSaving = false;
           this.showToast('Draft saved successfully', 'success');
         },
@@ -635,6 +519,7 @@ export class PageEditorComponent {
       this.http.post(`/api/pages/${this.pageId}/publish`, this.prepareSavePayload())
         .subscribe({
           next: () => {
+            this.savePageMetadata(); // Also save theme/template
             this.isSaving = false;
             this.showToast('Page published successfully!', 'success');
           },
@@ -664,9 +549,5 @@ export class PageEditorComponent {
         },
         error: (e) => this.showToast('Error: ' + e.message, 'error')
       });
-  }
-
-  isMobile(): boolean {
-    return window.innerWidth < 1024; // Simple check for lg breakpoint
   }
 }

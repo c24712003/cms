@@ -18,6 +18,15 @@ import { TimelineStepsComponent } from './timeline-steps.component';
 import { ContactFormCtaComponent } from './contact-form-cta.component';
 import { ContentWithImageComponent } from './content-with-image.component';
 
+// New Block Components
+import { VideoHeroComponent } from './video-hero.component';
+import { SplitHeroComponent } from './split-hero.component';
+import { MasonryGalleryComponent } from './masonry-gallery.component';
+import { ImageComparisonComponent } from './image-comparison.component';
+import { PricingTableComponent } from './pricing-table.component';
+import { TestimonialSliderComponent } from './testimonial-slider.component';
+import { TeamGridComponent } from './team-grid.component';
+
 @Component({
   selector: 'app-block-renderer',
   standalone: true,
@@ -34,7 +43,15 @@ import { ContentWithImageComponent } from './content-with-image.component';
     FaqAccordionComponent,
     TimelineStepsComponent,
     ContactFormCtaComponent,
-    ContentWithImageComponent
+    ContentWithImageComponent,
+    // New Block Components
+    VideoHeroComponent,
+    SplitHeroComponent,
+    MasonryGalleryComponent,
+    ImageComparisonComponent,
+    PricingTableComponent,
+    TestimonialSliderComponent,
+    TeamGridComponent
   ],
   template: `
     <!-- Check if the block is registered in the new system -->
@@ -135,6 +152,83 @@ import { ContentWithImageComponent } from './content-with-image.component';
           [image]="block.image"
           [imagePosition]="block.imagePosition || 'right'">
         </app-content-with-image>
+        
+        <!-- Video Hero -->
+        <app-video-hero 
+          *ngSwitchCase="'video-hero'" 
+          [videoUrl]="block.videoUrl"
+          [posterImage]="block.posterImage"
+          [title]="block.title"
+          [subtitle]="block.subtitle"
+          [cta]="block.cta"
+          [overlayOpacity]="block.overlayOpacity || 60"
+          [autoplay]="block.autoplay !== false"
+          [loop]="block.loop !== false"
+          [muted]="block.muted !== false">
+        </app-video-hero>
+        
+        <!-- Split Hero -->
+        <app-split-hero 
+          *ngSwitchCase="'split-hero'" 
+          [title]="block.title"
+          [subtitle]="block.subtitle"
+          [image]="block.image"
+          [mediaPosition]="block.mediaPosition || 'right'"
+          [cta]="block.cta"
+          [secondaryCta]="block.secondaryCta"
+          [features]="block.features || []">
+        </app-split-hero>
+        
+        <!-- Masonry Gallery -->
+        <app-masonry-gallery 
+          *ngSwitchCase="'masonry-gallery'" 
+          [title]="block.title"
+          [subtitle]="block.subtitle"
+          [images]="block.images || []"
+          [columns]="block.columns || 3"
+          [gap]="block.gap || 'md'"
+          [enableLightbox]="block.enableLightbox !== false">
+        </app-masonry-gallery>
+        
+        <!-- Image Comparison -->
+        <app-image-comparison 
+          *ngSwitchCase="'image-comparison'" 
+          [title]="block.title"
+          [beforeImage]="block.beforeImage"
+          [afterImage]="block.afterImage"
+          [beforeLabel]="block.beforeLabel || 'Before'"
+          [afterLabel]="block.afterLabel || 'After'"
+          [startPosition]="block.startPosition || 50"
+          [orientation]="block.orientation || 'horizontal'">
+        </app-image-comparison>
+        
+        <!-- Pricing Table -->
+        <app-pricing-table 
+          *ngSwitchCase="'pricing-table'" 
+          [title]="block.title"
+          [subtitle]="block.subtitle"
+          [currency]="block.currency || '¥'"
+          [plans]="block.plans || []">
+        </app-pricing-table>
+        
+        <!-- Testimonial Slider -->
+        <app-testimonial-slider 
+          *ngSwitchCase="'testimonial-slider'" 
+          [title]="block.title"
+          [testimonials]="block.testimonials || []"
+          [autoRotate]="block.autoRotate !== false"
+          [rotateInterval]="block.rotateInterval || 5">
+        </app-testimonial-slider>
+        
+        <!-- Team Grid -->
+        <app-team-grid 
+          *ngSwitchCase="'team-grid'" 
+          [title]="block.title"
+          [subtitle]="block.subtitle"
+          [columns]="block.columns || 3"
+          [cardStyle]="block.cardStyle || 'minimal'"
+          [members]="block.members || []">
+        </app-team-grid>
         
         <!-- Fallback: Basic text/html blocks -->
         <div *ngSwitchCase="'text'" class="max-w-4xl mx-auto px-6 py-4">

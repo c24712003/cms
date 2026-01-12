@@ -57,6 +57,10 @@ export class PageHeroComponent {
         breadcrumb: {
           type: 'array',
           title: 'Breadcrumbs',
+          ui: {
+            widget: 'array',
+            addLabel: 'Add Breadcrumb'
+          },
           items: {
             type: 'object',
             properties: {
