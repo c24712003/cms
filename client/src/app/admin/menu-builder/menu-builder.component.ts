@@ -1,4 +1,3 @@
-
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,18 +7,20 @@ import { MenuService, MenuItem, SocialLink } from '../../core/services/menu.serv
 import { MenuItemEditorComponent } from './menu-item-editor.component';
 import { Subject, of, forkJoin, merge, concat } from 'rxjs';
 import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'rxjs/operators';
+import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { I18nService } from '../../core/services/i18n.service';
 
 @Component({
   selector: 'app-menu-builder',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule, MenuItemEditorComponent],
+  imports: [CommonModule, FormsModule, DragDropModule, MenuItemEditorComponent, TranslatePipe],
   template: `
     <div class="relative min-h-[calc(100vh-4rem)] max-w-7xl mx-auto">
       <!-- Page Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-           <h1 class="text-2xl font-bold text-slate-800">{{ getTitle() }}</h1>
-           <p class="text-slate-500 text-sm mt-1">Manage your website navigation and links</p>
+           <h1 class="text-2xl font-bold text-slate-800">{{ getTitle() | translate }}</h1>
+           <p class="text-slate-500 text-sm mt-1">{{ 'MENU_SUBTITLE' | translate }}</p>
         </div>
         <div class="flex flex-wrap gap-2 items-center w-full md:w-auto">
             <span *ngIf="saveStatus" 
@@ -27,13 +28,13 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
                   [class.text-red-600]="saveStatus.type === 'error'"
                   class="text-sm font-medium animate-fade-in-out mr-2 hidden sm:inline">
                 <i [class]="saveStatus.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
-                {{ saveStatus.message }}
+                {{ saveStatus.message | translate }}
             </span>
           <button class="btn btn-secondary flex-1 md:flex-none justify-center" (click)="reload()" [disabled]="loading">
-             <i class="fas fa-sync-alt mr-2" [class.fa-spin]="loading"></i> Refresh
+             <i class="fas fa-sync-alt mr-2" [class.fa-spin]="loading"></i> {{ 'BTN_REFRESH' | translate }}
           </button>
           <button class="btn btn-primary flex-1 md:flex-none justify-center" (click)="save()" [disabled]="loading || saving">
-             {{ saving ? 'Saving...' : 'Save Changes' }}
+             {{ (saving ? 'BTN_SAVING' : 'BTN_SAVE_CHANGES') | translate }}
           </button>
         </div>
       </div>
@@ -44,13 +45,13 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
                 [class.border-blue-500]="activeTab === 'structure'" 
                 [class.text-blue-600]="activeTab === 'structure'"
                 class="px-4 sm:px-6 py-3 border-b-2 border-transparent font-medium hover:text-blue-500 transition-colors whitespace-nowrap">
-            Menu Structure
+            {{ 'TAB_STRUCTURE' | translate }}
         </button>
         <button (click)="activeTab = 'social'"
                 [class.border-blue-500]="activeTab === 'social'" 
                 [class.text-blue-600]="activeTab === 'social'"
                 class="px-4 sm:px-6 py-3 border-b-2 border-transparent font-medium hover:text-blue-500 transition-colors whitespace-nowrap">
-            Social Links
+            {{ 'TAB_SOCIAL' | translate }}
         </button>
       </div>
       
@@ -60,7 +61,7 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
          <div *ngIf="loading" class="absolute inset-0 bg-white/80 z-10 flex items-center justify-center rounded-lg border border-slate-100 min-h-[400px]">
             <div class="flex flex-col items-center gap-3">
                 <i class="fas fa-circle-notch fa-spin text-3xl text-blue-500"></i>
-                <span class="text-slate-500 font-medium">Loading menu...</span>
+                <span class="text-slate-500 font-medium">{{ 'LOADING_DATA' | translate }}</span>
             </div>
          </div>
 
@@ -120,12 +121,12 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
 
             <!-- Add Button -->
             <button (click)="add()" class="mt-4 w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:border-blue-400 hover:text-blue-500 transition-colors font-medium flex items-center justify-center gap-2 active:bg-slate-50">
-                <i class="fas fa-plus"></i> Add Top Level Item
+                <i class="fas fa-plus"></i> {{ 'BTN_ADD_TOP_LEVEL' | translate }}
             </button>
          </div>
          
          <div class="mt-4 bg-blue-50 border border-blue-200 rounded-md p-4 text-sm text-blue-700">
-            <p><i class="fas fa-info-circle mr-2"></i> <strong>Tip:</strong> You can nest items up to 3 levels deep. Drag items to reorder.</p>
+            <p><i class="fas fa-info-circle mr-2"></i> {{ 'TIP_NESTING' | translate }}</p>
          </div>
       </div>
 
@@ -134,7 +135,7 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Active Links -->
             <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
-                <h3 class="font-bold text-lg mb-4 text-slate-800">Active Social Links</h3>
+                <h3 class="font-bold text-lg mb-4 text-slate-800">{{ 'TAB_SOCIAL' | translate }}</h3>
                 <div cdkDropList (cdkDropListDropped)="dropSocial($event)" class="space-y-3">
                     <div *ngFor="let link of socialLinks; let i = index; trackBy: trackByLink" cdkDrag class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex items-center gap-3">
@@ -162,7 +163,7 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
                 
                 <div class="mt-4 pt-4 border-t border-slate-100">
                     <button (click)="addSocial()" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-2 w-full justify-center sm:justify-start py-2 sm:py-0">
-                        <i class="fas fa-plus-circle"></i> Add Another Link
+                        <i class="fas fa-plus-circle"></i> {{ 'BTN_ADD_LINK' | translate }}
                     </button>
                 </div>
             </div>
@@ -170,11 +171,11 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
             <!-- Preview / Instructions -->
             <div class="space-y-6">
                 <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-6">
-                    <h4 class="font-bold text-indigo-900 mb-2">Supported Platforms</h4>
+                    <h4 class="font-bold text-indigo-900 mb-2">{{ 'LABEL_SUPPORTED_PLATFORMS' | translate }}</h4>
                     <div class="flex flex-wrap gap-2">
                         <span class="px-2 py-1 bg-white rounded text-xs text-slate-600 border" *ngFor="let p of ['facebook','twitter','instagram','linkedin','youtube','github']">{{p}}</span>
                     </div>
-                    <p class="text-sm text-indigo-700 mt-3">Simply add a link and select the platform. Icons are automatically assigned for standard platforms.</p>
+                    <p class="text-sm text-indigo-700 mt-3">{{ 'TIP_PLATFORMS' | translate }}</p>
                 </div>
             </div>
          </div>
@@ -194,21 +195,19 @@ import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'r
              <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                <i class="fas fa-exclamation-triangle"></i>
              </div>
-             <h3 class="text-lg font-bold text-slate-800">Confirm Deletion</h3>
+             <h3 class="text-lg font-bold text-slate-800">{{ 'DIALOG_CONFIRM_DELETE' | translate }}</h3>
           </div>
           
           <p class="text-slate-600 mb-6 text-sm">
-            Are you sure you want to delete this item? 
-            <span *ngIf="deleteState.type === 'item'">This action will also remove all nested children.</span>
-             This action cannot be undone.
+             {{ (deleteState.type === 'item' ? 'MSG_CONFIRM_DELETE_ITEM' : 'MSG_CONFIRM_DELETE_GENERIC') | translate }}
           </p>
 
           <div class="flex gap-2 justify-end">
             <button (click)="cancelDelete()" class="px-4 py-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md font-medium transition-colors">
-              Cancel
+              {{ 'BTN_CANCEL' | translate }}
             </button>
             <button (click)="confirmDelete()" class="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-md font-medium transition-colors shadow-sm">
-              Delete
+              {{ 'BTN_DELETE' | translate }}
             </button>
           </div>
         </div>
@@ -237,7 +236,8 @@ export class MenuBuilderComponent implements OnInit, OnDestroy {
   constructor(
     private menuService: MenuService,
     private route: ActivatedRoute,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private i18n: I18nService
   ) { }
 
   ngOnInit() {
@@ -294,9 +294,9 @@ export class MenuBuilderComponent implements OnInit, OnDestroy {
   }
 
   getTitle(): string {
-    return this.menuCode === 'main' ? 'Header Navigation' :
-      this.menuCode === 'footer' ? 'Footer Navigation' :
-        'Menu Editor';
+    return this.menuCode === 'main' ? 'MENU_HEADER_NAV' :
+      this.menuCode === 'footer' ? 'MENU_FOOTER_NAV' :
+        'MENU_EDITOR_TITLE';
   }
 
   reload() {
@@ -421,7 +421,7 @@ export class MenuBuilderComponent implements OnInit, OnDestroy {
         // But concat emits for each.
       },
       complete: () => {
-        this.saveStatus = { type: 'success', message: 'Saved successfully!' };
+        this.saveStatus = { type: 'success', message: 'MSG_SAVED_SUCCESS' };
         this.cd.detectChanges();
         setTimeout(() => {
           this.saveStatus = null;
@@ -430,7 +430,7 @@ export class MenuBuilderComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Failed to save:', err);
-        this.saveStatus = { type: 'error', message: 'Error saving changes. Please try again.' };
+        this.saveStatus = { type: 'error', message: 'MSG_SAVE_ERROR' };
         this.cd.detectChanges();
       }
     });

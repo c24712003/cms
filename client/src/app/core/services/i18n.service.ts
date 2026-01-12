@@ -1,82 +1,109 @@
 import { Injectable, signal, computed, PLATFORM_ID, Inject, makeStateKey, TransferState } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Language, TranslationMap } from '../models/language.model';
-import { tap } from 'rxjs';
+import { tap, catchError, of, Observable } from 'rxjs';
 
 export const I18N_DATA_KEY = makeStateKey<TranslationMap>('I18N_DATA');
 export const LANG_KEY = makeStateKey<string>('I18N_LANG');
+
+const SUPPORTED_LANGS = ['en-US', 'zh-TW'];
+const DEFAULT_LANG = 'en-US';
 
 @Injectable({
     providedIn: 'root'
 })
 export class I18nService {
-    readonly currentLang = signal<string>('en');
+    readonly currentLang = signal<string>(DEFAULT_LANG);
     readonly translations = signal<TranslationMap>({});
 
     constructor(
         private http: HttpClient,
         private transferState: TransferState,
-        @Inject(PLATFORM_ID) private platformId: Object
+        @Inject(PLATFORM_ID) private platformId: Object,
+        @Inject(DOCUMENT) private document: Document
     ) {
-        this.init();
+        // Initialization is now explicit via initLanguage() called from App or APP_INITIALIZER
     }
 
-    private init() {
+    initLanguage() {
         if (isPlatformBrowser(this.platformId)) {
-            // Hydration: Check TransferState first
-            const serverLang = this.transferState.get(LANG_KEY, 'en');
-            const serverData = this.transferState.get(I18N_DATA_KEY, {});
+            // 1. Try TransferState (SSR hydration)
+            const serverLang = this.transferState.get(LANG_KEY, '');
+            const serverData = this.transferState.get(I18N_DATA_KEY, null);
 
-            this.currentLang.set(serverLang);
-            this.translations.set(serverData);
+            if (serverLang && serverData) {
+                this.setLanguageState(serverLang, serverData);
+                return;
+            }
+
+            // 2. Browser Detection
+            const detected = this.detectBrowserLanguage();
+            this.loadTranslations(detected).subscribe();
+        } else {
+            // Server-side default (could be improved with request headers if using SSR)
+            this.loadTranslations(DEFAULT_LANG).subscribe();
         }
     }
 
-    /**
-     * Called by Server Logic to seed data into TransferState
-     */
+    private detectBrowserLanguage(): string {
+        const browserLang = navigator.language; // e.g., 'en-US', 'zh-TW', 'en-GB'
+
+        // Exact match
+        if (SUPPORTED_LANGS.includes(browserLang)) {
+            return browserLang;
+        }
+
+        // Partial match (e.g., 'en-GB' -> 'en-US')
+        const prefix = browserLang.split('-')[0];
+        const partialMatch = SUPPORTED_LANGS.find(lang => lang.startsWith(prefix));
+
+        return partialMatch || DEFAULT_LANG;
+    }
+
     setServerState(lang: string, data: TranslationMap) {
-        this.currentLang.set(lang);
-        this.translations.set(data);
+        this.setLanguageState(lang, data);
         this.transferState.set(LANG_KEY, lang);
         this.transferState.set(I18N_DATA_KEY, data);
     }
 
-    /**
-     * Client-side language switch (Hot-swap or Navigate)
-     * Ideally, this should trigger a navigation to /:newLang/...
-     */
     switchLanguage(lang: string) {
-        // For a true SEO friendly CMS, we usually just redirect window.location
-        // But for hot-swapping demo:
-        const newUrl = window.location.pathname.replace(/^\/[a-z]{2}(-[a-z]{2})?/, `/${lang}`);
-        window.location.href = newUrl;
+        if (lang === this.currentLang()) return;
+        this.loadTranslations(lang).subscribe();
+    }
+
+    /**
+     * @deprecated Use switchLanguage instead
+     */
+    setLanguage(lang: string) {
+        this.switchLanguage(lang);
     }
 
     translate(key: string): string {
-        return this.translations()[key] || key;
+        const map = this.translations();
+        // Simple nested key support (e.g., 'status.DRAFT')
+        const detected = key.split('.').reduce((acc: any, part) => acc && acc[part], map);
+        return (detected as string) || key;
     }
 
-    loadTranslations(lang: string) {
-        return this.http.get<TranslationMap>(`/api/translations/${lang}`).pipe(
-            tap(data => {
-                this.translations.set(data);
-                this.currentLang.set(lang);
-                // Also update transfer state just in case
-                this.transferState.set(I18N_DATA_KEY, data);
+    private loadTranslations(lang: string): Observable<TranslationMap> {
+        // Load from static assets in public/i18n
+        return this.http.get<TranslationMap>(`/i18n/${lang}.json`).pipe(
+            tap(data => this.setLanguageState(lang, data)),
+            catchError(err => {
+                console.error(`Failed to load translations for ${lang}`, err);
+                // Fallback to default if loading fails and we aren't already on it
+                if (lang !== DEFAULT_LANG) {
+                    return this.loadTranslations(DEFAULT_LANG);
+                }
+                return of({});
             })
         );
     }
 
-    setLanguage(lang: string) {
-        // Optimistic update or check if already loaded? 
-        // For now, always reload to ensure fresh data, or we could cache.
-        // Let's just load.
-        if (this.currentLang() === lang && Object.keys(this.translations()).length > 0) {
-            return;
-        }
-
-        this.loadTranslations(lang).subscribe();
+    private setLanguageState(lang: string, data: TranslationMap) {
+        this.currentLang.set(lang);
+        this.translations.set(data);
+        this.document.documentElement.lang = lang;
     }
 }

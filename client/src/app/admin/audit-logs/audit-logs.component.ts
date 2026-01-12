@@ -1,378 +1,248 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { AuditLogService, AuditLog } from '../../core/services/audit-log.service';
+import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { I18nService } from '../../core/services/i18n.service';
+
+export interface AuditLog {
+  id: number;
+  user_id?: number;
+  username?: string;
+  action: string;
+  resource_type: string;
+  resource_id?: string;
+  details?: string;
+  ip_address: string;
+  status: string;
+  created_at: string;
+  // mapped fields for display if needed
+  role?: string;
+  target_resource?: string;
+}
 
 @Component({
   selector: 'app-audit-logs',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
     <div class="space-y-6 animate-fade-in relative pb-10">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Audit Logs</h1>
-          <p class="text-sm text-slate-500 mt-1">Track system activities and user operations</p>
-        </div>
-        
-        <div class="flex items-center gap-2 self-end sm:self-auto">
-            <button (click)="loadLogs()" [disabled]="loading()" class="p-2 text-slate-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 disabled:opacity-50" title="Refresh">
-                <svg class="w-5 h-5" [class.animate-spin]="loading()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-            </button>
-        </div>
+      <div class="mb-8">
+         <h1 class="text-3xl font-bold text-slate-800 tracking-tight">{{ 'AUDIT_LOGS_TITLE' | translate }}</h1>
+         <p class="text-slate-500 mt-2 text-lg">{{ 'AUDIT_LOGS_SUBTITLE' | translate }}</p>
       </div>
 
-      <!-- Filters -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-        <div class="relative">
-            <label class="block text-xs font-semibold text-slate-500 mb-1.5 ml-1">Filter by Action</label>
-            <div class="relative">
-                <select [(ngModel)]="filterAction" (change)="onFilterChange()" class="w-full pl-3 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none text-slate-700">
-                    <option value="">All Actions</option>
-                    <option value="CREATE_USER">Create User</option>
-                    <option value="UPDATE_USER">Update User</option>
-                    <option value="DELETE_USER">Delete User</option>
-                    <option value="UPDATE_PASSWORD">Password Change</option>
-                    <option value="LOGIN">Login</option>
+      <!-- Filters & Controls -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div class="flex items-center gap-3 w-full md:w-auto">
+             <div class="relative w-full md:w-64">
+                <select [(ngModel)]="filterAction" class="appearance-none w-full bg-slate-50 border border-slate-200 text-slate-700 py-2.5 px-4 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer font-medium">
+                   <option *ngFor="let type of actionTypes" [value]="type.value">{{ type.label | translate }}</option>
                 </select>
-                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-slate-500">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+                  <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                 </div>
-            </div>
-        </div>
+             </div>
+          </div>
+          
+          <div class="text-slate-500 text-sm font-medium">
+             {{ filteredLogs().length }} records found
+          </div>
       </div>
 
-      <!-- Content Area -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        
-        <!-- Desktop Table (Hidden on Mobile) -->
-        <div class="hidden md:block overflow-x-auto">
-          <table class="w-full text-left text-sm">
+      <!-- Logs Table -->
+      <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-slate-50 border-b border-slate-200">
-                <th class="px-6 py-4 font-semibold text-slate-700 w-48">Timestamp</th>
-                <th class="px-6 py-4 font-semibold text-slate-700 w-48">User</th>
-                <th class="px-6 py-4 font-semibold text-slate-700 w-32">Role</th>
-                <th class="px-6 py-4 font-semibold text-slate-700 w-40">Action</th>
-                <th class="px-6 py-4 font-semibold text-slate-700">Target</th>
-                <th class="px-6 py-4 font-semibold text-slate-700 w-32">IP Address</th>
-                <th class="px-6 py-4 font-semibold text-slate-700 w-24">Status</th>
-                <th class="px-6 py-4 w-20"></th>
+              <tr class="bg-slate-50/50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-bold">
+                <th class="px-6 py-4 whitespace-nowrap">{{ 'TBL_TIMESTAMP' | translate }}</th>
+                <th class="px-6 py-4 whitespace-nowrap">{{ 'LABEL_USERNAME' | translate }}</th>
+                <th class="px-6 py-4 whitespace-nowrap text-center">{{ 'TBL_ROLE' | translate }}</th>
+                <th class="px-6 py-4 whitespace-nowrap">{{ 'TBL_ACTION' | translate }}</th>
+                <th class="px-6 py-4 whitespace-nowrap">{{ 'TBL_TARGET' | translate }}</th>
+                <th class="px-6 py-4 whitespace-nowrap">{{ 'TBL_IP' | translate }}</th>
+                <th class="px-6 py-4 whitespace-nowrap text-center">{{ 'TBL_STATUS' | translate }}</th>
+                <th class="px-6 py-4 whitespace-nowrap text-right"></th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              <tr *ngFor="let log of logs()" class="hover:bg-slate-50 transition-colors group">
-                <td class="px-6 py-4 text-slate-500 whitespace-nowrap font-mono text-xs">
-                  {{ log.created_at | date:'medium' }}
+              <tr *ngFor="let log of filteredLogs()" class="hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0 group cursor-pointer" (click)="viewDetails(log)">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-mono">
+                   {{ log.created_at | date:'MMM d, HH:mm:ss' }}
                 </td>
-                <td class="px-6 py-4 font-medium text-slate-900">
-                    <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 min-w-[1.75rem] rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs text-slate-600 font-bold">
-                            {{ log.username?.charAt(0)?.toUpperCase() || '?' }}
-                        </div>
-                        <span class="truncate max-w-[8rem]">{{ log.username || 'System' }}</span>
-                    </div>
-                </td>
-                 <td class="px-6 py-4 text-slate-500">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                        {{ log.role }}
-                    </span>
-                 </td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 whitespace-nowrap">
                    <div class="flex items-center">
-                       <span class="font-mono text-xs text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100 font-medium">
-                         {{ log.action }}
-                       </span>
+                      <div class="h-8 w-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold mr-3">
+                         {{ log.username?.charAt(0) | uppercase }}
+                      </div>
+                      <div class="text-sm font-medium text-slate-900">{{ log.username || 'System' }}</div>
                    </div>
                 </td>
-                <td class="px-6 py-4 text-slate-600">
-                    <div class="flex flex-col">
-                        <span class="text-xs font-medium text-slate-700">{{ log.resource_type }}</span>
-                        <span class="text-[10px] text-slate-400 font-mono" *ngIf="log.resource_id">#{{ log.resource_id }}</span>
-                    </div>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                    <span class="px-2 py-1 text-xs font-bold rounded bg-slate-100 text-slate-600 border border-slate-200 uppercase">{{ log.role || 'N/A' }}</span>
                 </td>
-                <td class="px-6 py-4 text-slate-500 font-mono text-xs">{{ log.ip_address }}</td>
-                <td class="px-6 py-4">
-                  <span 
-                    class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ring-1 ring-inset"
-                    [ngClass]="{
-                      'bg-emerald-50 text-emerald-700 ring-emerald-600/20': log.status === 'SUCCESS',
-                      'bg-red-50 text-red-700 ring-red-600/20': log.status !== 'SUCCESS'
-                    }"
-                  >
-                    <span class="w-1.5 h-1.5 rounded-full" [ngClass]="log.status === 'SUCCESS' ? 'bg-emerald-500' : 'bg-red-500'"></span>
-                    {{ log.status }}
-                  </span>
+                <td class="px-6 py-4 whitespace-nowrap">
+                   <div class="text-sm font-bold text-slate-700">{{ formatAction(log.action) | translate }}</div>
                 </td>
-                <td class="px-6 py-4 text-right">
-                    <button (click)="viewDetails(log)" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
-                        <span class="sr-only">View</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                    </button>
+                <td class="px-6 py-4 whitespace-nowrap">
+                   <div class="text-sm text-slate-500 font-mono bg-slate-50 px-2 py-1 rounded inline-block border border-slate-100 max-w-[150px] truncate" [title]="log.resource_type">
+                      {{ log.resource_type || '-' }} <span *ngIf="log.resource_id">#{{log.resource_id}}</span>
+                   </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                   {{ log.ip_address }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                   <span class="px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide" [ngClass]="getStatusClass(log.status)">
+                      {{ log.status }}
+                   </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                   <button class="text-blue-600 hover:text-blue-900 opacity-0 group-hover:opacity-100 transition-opacity" title="View Details">
+                      <i class="fas fa-eye"></i>
+                   </button>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+      </div>
 
-        <!-- Mobile Card View (Visible on Mobile) -->
-        <div class="md:hidden divide-y divide-slate-100">
-            <div *ngFor="let log of logs()" class="p-4 hover:bg-slate-50 transition-colors active:bg-slate-100" (click)="viewDetails(log)">
-                <div class="flex justify-between items-start mb-3">
-                    <div class="flex items-center gap-3">
-                         <div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs text-slate-600 font-bold">
-                            {{ log.username?.charAt(0)?.toUpperCase() || '?' }}
-                        </div>
-                        <div>
-                            <div class="text-sm font-semibold text-slate-900">{{ log.username || 'System' }}</div>
-                            <div class="text-xs text-slate-500">{{ log.created_at | date:'MMM d, h:mm a' }}</div>
-                        </div>
-                    </div>
-                    <span 
-                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ring-1 ring-inset"
-                        [ngClass]="{
-                            'bg-emerald-50 text-emerald-700 ring-emerald-600/20': log.status === 'SUCCESS',
-                            'bg-red-50 text-red-700 ring-red-600/20': log.status !== 'SUCCESS'
-                        }"
-                    >
-                        {{ log.status }}
-                    </span>
-                </div>
-                
-                <div class="pl-11 space-y-2">
-                    <div class="flex items-center justify-between">
-                         <span class="font-mono text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 font-medium">
-                             {{ log.action }}
-                         </span>
-                         <span class="text-xs text-slate-500 font-mono">{{ log.ip_address }}</span>
-                    </div>
-                    <div class="flex items-center text-xs text-slate-600">
-                        <span class="font-medium mr-1.5 ">Target:</span>
-                        <span>{{ log.resource_type }}</span>
-                        <span class="text-slate-400 font-mono ml-1" *ngIf="log.resource_id">#{{ log.resource_id }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Empty State -->
-        <div *ngIf="logs().length === 0 && !loading()" class="px-6 py-12 text-center text-slate-500">
-            <div class="flex flex-col items-center justify-center">
-                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                </div>
-                <h3 class="text-base font-medium text-slate-900">No logs found</h3>
-                <p class="text-sm mt-1">Try adjusting your filters or check back later.</p>
-            </div>
-        </div>
-        
-        <!-- Pagination -->
-        <div class="px-4 sm:px-6 py-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50 gap-4">
-            <div class="text-xs sm:text-sm text-slate-500 text-center sm:text-left">
-                Showing <span class="font-medium text-slate-900">{{ offset() + 1 }}</span> to <span class="font-medium text-slate-900">{{ getEndRange() }}</span> of <span class="font-medium text-slate-900">{{ total() }}</span> results
-            </div>
-            <div class="flex gap-2 w-full sm:w-auto">
-                <button 
-                  [disabled]="offset() === 0 || loading()"
-                  (click)="prevPage()"
-                  class="flex-1 sm:flex-none justify-center px-4 py-2 border border-slate-300 rounded-lg bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
-                >
-                  Previous
-                </button>
-                <button 
-                  [disabled]="getEndRange() >= total() || loading()"
-                  (click)="nextPage()"
-                  class="flex-1 sm:flex-none justify-center px-4 py-2 border border-slate-300 rounded-lg bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
-                >
-                  Next
-                </button>
-            </div>
-        </div>
+       <!-- Empty State -->
+      <div *ngIf="filteredLogs().length === 0" class="p-12 text-center flex flex-col items-center justify-center text-slate-400 bg-white rounded-xl border border-slate-200 border-dashed mt-6">
+          <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+             <i class="fas fa-search text-2xl text-slate-300"></i>
+          </div>
+          <h3 class="text-lg font-medium text-slate-600">{{ 'MSG_NO_LOGS' | translate }}</h3>
+          <p class="text-sm mt-1">{{ 'MSG_NO_LOGS_SUB' | translate }}</p>
       </div>
 
       <!-- Detail Modal -->
-      <div *ngIf="selectedLog()" class="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <!-- Backdrop -->
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="closeModal()"></div>
-        
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-          <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-slate-100 w-full animate-modal-in">
-            
-            <!-- Modal Header -->
-            <div class="bg-white px-4 py-4 sm:px-6 flex justify-between items-center border-b border-slate-100">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900 leading-tight">Log Details</h3>
-                        <p class="text-xs text-slate-400 font-mono">ID: #{{ selectedLog()?.id }}</p>
-                    </div>
+      <div *ngIf="selectedLog" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" (click)="closeDetails()">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in" (click)="$event.stopPropagation()">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div>
+                   <h3 class="text-xl font-bold text-slate-800">{{ 'MODAL_LOG_DETAILS' | translate }}</h3>
+                   <span class="text-s text-slate-500 font-mono mt-1 block">ID: #{{ selectedLog.id }}</span>
                 </div>
-                <button (click)="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                <button (click)="closeDetails()" class="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
             
-            <!-- Modal Body -->
-            <div class="px-4 py-5 sm:p-6 max-h-[70vh] overflow-y-auto bg-slate-50/50">
-                <!-- Info Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                     <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">User Info</label>
-                        <div class="flex items-center gap-2">
-                             <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold">
-                                {{ selectedLog()?.username?.charAt(0)?.toUpperCase() || '?' }}
-                            </div>
-                            <div class="text-sm font-medium text-slate-900">{{ selectedLog()?.username || 'System' }}</div>
-                            <span class="text-xs text-slate-400 ml-auto border border-slate-200 px-1.5 rounded">{{ selectedLog()?.role }}</span>
+            <div class="p-6 space-y-6">
+                <!-- User Section -->
+                <div class="flex items-start gap-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600 font-bold text-lg">
+                        {{ selectedLog.username?.charAt(0) | uppercase}}
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-blue-900 uppercase tracking-wider mb-1">{{ 'LABEL_USER_INFO' | translate }}</h4>
+                        <div class="text-slate-800 font-medium">{{ selectedLog.username }}</div>
+                        <div class="text-slate-500 text-sm flex gap-2 items-center mt-1">
+                            <span class="px-2 py-0.5 bg-white rounded border border-blue-200 text-xs font-bold text-blue-600">{{ selectedLog.role }}</span>
                         </div>
-                     </div>
-                     
-                     <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Action Type</label>
-                        <div class="text-sm font-mono font-medium text-blue-600">{{ selectedLog()?.action }}</div>
-                     </div>
-                     
-                     <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Target Resource</label>
-                        <div class="text-sm text-slate-900 border-b border-dashed border-slate-300 inline-block pb-0.5">{{ selectedLog()?.resource_type }}</div>
-                        <span class="text-xs text-slate-400 ml-2 font-mono">#{{ selectedLog()?.resource_id }}</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <!-- Action Info -->
+                     <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ 'LABEL_ACTION_TYPE' | translate }}</label>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 font-medium text-slate-700 flex items-center gap-2">
+                             <span class="w-2 h-2 rounded-full" [class.bg-green-500]="selectedLog.status === 'success'" [class.bg-red-500]="selectedLog.status === 'failure'"></span>
+                             {{ formatAction(selectedLog.action) | translate }}
+                        </div>
                      </div>
 
-                     <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">IP & Time</label>
-                        <div class="flex justify-between items-center">
-                            <div class="text-xs font-mono text-slate-600">{{ selectedLog()?.ip_address }}</div>
-                            <div class="text-xs text-slate-400">{{ selectedLog()?.created_at | date:'short' }}</div>
+                     <!-- Target Info -->
+                     <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ 'LABEL_TARGET_RESOURCE' | translate }}</label>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 font-medium text-slate-700 font-mono text-sm">
+                             {{ selectedLog.resource_type }} <span *ngIf="selectedLog.resource_id">#{{selectedLog.resource_id}}</span>
                         </div>
                      </div>
+                </div>
+
+                <!-- Timing & IP -->
+                <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{{ 'LABEL_IP_TIME' | translate }}</h4>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="flex items-center gap-2 text-slate-600">
+                            <i class="fas fa-globe text-slate-400"></i> {{ selectedLog.ip_address }}
+                        </span>
+                        <span class="flex items-center gap-2 text-slate-600">
+                            <i class="far fa-clock text-slate-400"></i> {{ selectedLog.created_at | date:'medium' }}
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Payload -->
-                <div class="relative group">
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                        <span>Payload Data</span>
-                        <div class="h-px bg-slate-200 flex-1"></div>
-                    </label>
-                    <div class="bg-slate-900 rounded-xl p-4 overflow-x-auto border border-slate-800 shadow-inner relative group">
-                        <div class="absolute top-2 right-2 text-[10px] text-slate-600 font-mono">JSON</div>
-                        <pre class="text-emerald-400 text-xs font-mono leading-relaxed">{{ formatDetails(selectedLog()?.details) }}</pre>
-                    </div>
+                <div *ngIf="selectedLog.details">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">{{ 'LABEL_PAYLOAD' | translate }}</label>
+                    <pre class="bg-slate-900 text-slate-50 p-4 rounded-xl text-xs font-mono overflow-x-auto text-green-400 shadow-inner custom-scrollbar">{{ selectedLog.details | json }}</pre>
                 </div>
             </div>
-            
-            <!-- Modal Footer -->
-            <div class="bg-white px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-slate-100 gap-3">
-              <button type="button" (click)="closeModal()" class="w-full inline-flex justify-center items-center rounded-lg border border-slate-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto transition-all">
-                Close Details
-              </button>
+
+            <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+                <button (click)="closeDetails()" class="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+                    {{ 'BTN_CLOSE_DETAILS' | translate }}
+                </button>
             </div>
-          </div>
         </div>
       </div>
-
     </div>
-
-  `,
-  styles: [`
-    :host { display: block; }
-    /* Simple fade in animation */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in {
-        animation: fadeIn 0.3s ease-out forwards;
-    }
-    @keyframes modalIn {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-    }
-    .animate-modal-in {
-        animation: modalIn 0.2s ease-out forwards;
-    }
-  `]
+  `
 })
 export class AuditLogsComponent implements OnInit {
   logs = signal<AuditLog[]>([]);
-  total = signal(0);
-  loading = signal(false);
-  offset = signal(0);
-  limit = 20;
+  filteredLogs = computed(() => {
+    if (this.filterAction === 'ALL') return this.logs();
+    return this.logs().filter(l => l.action === this.filterAction);
+  });
 
-  filterAction = '';
+  filterAction = 'ALL';
+  selectedLog: AuditLog | null = null;
 
-  selectedLog = signal<AuditLog | null>(null);
+  actionTypes = [
+    { value: 'ALL', label: 'ACTION_ALL' },
+    { value: 'CREATE_USER', label: 'ACTION_CREATE_USER' },
+    { value: 'UPDATE_USER', label: 'ACTION_UPDATE_USER' },
+    { value: 'DELETE_USER', label: 'ACTION_DELETE_USER' },
+    { value: 'UPDATE_PASSWORD', label: 'ACTION_UPDATE_PASSWORD' },
+    { value: 'LOGIN', label: 'ACTION_LOGIN' }
+  ];
 
-  constructor(private auditService: AuditLogService) { }
+  constructor(private http: HttpClient, private i18n: I18nService) { }
 
   ngOnInit() {
     this.loadLogs();
   }
 
   loadLogs() {
-    this.loading.set(true);
-    this.auditService.getLogs({
-      limit: this.limit,
-      offset: this.offset(),
-      action: this.filterAction || undefined
-    }).subscribe({
-      next: (res) => {
-        this.logs.set(res.data);
-        this.total.set(res.total);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading.set(false);
-      }
+    this.http.get<AuditLog[]>('/api/audit-logs').subscribe(data => {
+      // Sort by id desc for now since timestamp might be same
+      this.logs.set(data.sort((a, b) => b.id - a.id));
     });
   }
 
-  onFilterChange() {
-    this.offset.set(0);
-    this.loadLogs();
-  }
-
-  nextPage() {
-    if (this.offset() + this.limit < this.total()) {
-      this.offset.update(v => v + this.limit);
-      this.loadLogs();
-    }
-  }
-
-  prevPage() {
-    if (this.offset() > 0) {
-      this.offset.update(v => Math.max(0, v - this.limit));
-      this.loadLogs();
-    }
-  }
-
-  getEndRange() {
-    return Math.min(this.offset() + this.limit, this.total());
-  }
-
   viewDetails(log: AuditLog) {
-    this.selectedLog.set(log);
+    this.selectedLog = log;
   }
 
-  closeModal() {
-    this.selectedLog.set(null);
+  closeDetails() {
+    this.selectedLog = null;
   }
 
-  formatDetails(details: string | undefined): string {
-    if (!details) return '{}';
-    try {
-      // If it's already a string that looks like JSON, parse it first to format it
-      const parsed = JSON.parse(details);
-      return JSON.stringify(parsed, null, 2);
-    } catch (e) {
-      return details;
-    }
+  formatAction(action: string): string {
+    return 'ACTION_' + action;
+  }
+
+  getStatusClass(status: string): string {
+    return status === 'success'
+      ? 'bg-green-100 text-green-700 border border-green-200'
+      : 'bg-red-100 text-red-700 border border-red-200';
   }
 }

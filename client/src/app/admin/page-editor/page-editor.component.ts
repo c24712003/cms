@@ -13,6 +13,8 @@ import { BlockInstance, ContentBlockManifest } from '../../features/content-bloc
 import { SeoPanelComponent } from '../components/seo-panel.component';
 import { SeoValidatorService } from '../services/seo-validator.service';
 
+import { TranslatePipe } from '../../core/pipes/translate.pipe';
+
 @Component({
   selector: 'app-page-editor',
   standalone: true,
@@ -22,7 +24,8 @@ import { SeoValidatorService } from '../services/seo-validator.service';
     DragDropModule,
     DynamicBlockRendererComponent,
     PropertyPanelComponent,
-    SeoPanelComponent
+    SeoPanelComponent,
+    TranslatePipe
   ],
   template: `
     <div class="flex flex-col h-screen bg-slate-50 overflow-hidden">
@@ -31,15 +34,15 @@ import { SeoValidatorService } from '../services/seo-validator.service';
         <!-- Left: Title, Selector, New Button -->
         <div class="flex items-center gap-2 flex-grow sm:flex-grow-0">
           <h1 class="font-bold text-slate-800 text-sm flex items-center gap-2 shrink-0">
-            <span class="text-slate-400 hidden sm:inline">Pages /</span> 
-            Editor
+            <span class="text-slate-400 hidden sm:inline">{{ 'NAV_PAGES' | translate }} /</span> 
+            {{ 'NAV_EDITOR' | translate }}
           </h1>
           
           <!-- Page Selector -->
           <div class="relative group flex-grow sm:flex-grow-0 max-w-[140px] sm:max-w-none">
              <select [ngModel]="selectedPageSlug()" (ngModelChange)="loadPage($event)" 
                      class="w-full appearance-none pl-3 pr-8 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors cursor-pointer border-transparent focus:border-blue-500 focus:ring-0 truncate">
-                  <option value="">Select...</option>
+                  <option value="">{{ 'SELECT_PLACEHOLDER' | translate }}</option>
                   <option *ngFor="let p of pages()" [value]="p.slug_key">{{ p.slug_key }}</option>
              </select>
              <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
@@ -49,7 +52,7 @@ import { SeoValidatorService } from '../services/seo-validator.service';
           
           <button class="btn btn-sm btn-ghost px-2 sm:px-3" (click)="openCreateModal()">
             <span class="sm:hidden text-xl leading-none">+</span>
-            <span class="hidden sm:inline">+ New</span>
+            <span class="hidden sm:inline">{{ 'ACTION_NEW' | translate }}</span>
           </button>
         </div>
 
@@ -75,18 +78,18 @@ import { SeoValidatorService } from '../services/seo-validator.service';
 
             <div class="hidden md:flex items-center text-xs text-slate-500 italic mr-2" *ngIf="selectedPageSlug()">
                 <span class="w-2 h-2 rounded-full bg-amber-400 mr-2"></span>
-                {{ i18n.translate('STATUS_DRAFT') }}
+                {{ 'STATUS_DRAFT' | translate }}
             </div>
 
             <button class="btn btn-secondary btn-sm px-2 sm:px-4" (click)="saveDraft()" [disabled]="!selectedPageSlug() || isSaving" title="Save Draft">
                <!-- Icon for Mobile -->
                <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
-               <span class="hidden sm:inline">{{ isSaving ? 'Saving...' : i18n.translate('BTN_SAVE_DRAFT') }}</span>
+               <span class="hidden sm:inline">{{ isSaving ? 'Saving...' : ('BTN_SAVE_DRAFT' | translate) }}</span>
             </button>
             <button class="btn btn-primary btn-sm px-2 sm:px-4" (click)="publish()" [disabled]="!selectedPageSlug() || isSaving" title="Publish">
               <!-- Icon for Mobile -->
                <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-               <span class="hidden sm:inline">{{ i18n.translate('BTN_DEPLOY_PUBLISH') }}</span>
+               <span class="hidden sm:inline">{{ 'BTN_DEPLOY_PUBLISH' | translate }}</span>
             </button>
         </div>
       </header>
@@ -100,7 +103,7 @@ import { SeoValidatorService } from '../services/seo-validator.service';
             <!-- Metadata Card (Collapsible or Top) -->
             <div class="max-w-5xl mx-auto mb-8 bg-white rounded-xl border border-slate-200 p-6 shadow-sm group">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ i18n.translate('PAGE_SETTINGS_HEADER') }}</h3>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ 'PAGE_SETTINGS_HEADER' | translate }}</h3>
                     <button (click)="showSeoPanel = !showSeoPanel" 
                             class="text-xs font-medium px-3 py-1 rounded-full transition-colors"
                             [class.bg-blue-100]="showSeoPanel" [class.text-blue-700]="showSeoPanel"
@@ -110,11 +113,11 @@ import { SeoValidatorService } from '../services/seo-validator.service';
                 </div>
                 <div class="grid grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">{{ i18n.translate('PAGE_TITLE_LABEL') }}</label>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">{{ 'PAGE_TITLE_LABEL' | translate }}</label>
                         <input [(ngModel)]="content.title" class="w-full text-lg font-bold border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 transition-all placeholder:text-slate-300" placeholder="Page Title" />
                     </div>
                      <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">{{ i18n.translate('PAGE_URL_SLUG_LABEL') }}</label>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">{{ 'PAGE_URL_SLUG_LABEL' | translate }}</label>
                         <div class="flex items-baseline text-slate-500">
                              <span class="text-sm">/{{ activeLang() }}/</span>
                              <input [(ngModel)]="content.slug_localized" class="flex-1 bg-transparent border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 text-sm font-mono text-slate-700" />
@@ -197,8 +200,8 @@ import { SeoValidatorService } from '../services/seo-validator.service';
                      <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 mb-3">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                      </div>
-                     <h3 class="font-bold text-slate-700">{{ i18n.translate('ADD_BLOCK_TITLE') }}</h3>
-                     <p class="text-sm text-slate-500">{{ i18n.translate('ADD_BLOCK_DESC') }}</p>
+                     <h3 class="font-bold text-slate-700">{{ 'ADD_BLOCK_TITLE' | translate }}</h3>
+                     <p class="text-sm text-slate-500">{{ 'ADD_BLOCK_DESC' | translate }}</p>
                  </div>
             </div>
 
@@ -238,9 +241,9 @@ import { SeoValidatorService } from '../services/seo-validator.service';
                  <div class="inline-block p-6 rounded-full bg-blue-50 text-blue-500 mb-6">
                     <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                  </div>
-                 <h2 class="text-2xl font-bold text-slate-800 mb-2">Select a Page to Edit</h2>
-                 <p class="text-slate-500 mb-8">Choose an existing page from the dropdown above or create a new one to get started.</p>
-                 <button class="btn btn-primary" (click)="openCreateModal()">Create New Page</button>
+                 <h2 class="text-2xl font-bold text-slate-800 mb-2">{{ 'EMPTY_TITLE' | translate }}</h2>
+                 <p class="text-slate-500 mb-8">{{ 'EMPTY_DESC' | translate }}</p>
+                 <button class="btn btn-primary" (click)="openCreateModal()">{{ 'BTN_CREATE_NEW' | translate }}</button>
              </div>
           </div>
       </ng-template>
@@ -250,8 +253,8 @@ import { SeoValidatorService } from '../services/seo-validator.service';
         <div class="bg-white rounded-2xl shadow-2xl w-[800px] max-w-full max-h-[90vh] flex flex-col overflow-hidden">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
                 <div>
-                    <h3 class="text-xl font-bold text-slate-800">Add Content Block</h3>
-                    <p class="text-sm text-slate-500">Choose a component to add to your page</p>
+                    <h3 class="text-xl font-bold text-slate-800">{{ 'ADD_BLOCK_TITLE' | translate }}</h3>
+                    <p class="text-sm text-slate-500">{{ 'ADD_BLOCK_DESC' | translate }}</p>
                 </div>
                 <button (click)="showBlockPicker = false" class="btn btn-circle btn-ghost btn-sm text-slate-400">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -278,11 +281,11 @@ import { SeoValidatorService } from '../services/seo-validator.service';
       <!-- Create Page Modal -->
         <div *ngIf="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-96">
-            <h3 class="text-lg font-bold mb-4">Create New Page</h3>
+            <h3 class="text-lg font-bold mb-4">{{ 'MODAL_CREATE_TITLE' | translate }}</h3>
             
             <div class="space-y-4">
                 <div>
-                    <label class="form-label">URL Slug Key</label>
+                    <label class="form-label">{{ 'PAGE_URL_SLUG_LABEL' | translate }}</label>
                     <input [(ngModel)]="newPageSlug" class="input-field" placeholder="e.g. services" />
                     <p class="text-xs text-slate-500 mt-1">Unique identifier for the URL.</p>
                 </div>
@@ -297,8 +300,8 @@ import { SeoValidatorService } from '../services/seo-validator.service';
             </div>
 
             <div class="flex justify-end gap-2 mt-6">
-                <button class="btn btn-ghost" (click)="showCreateModal = false">Cancel</button>
-                <button class="btn btn-primary" (click)="createPage()">Create Page</button>
+                <button class="btn btn-ghost" (click)="showCreateModal = false">{{ 'MODAL_CANCEL' | translate }}</button>
+                <button class="btn btn-primary" (click)="createPage()">{{ 'MODAL_CONFIRM_CREATE' | translate }}</button>
             </div>
         </div>
       </div>

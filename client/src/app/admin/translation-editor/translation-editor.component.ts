@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Language } from '../../core/models/language.model';
+import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { I18nService } from '../../core/services/i18n.service';
 
 interface TranslationKey {
     key: string;
@@ -12,12 +14,12 @@ interface TranslationKey {
 @Component({
     selector: 'app-translation-editor',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, TranslatePipe],
     template: `
     <div class="max-w-7xl mx-auto">
       <!-- Page Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <h1 class="text-2xl font-bold text-slate-800">Translations</h1>
+        <h1 class="text-2xl font-bold text-slate-800">{{ 'TRANSLATIONS_TITLE' | translate }}</h1>
         
         <!-- Add Key Control -->
         <div class="flex items-center gap-2 w-full md:w-auto bg-white p-1 rounded-xl border border-slate-200 shadow-sm md:border-none md:shadow-none md:bg-transparent">
@@ -25,8 +27,8 @@ interface TranslationKey {
                    class="input-field flex-grow text-sm md:w-64" />
             <button class="btn btn-primary whitespace-nowrap" (click)="addKey()">
                  <svg class="w-4 h-4 mr-1 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                 <span class="hidden md:inline">+ Add Key</span>
-                 <span class="md:hidden">Add</span>
+                 <span class="hidden md:inline">+ {{ 'BTN_ADD_KEY' | translate }}</span>
+                 <span class="md:hidden">{{ 'BTN_ADD' | translate }}</span>
             </button>
         </div>
       </div>
@@ -36,7 +38,7 @@ interface TranslationKey {
           <table class="w-full text-left text-sm">
               <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-xs font-semibold">
                   <tr>
-                      <th class="px-6 py-4 w-1/4 sticky left-0 bg-slate-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">Key</th>
+                      <th class="px-6 py-4 w-1/4 sticky left-0 bg-slate-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">{{ 'TBL_KEY' | translate }}</th>
                       <th *ngFor="let lang of languages()" class="px-6 py-4 min-w-[200px]">{{ lang.name }} ({{ lang.code }})</th>
                   </tr>
               </thead>
@@ -80,7 +82,7 @@ interface TranslationKey {
       </div>
       
       <div class="p-8 text-center text-slate-400 bg-white rounded-xl border border-slate-200 border-dashed mt-4" *ngIf="keys().length === 0">
-          No translations found. Add your first key to start translating.
+          {{ 'MSG_NO_KEYS' | translate }}
       </div>
     </div>
   `
@@ -92,7 +94,7 @@ export class TranslationEditorComponent {
     values = signal<Record<string, Record<string, string>>>({});
     newKey = '';
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private i18n: I18nService) {
         this.loadData();
     }
 

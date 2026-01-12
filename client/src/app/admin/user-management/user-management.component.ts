@@ -3,6 +3,8 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { I18nService } from '../../core/services/i18n.service';
 
 interface User {
   id: number;
@@ -14,14 +16,14 @@ interface User {
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
     <div class="max-w-7xl mx-auto">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <h1 class="text-2xl font-bold text-slate-800">User Management</h1>
+        <h1 class="text-2xl font-bold text-slate-800">{{ 'USER_MANAGEMENT' | translate }}</h1>
         <button (click)="openCreateModal()" class="btn btn-primary w-full md:w-auto flex justify-center items-center">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Add User
+            {{ 'BTN_ADD_USER' | translate }}
         </button>
       </div>
 
@@ -30,11 +32,11 @@ interface User {
         <table class="w-full text-left text-sm">
           <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-xs font-semibold">
             <tr>
-              <th class="px-6 py-4">ID</th>
-              <th class="px-6 py-4">Username</th>
-              <th class="px-6 py-4">Role</th>
-              <th class="px-6 py-4">Status</th>
-              <th class="px-6 py-4 text-right">Actions</th>
+              <th class="px-6 py-4">{{ 'TBL_ID' | translate }}</th>
+              <th class="px-6 py-4">{{ 'TBL_USERNAME' | translate }}</th>
+              <th class="px-6 py-4">{{ 'TBL_ROLE' | translate }}</th>
+              <th class="px-6 py-4">{{ 'TBL_STATUS' | translate }}</th>
+              <th class="px-6 py-4 text-right">{{ 'TBL_ACTIONS' | translate }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -43,7 +45,7 @@ interface User {
               <td class="px-6 py-4 font-bold text-slate-700">{{ user.username }}</td>
               <td class="px-6 py-4">
                 <span [class]="getRoleBadgeClass(user.role)" class="px-2 py-1 rounded text-xs font-bold uppercase tracking-wide">
-                  {{ user.role }}
+                  {{ ('ROLE_' + (user.role | uppercase)) | translate }}
                 </span>
               </td>
               <td class="px-6 py-4">
@@ -51,14 +53,14 @@ interface User {
                       [class.bg-red-100]="!user.is_active" [class.text-red-700]="!user.is_active"
                       class="px-2 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1">
                   <span class="w-1.5 h-1.5 rounded-full" [class.bg-green-500]="user.is_active" [class.bg-red-500]="!user.is_active"></span>
-                  {{ user.is_active ? 'Active' : 'Inactive' }}
+                  {{ (user.is_active ? 'STATUS_ACTIVE' : 'STATUS_INACTIVE') | translate }}
                 </span>
               </td>
               <td class="px-6 py-4 text-right space-x-2">
-                <button (click)="resetPassword(user)" class="text-slate-400 hover:text-blue-600 font-medium text-xs transition-colors" title="Reset Password">
+                <button (click)="resetPassword(user)" class="text-slate-400 hover:text-blue-600 font-medium text-xs transition-colors" [title]="'BTN_RESET_PASSWORD' | translate">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11.536 9.636a1.003 1.003 0 00-.454-.242l-2.646-.882a6 6 0 00-7.072 6.641l1.635-1.19a4 4 0 005.656 0L15 7z"/></svg>
                 </button>
-                <button (click)="editUser(user)" class="text-blue-600 hover:text-blue-800 font-medium text-xs transition-colors bg-blue-50 px-3 py-1 rounded-md">Edit</button>
+                <button (click)="editUser(user)" class="text-blue-600 hover:text-blue-800 font-medium text-xs transition-colors bg-blue-50 px-3 py-1 rounded-md">{{ 'EDIT' | translate }}</button>
               </td>
             </tr>
           </tbody>
@@ -79,21 +81,21 @@ interface User {
                     </div>
                 </div>
                 <span [class]="getRoleBadgeClass(user.role)" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">
-                  {{ user.role }}
+                  {{ ('ROLE_' + (user.role | uppercase)) | translate }}
                 </span>
             </div>
             
             <div class="flex items-center justify-between pt-3 border-t border-slate-50">
                  <span [class.text-green-600]="user.is_active" [class.text-red-500]="!user.is_active" class="text-xs font-bold flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full" [class.bg-green-500]="user.is_active" [class.bg-red-500]="!user.is_active"></span>
-                    {{ user.is_active ? 'Active' : 'Inactive' }}
+                    {{ (user.is_active ? 'STATUS_ACTIVE' : 'STATUS_INACTIVE') | translate }}
                  </span>
                  
                  <div class="flex items-center gap-2">
-                     <button (click)="resetPassword(user)" class="btn btn-xs btn-ghost text-slate-400" title="Reset Password">
+                     <button (click)="resetPassword(user)" class="btn btn-xs btn-ghost text-slate-400" [title]="'BTN_RESET_PASSWORD' | translate">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11.536 9.636a1.003 1.003 0 00-.454-.242l-2.646-.882a6 6 0 00-7.072 6.641l1.635-1.19a4 4 0 005.656 0L15 7z"/></svg>
                      </button>
-                     <button (click)="editUser(user)" class="btn btn-xs btn-outline btn-primary">Edit</button>
+                     <button (click)="editUser(user)" class="btn btn-xs btn-outline btn-primary">{{ 'EDIT' | translate }}</button>
                  </div>
             </div>
         </div>
@@ -102,37 +104,37 @@ interface User {
       <!-- Create/Edit Modal (Responsive) -->
       <div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
-            <h3 class="text-lg font-bold mb-4">{{ isEditing ? 'Edit User' : 'Create User' }}</h3>
+            <h3 class="text-lg font-bold mb-4">{{ (isEditing ? 'TITLE_EDIT_USER' : 'TITLE_CREATE_USER') | translate }}</h3>
             
             <div class="space-y-4">
                 <div>
-                    <label class="form-label">Username</label>
-                    <input [(ngModel)]="formData.username" [disabled]="isEditing" class="input-field" placeholder="Username" />
+                    <label class="form-label">{{ 'LABEL_USERNAME' | translate }}</label>
+                    <input [(ngModel)]="formData.username" [disabled]="isEditing" class="input-field" [placeholder]="'LABEL_USERNAME' | translate" />
                 </div>
                 
                 <div *ngIf="!isEditing">
-                    <label class="form-label">Password</label>
-                    <input [(ngModel)]="formData.password" type="password" class="input-field" placeholder="Password" />
+                    <label class="form-label">{{ 'LABEL_PASSWORD' | translate }}</label>
+                    <input [(ngModel)]="formData.password" type="password" class="input-field" [placeholder]="'LABEL_PASSWORD' | translate" />
                 </div>
 
                 <div>
-                    <label class="form-label">Role</label>
+                    <label class="form-label">{{ 'LABEL_ROLE' | translate }}</label>
                     <select [(ngModel)]="formData.role" class="input-field">
-                        <option value="admin">Admin</option>
-                        <option value="editor">Editor</option>
-                        <option value="viewer">Viewer</option>
+                        <option value="admin">{{ 'ROLE_ADMIN' | translate }}</option>
+                        <option value="editor">{{ 'ROLE_EDITOR' | translate }}</option>
+                        <option value="viewer">{{ 'ROLE_VIEWER' | translate }}</option>
                     </select>
                 </div>
 
                 <div *ngIf="isEditing" class="flex items-center gap-2 mt-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
                     <input type="checkbox" [(ngModel)]="formData.is_active" id="isActive" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-                    <label for="isActive" class="text-sm font-medium text-slate-700">Account Active</label>
+                    <label for="isActive" class="text-sm font-medium text-slate-700">{{ 'LABEL_ACCOUNT_ACTIVE' | translate }}</label>
                 </div>
             </div>
 
             <div class="flex justify-end gap-2 mt-6">
-                <button class="btn btn-ghost" (click)="showModal = false">Cancel</button>
-                <button class="btn btn-primary" (click)="saveUser()">{{ isEditing ? 'Update' : 'Create' }}</button>
+                <button class="btn btn-ghost" (click)="showModal = false">{{ 'CANCEL' | translate }}</button>
+                <button class="btn btn-primary" (click)="saveUser()">{{ (isEditing ? 'BTN_UPDATE' : 'BTN_CREATE') | translate }}</button>
             </div>
         </div>
       </div>
@@ -145,7 +147,7 @@ export class UserManagementComponent implements OnInit {
   isEditing = false;
   formData: any = { username: '', password: '', role: 'viewer', is_active: true };
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private i18n: I18nService) { }
 
   ngOnInit() {
     this.loadUsers();
@@ -190,17 +192,17 @@ export class UserManagementComponent implements OnInit {
           this.showModal = false;
           this.loadUsers();
         },
-        error: (e) => alert(e.error?.error || 'Error creating user')
+        error: (e) => alert(e.error?.error || this.i18n.translate('MSG_ERROR_CREATE_USER'))
       });
     }
   }
 
   resetPassword(user: User) {
-    const newPass = prompt(`Enter new password for ${user.username}:`);
+    const newPass = prompt(this.i18n.translate('MSG_ENTER_PASSWORD') + ' ' + user.username + ':');
     if (!newPass) return;
 
     this.http.put(`/api/users/${user.id}/password`, { password: newPass }).subscribe(() => {
-      alert('Password updated successfully');
+      alert(this.i18n.translate('MSG_PASSWORD_UPDATED'));
     });
   }
 }

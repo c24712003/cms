@@ -31,6 +31,7 @@ export class App {
     @Inject(LOCALE_ID) public locale: string,
     private registry: BlockRegistryService
   ) {
+    this.i18n.initLanguage();
     this.registerBlocks();
   }
 

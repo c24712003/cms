@@ -3,18 +3,20 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MediaService, MediaAsset } from '../../core/services/media.service';
+import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { I18nService } from '../../core/services/i18n.service';
 
 @Component({
   selector: 'app-media-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
     <div class="max-w-7xl mx-auto" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
       <!-- Page Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900">Media Library</h1>
-          <p class="text-slate-500">Manage your images, videos, and documents</p>
+          <h1 class="text-2xl font-bold text-slate-900">{{ 'MEDIA_LIBRARY' | translate }}</h1>
+          <p class="text-slate-500">{{ 'MEDIA_DESC' | translate }}</p>
         </div>
         
         <div class="flex gap-2">
@@ -24,7 +26,7 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
             <svg class="w-4 h-4 mr-2 text-red-600" fill="currentColor" viewBox="0 0 24 24">
               <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
             </svg>
-            Add Video
+            {{ 'BTN_ADD_VIDEO' | translate }}
           </button>
           
           <!-- Upload Button -->
@@ -34,7 +36,7 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
             </svg>
-            Upload
+            {{ 'BTN_UPLOAD' | translate }}
           </button>
         </div>
       </div>
@@ -51,14 +53,14 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
                   [class.text-slate-900]="currentFilter === filter.id"
                   [class.text-slate-500]="currentFilter !== filter.id"
                   class="px-3 py-1.5 text-sm font-medium rounded-md transition-all">
-            {{ filter.label }}
+            {{ filter.label | translate }}
           </button>
         </div>
 
         <div class="flex gap-4 w-full md:w-auto">
             <!-- Search -->
             <div class="relative flex-1 md:w-64">
-                <input type="text" [(ngModel)]="searchQuery" placeholder="Search files..." 
+                <input type="text" [(ngModel)]="searchQuery" [placeholder]="'SEARCH_FILES' | translate" 
                        class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
                 <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -69,12 +71,12 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
             <div class="flex items-center bg-slate-100 p-1 rounded-lg">
                 <button (click)="viewMode = 'grid'" 
                         [class.bg-white]="viewMode === 'grid'" [class.shadow-sm]="viewMode === 'grid'"
-                        class="p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition-all" title="Grid View">
+                        class="p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition-all" [title]="'VIEW_GRID' | translate">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 </button>
                 <button (click)="viewMode = 'list'"
                         [class.bg-white]="viewMode === 'list'" [class.shadow-sm]="viewMode === 'list'"
-                        class="p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition-all" title="List View">
+                        class="p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition-all" [title]="'VIEW_LIST' | translate">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
             </div>
@@ -88,7 +90,7 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
           <svg class="w-12 h-12 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
           </svg>
-          <span class="text-blue-600 font-medium">Drop files to upload</span>
+          <span class="text-blue-600 font-medium">{{ 'DROP_FILES' | translate }}</span>
         </div>
       </div>
 
@@ -132,10 +134,10 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-slate-400">{{ formatSize(asset.size_bytes) }}</span>
                         <div class="flex gap-1">
-                            <button (click)="copyUrl($event, asset.url)" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Copy URL">
+                            <button (click)="copyUrl($event, asset.url)" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" [title]="'ACTION_COPY_URL' | translate">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             </button>
-                            <button (click)="deleteAsset($event, asset.id!)" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
+                            <button (click)="deleteAsset($event, asset.id!)" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" [title]="'ACTION_DELETE' | translate">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
                         </div>
@@ -149,12 +151,12 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
             <table class="w-full text-left text-sm">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-100 text-slate-500">
-                        <th class="px-6 py-4 font-medium w-20">Preview</th>
-                        <th class="px-6 py-4 font-medium">Filename</th>
-                        <th class="px-6 py-4 font-medium w-32">Type</th>
-                        <th class="px-6 py-4 font-medium w-32">Size</th>
-                        <th class="px-6 py-4 font-medium w-40">Date</th>
-                        <th class="px-6 py-4 font-medium w-24 text-right">Actions</th>
+                        <th class="px-6 py-4 font-medium w-20">{{ 'TBL_PREVIEW' | translate }}</th>
+                        <th class="px-6 py-4 font-medium">{{ 'TBL_FILENAME' | translate }}</th>
+                        <th class="px-6 py-4 font-medium w-32">{{ 'TBL_TYPE' | translate }}</th>
+                        <th class="px-6 py-4 font-medium w-32">{{ 'TBL_SIZE' | translate }}</th>
+                        <th class="px-6 py-4 font-medium w-40">{{ 'TBL_DATE' | translate }}</th>
+                        <th class="px-6 py-4 font-medium w-24 text-right">{{ 'TBL_ACTIONS' | translate }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -171,7 +173,7 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
                         </td>
                         <td class="px-6 py-3">
                             <p class="font-medium text-slate-900 truncate max-w-[200px]">{{ asset.filename }}</p>
-                            <a [href]="asset.url" target="_blank" class="text-xs text-blue-500 hover:text-blue-700 hover:underline">Open file</a>
+                            <a [href]="asset.url" target="_blank" class="text-xs text-blue-500 hover:text-blue-700 hover:underline">{{ 'ACTION_OPEN_FILE' | translate }}</a>
                         </td>
                         <td class="px-6 py-3">
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
@@ -180,7 +182,7 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
                                     'bg-red-50 text-red-700': asset.type === 'video_url',
                                     'bg-gray-100 text-gray-700': asset.type === 'document'
                                   }">
-                                {{ asset.type === 'video_url' ? 'Video' : (asset.type | titlecase) }}
+                                {{ (asset.type === 'video_url' ? 'FILTER_VIDEOS' : (asset.type === 'image' ? 'FILTER_IMAGES' : 'FILTER_DOCS')) | translate }}
                             </span>
                         </td>
                         <td class="px-6 py-3 text-slate-500">{{ formatSize(asset.size_bytes) }}</td>
@@ -209,11 +211,11 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-medium text-slate-600">No media found</h3>
+            <h3 class="text-lg font-medium text-slate-600">{{ 'NO_MEDIA' | translate }}</h3>
             <p class="text-slate-500 mt-1 max-w-sm text-center">
-                {{ searchQuery ? 'Try adjusting your search query' : 'Upload files from your computer or add external video links from YouTube' }}
+                {{ searchQuery ? ('Adjustment_Tip' | translate) : ('NO_MEDIA_DESC' | translate) }}
             </p>
-            <button *ngIf="searchQuery" (click)="searchQuery = ''" class="mt-4 text-blue-600 hover:text-blue-700 font-medium">Clear Search</button>
+            <button *ngIf="searchQuery" (click)="searchQuery = ''" class="mt-4 text-blue-600 hover:text-blue-700 font-medium">{{ 'BTN_CLEAR_SEARCH' | translate }}</button>
         </div>
       </ng-template>
 
@@ -221,10 +223,10 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
       <div *ngIf="showVideoDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
           <div class="p-6">
-            <h3 class="text-lg font-bold text-slate-900 mb-4">Add YouTube Video</h3>
+            <h3 class="text-lg font-bold text-slate-900 mb-4">{{ 'DIALOG_ADD_VIDEO' | translate }}</h3>
             
             <div class="mb-4">
-              <label class="block text-sm font-medium text-slate-700 mb-1">YouTube URL</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">{{ 'LABEL_YOUTUBE_URL' | translate }}</label>
               <div class="flex gap-2">
                 <input type="text" [(ngModel)]="videoUrl" placeholder="https://youtube.com/watch?v=..." 
                        class="flex-1 rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
@@ -242,14 +244,14 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
 
             <div *ngIf="isParsing" class="flex items-center justify-center py-4 text-slate-500">
                 <svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                Processing...
+                {{ 'PROCESSING' | translate }}
             </div>
             
             <div class="flex justify-end gap-2">
-              <button (click)="showVideoDialog = false; resetVideoDialog()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800">Cancel</button>
+              <button (click)="showVideoDialog = false; resetVideoDialog()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800">{{ 'CANCEL' | translate }}</button>
               <button (click)="saveVideo()" [disabled]="!videoPreview" 
                       class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                Add Video
+                {{ 'BTN_ADD_VIDEO' | translate }}
               </button>
             </div>
           </div>
@@ -265,10 +267,10 @@ export class MediaManagerComponent implements OnInit {
   searchQuery = '';
 
   filters = [
-    { id: 'all', label: 'All' },
-    { id: 'image', label: 'Images' },
-    { id: 'video_url', label: 'Videos' },
-    { id: 'document', label: 'Docs' }
+    { id: 'all', label: 'FILTER_ALL' },
+    { id: 'image', label: 'FILTER_IMAGES' },
+    { id: 'video_url', label: 'FILTER_VIDEOS' },
+    { id: 'document', label: 'FILTER_DOCS' }
   ];
 
   isDragging = false;
@@ -287,7 +289,7 @@ export class MediaManagerComponent implements OnInit {
     });
   });
 
-  constructor(public mediaService: MediaService) { }
+  constructor(public mediaService: MediaService, private i18n: I18nService) { }
 
   ngOnInit() {
     this.mediaService.loadAssets();
@@ -364,7 +366,7 @@ export class MediaManagerComponent implements OnInit {
     event.stopPropagation();
     event.preventDefault();
 
-    if (confirm('Are you sure you want to delete this asset?')) {
+    if (confirm(this.i18n.translate('MSG_CONFIRM_DELETE'))) {
       this.mediaService.delete(id).subscribe();
     }
   }
@@ -372,7 +374,7 @@ export class MediaManagerComponent implements OnInit {
   copyUrl(event: Event, url: string) {
     event.stopPropagation();
     event.preventDefault();
-    navigator.clipboard.writeText(url).then(() => alert('URL Copied!'));
+    navigator.clipboard.writeText(url).then(() => alert(this.i18n.translate('MSG_URL_COPIED')));
   }
 
   formatSize(bytes?: number): string {
