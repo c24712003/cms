@@ -1,0 +1,81 @@
+{
+    "id": "corporate-v1",
+    "name": "Modern Corporate",
+    "description": "Complete corporate site structure with Home, About, and Contact pages.",
+    "category": "Corporate",
+    "thumbnail": "/assets/templates/corporate-v1.jpg",
+    "tags": ["business", "professional", "services"],
+    "variables": [
+        { "key": "COMPANY_NAME", "label": "Company Name", "defaultValue": "Acme Corp", "type": "text" },
+        { "key": "CONTACT_EMAIL", "label": "Contact Email", "defaultValue": "info@example.com", "type": "text" }
+    ],
+    "pages": [
+        {
+            "slug": "home",
+            "template": "home",
+            "title": "Home",
+            "structure": [
+                {
+                    "type": "hero-carousel",
+                    "slides": [
+                        {
+                            "title": "Welcome to {{COMPANY_NAME}}",
+                            "subtitle": "Leading the industry with innovation and excellence.",
+                            "cta": { "text": "Contact Us", "link": "/contact" },
+                            "image": "/assets/images/hero-corporate.jpg"
+                        }
+                    ]
+                },
+                {
+                    "type": "feature-grid",
+                    "title": "Our Services",
+                    "items": [
+                        { "icon": "icon-certified", "title": "Certified Quality", "description": "{{COMPANY_NAME}} is committed to the highest standards." },
+                        { "icon": "icon-support", "title": "24/7 Support", "description": "Email us at {{CONTACT_EMAIL}} anytime." }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "about",
+            "template": "default",
+            "title": "About Us",
+            "structure": [
+                {
+                    "type": "page-hero",
+                    "title": "About {{COMPANY_NAME}}",
+                    "subtitle": "Our mission and values.",
+                    "image": "/assets/images/hero-about.jpg"
+                },
+                {
+                    "type": "content-with-image",
+                    "imagePosition": "right",
+                    "title": "Our Story",
+                    "items": ["Founded in 2024", "Dedicated to excellence", "Customer first approach"],
+                    "image": "/assets/images/team.jpg"
+                }
+            ]
+        },
+        {
+            "slug": "contact",
+            "template": "contact",
+            "title": "Contact Us",
+            "structure": [
+                {
+                    "type": "page-hero",
+                    "title": "Get in Touch",
+                    "subtitle": "We'd love to hear from you.",
+                    "image": "/assets/images/hero-contact.jpg"
+                },
+                {
+                    "type": "feature-grid",
+                    "title": "Contact Info",
+                    "items": [
+                        { "icon": "icon-email", "title": "Email", "description": "{{CONTACT_EMAIL}}" },
+                        { "icon": "icon-phone", "title": "Phone", "description": "+1 234 567 890" }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -5,12 +5,35 @@ import { RouterModule } from '@angular/router';
 import { DashboardService, AuditLog, SystemStatus } from '../services/dashboard.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 
+import { TemplateGalleryComponent } from './template-gallery/template-gallery.component';
+import { TemplateHydrationDialog } from './template-hydration/template-hydration.dialog';
+import { BoardingTemplate } from '../../shared/models/template.types';
+import { TemplateService } from '../services/template.service';
+import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, DatePipe, TranslatePipe],
+  imports: [CommonModule, RouterModule, DatePipe, TranslatePipe, TemplateGalleryComponent, TemplateHydrationDialog],
   template: `
-    <div class="min-h-screen bg-slate-50/50 dark:bg-slate-900 p-6 md:p-8 transition-all duration-300 ease-in-out">
+    <div class="min-h-screen bg-slate-50/50 dark:bg-slate-900 p-6 md:p-8 transition-all duration-300 ease-in-out relative">
+      <!-- Template Gallery Overlay -->
+      @if (showGallery()) {
+        <app-template-gallery 
+          (close)="showGallery.set(false)"
+          (select)="onTemplateSelect($event)">
+        </app-template-gallery>
+      }
+
+      <!-- Hydration Dialog -->
+      @if (selectedTemplate()) {
+        <app-template-hydration
+          [template]="selectedTemplate()!"
+          (cancel)="selectedTemplate.set(null)"
+          (confirm)="onHydrationConfirm($event)">
+        </app-template-hydration>
+      }
+
       <!-- Header Section with Greeting -->
       <div class="mb-10 animate-fade-in-up">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -101,7 +124,7 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
               <!-- <button class="text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline">View All</button> -->
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-               <button routerLink="/admin/pages" [queryParams]="{ action: 'create' }" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-600 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-300 group">
+               <button (click)="openGallery()" class="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-600 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-300 group cursor-pointer">
                 <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                   <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 </div>
@@ -235,12 +258,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   activityLogs = signal<any[]>([]);
   systemStatus = signal<any>(null);
 
+  // Template Onboarding State
+  showGallery = signal(false);
+  selectedTemplate = signal<BoardingTemplate | null>(null);
+
   currentTime: Date = new Date();
   private timer: any;
 
   constructor(
     private http: HttpClient,
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private templateService: TemplateService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -297,5 +326,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
       case 'security': return 'bg-red-400';
       default: return 'bg-slate-400';
     }
+  }
+
+  // Template Methods
+  openGallery() {
+    this.showGallery.set(true);
+  }
+
+  onTemplateSelect(template: BoardingTemplate) {
+    this.showGallery.set(false);
+    this.selectedTemplate.set(template);
+  }
+
+  onHydrationConfirm(data: { themeName: string, variables: Record<string, string> }) {
+    if (!this.selectedTemplate()) return;
+
+    this.templateService.instantiateTemplate({
+      templateId: this.selectedTemplate()!.id,
+      themeName: data.themeName,
+      variables: data.variables
+    }).subscribe({
+      next: (res) => {
+        this.selectedTemplate.set(null);
+        // Navigate to Pages List to show the generated group
+        this.router.navigate(['/admin/pages']);
+      },
+      error: (err) => {
+        console.error('Failed to instantiate template', err);
+        alert('Failed to create theme: ' + (err.error?.error || err.message));
+        this.selectedTemplate.set(null);
+      }
+    });
   }
 }

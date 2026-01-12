@@ -5,10 +5,22 @@ import { logActivity } from './audit-logs';
 const router = express.Router();
 
 // GET /api/pages - List all pages (metadata)
+// If 'public' query is present, only return pages from ACTIVE theme
 router.get('/', async (req: Request, res: Response) => {
     try {
         const db = getDb();
-        const pages = await db.all('SELECT * FROM pages ORDER BY id ASC');
+        const { public: isPublic } = req.query;
+
+        let query = 'SELECT p.* FROM pages p';
+        const params = [];
+
+        if (isPublic) {
+            query += ' JOIN themes t ON p.theme_id = t.id WHERE t.is_active = 1';
+        }
+
+        query += ' ORDER BY p.id ASC';
+
+        const pages = await db.all(query, params);
         res.json(pages);
     } catch (e) {
         res.status(500).json({ error: String(e) });
@@ -28,9 +40,22 @@ router.get('/:slug/content', async (req: Request, res: Response) => {
 
     try {
         const db = getDb();
-        const page = await db.get('SELECT id FROM pages WHERE slug_key = ?', slug);
+        // Updated to check for Active Theme
+        const page = await db.get(`
+            SELECT p.id 
+            FROM pages p 
+            JOIN themes t ON p.theme_id = t.id
+            WHERE p.slug_key = ? AND t.is_active = 1
+        `, slug);
+
         if (!page) {
-            res.status(404).json({ error: 'Page not found' });
+            // Check if it's an "orphan" page (no theme) for backward compatibility?
+            // Or just return 404. Stricter is better for "Theme Mode".
+            // But let's allow "no theme" pages if NO themes are active? 
+            // Better constraint: If themes exist, must be active.
+
+            // For now, let's enforce: MUST be in active theme.
+            res.status(404).json({ error: 'Page not found or not part of active theme' });
             return;
         }
 

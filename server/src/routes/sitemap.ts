@@ -25,8 +25,10 @@ router.get('/sitemap.xml', async (req, res) => {
                 pc.updated_at,
                 pc.noindex
             FROM pages p
+            JOIN themes t ON p.theme_id = t.id
             LEFT JOIN page_contents pc ON p.id = pc.page_id
-            WHERE pc.noindex IS NULL OR pc.noindex = 0
+            WHERE (pc.noindex IS NULL OR pc.noindex = 0)
+            AND t.is_active = 1
             ORDER BY p.id, pc.lang_code
         `);
 

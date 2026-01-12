@@ -62,6 +62,24 @@ let db: any;
         console.log('Audit schema file not found or error, skipping', e);
     }
 
+    // Load Themes Schema Extensions
+    try {
+        const themesSchemaSql = fs.readFileSync(path.join(__dirname, 'db', 'schema_themes_update.sql'), 'utf8');
+        const statements = themesSchemaSql.split(';').filter((s: string) => s.trim());
+        for (const stmt of statements) {
+            try {
+                await db.exec(stmt + ';');
+            } catch (e: any) {
+                if (!e.message?.includes('duplicate column')) {
+                    console.warn('Theme schema statement warning:', e.message);
+                }
+            }
+        }
+        console.log('Theme schema extensions loaded');
+    } catch (e) {
+        console.log('Theme schema file not found or error, skipping', e);
+    }
+
     // Seed Admin
     const { seedAdmin } = require('./routes/auth');
     await seedAdmin();
@@ -87,6 +105,8 @@ import usersRouter from './routes/users';
 import searchRouter from './routes/search';
 import auditLogsRouter from './routes/audit-logs';
 import healthRouter from './routes/health';
+import templatesRouter from './routes/templates';
+import themesRouter from './routes/themes';
 
 // Import Middleware
 import redirectMiddleware from './middleware/redirects';
@@ -115,6 +135,8 @@ app.use('/api/search-console', searchConsoleRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/audit-logs', auditLogsRouter);
 app.use('/api/health', healthRouter);
+app.use('/api/templates', templatesRouter);
+app.use('/api/themes', themesRouter);
 app.use('/', sitemapRouter); // Root level for /sitemap.xml
 app.use('/', robotsRouter);  // Root level for /robots.txt
 

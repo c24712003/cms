@@ -22,7 +22,8 @@ export const ADMIN_ROUTES: Routes = [
             { path: 'media', component: MediaManagerComponent },
             { path: 'users', loadComponent: () => import('./user-management/user-management.component').then(m => m.UserManagementComponent) },
             { path: 'audit-logs', loadComponent: () => import('./audit-logs/audit-logs.component').then(m => m.AuditLogsComponent) },
-            { path: 'menus/:code', loadComponent: () => import('./menu-builder/menu-builder.component').then(m => m.MenuBuilderComponent) }
+            { path: 'menus/:code', loadComponent: () => import('./menu-builder/menu-builder.component').then(m => m.MenuBuilderComponent) },
+            { path: 'themes', loadComponent: () => import('./theme-manager/theme-manager.component').then(m => m.ThemeManagerComponent) }
         ]
     }
 ];

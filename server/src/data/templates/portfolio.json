@@ -1,0 +1,51 @@
+{
+    "id": "portfolio-v1",
+    "name": "Creative Portfolio",
+    "description": "Minimalist portfolio site with Home and Project Showcase pages.",
+    "category": "Portfolio",
+    "thumbnail": "/assets/templates/portfolio-v1.jpg",
+    "tags": ["creative", "minimal", "gallery"],
+    "variables": [
+        { "key": "CREATOR_NAME", "label": "Your Name", "defaultValue": "Alex Doe", "type": "text" },
+        { "key": "PROFESSION", "label": "Profession", "defaultValue": "Designer", "type": "text" }
+    ],
+    "pages": [
+        {
+            "slug": "home",
+            "template": "home",
+            "title": "Home",
+            "structure": [
+                {
+                    "type": "page-hero",
+                    "title": "Hi, I'm {{CREATOR_NAME}}",
+                    "subtitle": "A {{PROFESSION}} based in the city.",
+                    "image": "/assets/images/hero-portfolio.jpg"
+                },
+                {
+                    "type": "card-carousel",
+                    "title": "Selected Works",
+                    "subtitle": "Check out my latest projects",
+                    "cards": [
+                        { "title": "Project Alpha", "summary": "Brand identity", "link": "/projects/alpha", "image": "/assets/images/p1.jpg" },
+                        { "title": "Project Beta", "summary": "App Design", "link": "/projects/beta", "image": "/assets/images/p2.jpg" }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "projects",
+            "template": "default",
+            "title": "All Projects",
+            "structure": [
+                {
+                    "type": "feature-grid",
+                    "title": "Work Archive",
+                    "items": [
+                        { "icon": "icon-star", "title": "2024 Collection", "description": "Latest works" },
+                        { "icon": "icon-archive", "title": "2023 Collection", "description": "Previous works" }
+                    ]
+                }
+            ]
+        }
+    ]
+}

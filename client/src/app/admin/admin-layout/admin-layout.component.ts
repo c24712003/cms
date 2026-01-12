@@ -85,6 +85,14 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
             <div class="hidden sm:block lg:hidden absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">{{ 'NAV_PAGES' | translate }}</div>
           </a>
 
+          <a routerLink="themes" routerLinkActive="bg-slate-800 text-white" class="flex items-center px-4 py-3 mx-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-all group relative overflow-hidden whitespace-nowrap sm:justify-center lg:justify-start" (click)="isMobileMenuOpen.set(false)">
+            <svg class="w-5 h-5 min-w-[1.25rem] text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+            </svg>
+            <span class="ml-3 font-medium sm:hidden lg:block">{{ 'NAV_THEMES' | translate }}</span>
+            <div class="hidden sm:block lg:hidden absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">{{ 'NAV_THEMES' | translate }}</div>
+          </a>
+
           <a routerLink="media" routerLinkActive="bg-slate-800 text-white" class="flex items-center px-4 py-3 mx-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-all group relative overflow-hidden whitespace-nowrap sm:justify-center lg:justify-start" (click)="isMobileMenuOpen.set(false)">
             <svg class="w-5 h-5 min-w-[1.25rem] text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
