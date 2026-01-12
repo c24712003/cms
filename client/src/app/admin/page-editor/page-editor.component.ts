@@ -218,8 +218,8 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
                [class.hidden]="!selectedBlock && !isMobile()"> <!-- Use hidden for space reclaiming on desktop -->
              
              <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/50">
-                 <h3 class="font-bold text-slate-700 text-sm">Block Properties</h3>
-                 <button (click)="selectedBlock = null" class="btn btn-xs btn-ghost text-slate-400 hover:text-slate-600">Close</button>
+                 <h3 class="font-bold text-slate-700 text-sm">{{ 'BLOCK_PROP_HEADER' | translate }}</h3>
+                 <button (click)="selectedBlock = null" class="btn btn-xs btn-ghost text-slate-400 hover:text-slate-600">{{ 'BLOCK_PROP_CLOSE' | translate }}</button>
              </div>
 
              <div class="flex-1 overflow-y-auto">

@@ -7,15 +7,16 @@ import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 import { ArrayEditorComponent } from './array-editor.component';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-property-panel',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, forwardRef(() => ArrayEditorComponent)],
+  imports: [CommonModule, ReactiveFormsModule, forwardRef(() => ArrayEditorComponent), TranslatePipe],
   template: `
     <div class="h-full flex flex-col bg-slate-50 border-l border-slate-200">
       <div class="p-4 border-b border-slate-200 bg-white">
-        <h3 class="font-bold text-slate-800">Properties</h3>
+        <h3 class="font-bold text-slate-800">{{ 'BLOCK_PROP_PANEL_HEADER' | translate }}</h3>
       </div>
       
       <div class="flex-1 overflow-y-auto p-4" *ngIf="form">
@@ -26,19 +27,19 @@ import { ArrayEditorComponent } from './array-editor.component';
               <!-- Textarea Widget -->
               <div *ngSwitchCase="'textarea'">
                  <label [for]="key" class="label">
-                   <span class="label-text font-medium">{{ getLabel(key) }}</span>
+                   <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
                  </label>
                  <textarea [id]="key" [formControlName]="key" class="textarea textarea-bordered w-full h-24"></textarea>
-                 <p *ngIf="schema?.properties?.[key]?.description" class="text-xs text-slate-500 mt-1">{{ schema?.properties?.[key]?.description }}</p>
+                 <p *ngIf="schema?.properties?.[key]?.description" class="text-xs text-slate-500 mt-1">{{ schema?.properties?.[key]?.description | translate }}</p>
               </div>
 
                <!-- Image Widget (Simplistic for now) -->
                <div *ngSwitchCase="'image'">
                  <label [for]="key" class="label">
-                   <span class="label-text font-medium">{{ getLabel(key) }}</span>
+                   <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
                  </label>
                  <div class="flex gap-2">
-                    <input type="text" [id]="key" [formControlName]="key" class="input input-bordered w-full" placeholder="Image URL">
+                    <input type="text" [id]="key" [formControlName]="key" class="input input-bordered w-full" [placeholder]="'BLOCK_PROP_IMAGE_URL' | translate">
                     <button type="button" class="btn btn-square btn-outline">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                           <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
@@ -52,7 +53,7 @@ import { ArrayEditorComponent } from './array-editor.component';
               <div *ngSwitchCase="'array'">
                   <app-array-editor
                      *ngIf="schema?.properties?.[key]?.items"
-                     [label]="getLabel(key)"
+                     [label]="getLabel(key) | translate"
                      [formArray]="getAsFormArray(key)"
                      [itemSchema]="schema?.properties?.[key]?.items!">
                   </app-array-editor>
@@ -64,7 +65,7 @@ import { ArrayEditorComponent } from './array-editor.component';
               
               <!-- Nested Object -->
               <div *ngSwitchCase="'object'" class="border border-slate-200 rounded-lg p-3 bg-slate-50/50">
-                  <h4 class="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">{{ getLabel(key) }}</h4>
+                  <h4 class="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">{{ getLabel(key) | translate }}</h4>
                   <app-property-panel
                       [schema]="asSchema(schema?.properties?.[key]!)"
                       [group]="getAsFormGroup(key)">
@@ -74,7 +75,7 @@ import { ArrayEditorComponent } from './array-editor.component';
               <!-- Default Text Input -->
               <div *ngSwitchDefault>
                 <label [for]="key" class="label">
-                  <span class="label-text font-medium">{{ getLabel(key) }}</span>
+                  <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
                 </label>
                 <input type="text" [id]="key" [formControlName]="key" class="input input-bordered w-full" />
               </div>
@@ -86,12 +87,12 @@ import { ArrayEditorComponent } from './array-editor.component';
       
       <div class="p-4 border-t border-slate-200 bg-slate-50 sticky bottom-0 z-10" *ngIf="!group">
         <button type="button" class="btn btn-primary w-full" (click)="save()" [disabled]="form?.invalid || form?.pristine">
-          Save Changes
+          {{ 'BLOCK_PROP_SAVE' | translate }}
         </button>
       </div>
       
       <div class="p-8 text-center text-slate-400" *ngIf="!form">
-        <p>No block selected</p>
+        <p>{{ 'BLOCK_PROP_NO_SELECTION' | translate }}</p>
       </div>
     </div>
   `
