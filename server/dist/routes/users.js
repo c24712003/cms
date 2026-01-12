@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const index_1 = require("../index");
 const auth_middleware_1 = require("../middleware/auth.middleware");
+const audit_logger_1 = require("../middleware/audit-logger");
 const router = express_1.default.Router();
 const SALT_ROUNDS = 10;
 // Middleware: All user management requires Admin
@@ -24,7 +25,7 @@ router.get('/', async (req, res) => {
     }
 });
 // POST /api/users - Create User
-router.post('/', async (req, res) => {
+router.post('/', (0, audit_logger_1.auditLogger)('CREATE_USER'), async (req, res) => {
     const { username, password, role } = req.body;
     if (!username || !password || !role) {
         res.status(400).json({ error: 'Username, password, and role are required' });
@@ -46,7 +47,7 @@ router.post('/', async (req, res) => {
     }
 });
 // PUT /api/users/:id - Update User (Role/Status)
-router.put('/:id', async (req, res) => {
+router.put('/:id', (0, audit_logger_1.auditLogger)('UPDATE_USER'), async (req, res) => {
     const { id } = req.params;
     const { role, is_active } = req.body;
     try {
@@ -72,7 +73,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 // PUT /api/users/:id/password - Reset Password
-router.put('/:id/password', async (req, res) => {
+router.put('/:id/password', (0, audit_logger_1.auditLogger)('UPDATE_PASSWORD'), async (req, res) => {
     const { id } = req.params;
     const { password } = req.body;
     if (!password) {
@@ -90,7 +91,7 @@ router.put('/:id/password', async (req, res) => {
     }
 });
 // DELETE /api/users/:id - Delete User (Optional, preferred is deactivate)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', (0, audit_logger_1.auditLogger)('DELETE_USER'), async (req, res) => {
     const { id } = req.params;
     try {
         const db = (0, index_1.getDb)();

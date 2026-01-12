@@ -46,6 +46,25 @@ let db;
     catch (e) {
         console.log('SEO schema file not found or error, skipping');
     }
+    // Load Audit Schema Extensions
+    try {
+        const auditSchemaSql = fs.readFileSync(path_1.default.join(__dirname, 'db', 'schema_audit_update.sql'), 'utf8');
+        const statements = auditSchemaSql.split(';').filter((s) => s.trim());
+        for (const stmt of statements) {
+            try {
+                await db.exec(stmt + ';');
+            }
+            catch (e) {
+                if (!e.message?.includes('duplicate column')) {
+                    console.warn('Audit schema statement warning:', e.message);
+                }
+            }
+        }
+        console.log('Audit schema extensions loaded');
+    }
+    catch (e) {
+        console.log('Audit schema file not found or error, skipping', e);
+    }
     // Seed Admin
     const { seedAdmin } = require('./routes/auth');
     await seedAdmin();
@@ -68,6 +87,8 @@ const menus_1 = __importDefault(require("./routes/menus"));
 const delivery_1 = __importDefault(require("./routes/delivery"));
 const users_1 = __importDefault(require("./routes/users"));
 const search_1 = __importDefault(require("./routes/search"));
+const audit_logs_1 = __importDefault(require("./routes/audit-logs"));
+const health_1 = __importDefault(require("./routes/health"));
 // Import Middleware
 const redirects_1 = __importDefault(require("./middleware/redirects"));
 // Serve Uploads
@@ -86,6 +107,8 @@ app.use('/api/users', users_1.default);
 app.use('/api/seo', seo_1.default);
 app.use('/api/search-console', search_console_1.default);
 app.use('/api/search', search_1.default);
+app.use('/api/audit-logs', audit_logs_1.default);
+app.use('/api/health', health_1.default);
 app.use('/', sitemap_1.default); // Root level for /sitemap.xml
 app.use('/', robots_1.default); // Root level for /robots.txt
 app.listen(Number(PORT), '0.0.0.0', () => {

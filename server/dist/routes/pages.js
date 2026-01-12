@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = require("../index");
+const audit_logs_1 = require("./audit-logs");
 const router = express_1.default.Router();
 // GET /api/pages - List all pages (metadata)
 router.get('/', async (req, res) => {
@@ -143,6 +144,7 @@ router.post('/:id/publish', async (req, res) => {
                 content_json = excluded.content_json,
                 updated_at = CURRENT_TIMESTAMP
         `, [id, lang, title, slug_localized, seo_title, seo_desc, JSON.stringify(content_json)]);
+        await (0, audit_logs_1.logActivity)('Page Published', `Published page: ${title} (${lang})`, 'content');
         res.json({ success: true, mode: 'published' });
     }
     catch (e) {
@@ -155,6 +157,7 @@ router.post('/', async (req, res) => {
     try {
         const db = (0, index_1.getDb)();
         const result = await db.run('INSERT INTO pages (slug_key, template) VALUES (?, ?)', [slug_key, template]);
+        await (0, audit_logs_1.logActivity)('Page Created', `Created new page: ${slug_key}`, 'content');
         res.status(201).json({ success: true, id: result.lastID });
     }
     catch (e) {

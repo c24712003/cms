@@ -47,7 +47,16 @@ let db: any;
     // Load Audit Schema Extensions
     try {
         const auditSchemaSql = fs.readFileSync(path.join(__dirname, 'db', 'schema_audit_update.sql'), 'utf8');
-        await db.exec(auditSchemaSql);
+        const statements = auditSchemaSql.split(';').filter((s: string) => s.trim());
+        for (const stmt of statements) {
+            try {
+                await db.exec(stmt + ';');
+            } catch (e: any) {
+                if (!e.message?.includes('duplicate column')) {
+                    console.warn('Audit schema statement warning:', e.message);
+                }
+            }
+        }
         console.log('Audit schema extensions loaded');
     } catch (e) {
         console.log('Audit schema file not found or error, skipping', e);

@@ -267,8 +267,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   fetchActivity() {
-    this.dashboardService.getAuditLogs().subscribe((logs: AuditLog[]) => {
-      this.activityLogs.set(logs.map(log => ({
+    this.dashboardService.getAuditLogs().subscribe((res: any) => { // Updated to accept paginated response
+      const logs = res.data || []; // Extract data array
+      this.activityLogs.set(logs.map((log: AuditLog) => ({
         ...log,
         // SQLite CURRENT_TIMESTAMP is UTC but lacks 'Z'. Append it to ensure browser treats it as UTC.
         created_at: log.created_at.endsWith('Z') ? log.created_at : log.created_at + 'Z'

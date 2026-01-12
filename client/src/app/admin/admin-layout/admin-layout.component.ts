@@ -119,6 +119,14 @@ import { GlobalSearchInputComponent } from '../../shared/components/global-searc
             <div class="hidden sm:block lg:hidden absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">Users</div>
           </a>
 
+          <a routerLink="audit-logs" routerLinkActive="bg-slate-800 text-white" class="flex items-center px-4 py-3 mx-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-all group relative overflow-hidden whitespace-nowrap sm:justify-center lg:justify-start" (click)="isMobileMenuOpen.set(false)">
+            <svg class="w-5 h-5 min-w-[1.25rem] text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+            <span class="ml-3 font-medium sm:hidden lg:block">Audit Logs</span>
+            <div class="hidden sm:block lg:hidden absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">Audit Logs</div>
+          </a>
+
           <div class="px-4 mt-6 mb-2 text-xs font-semibold text-slate-600 uppercase tracking-wider sm:hidden lg:block">Menus</div>
 
           <a routerLink="menus/main" routerLinkActive="bg-slate-800 text-white" class="flex items-center px-4 py-3 mx-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-all group relative overflow-hidden whitespace-nowrap sm:justify-center lg:justify-start" (click)="isMobileMenuOpen.set(false)">

@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const index_1 = require("../index");
 const auth_1 = require("../middleware/auth");
 const crypto_1 = require("crypto");
+const audit_logs_1 = require("./audit-logs");
 const router = express_1.default.Router();
 // Helper to build tree from flat list
 function buildTree(items) {
@@ -185,6 +186,7 @@ router.post('/:code', auth_1.authenticateToken, async (req, res) => {
         // Actually best to update it so if other parts of app read it they don't break immediately if they use raw SQL?
         // For now, let's just stick to relational.
         await db.run('COMMIT');
+        await (0, audit_logs_1.logActivity)('Menu Updated', `Updated menu: ${req.params.code}`, 'content');
         res.json({ success: true });
     }
     catch (e) {
