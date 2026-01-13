@@ -55,80 +55,192 @@ import { I18nService } from '../../core/services/i18n.service';
         </button>
       </div>
       
-      <!-- TAB: Menu Structure -->
-      <div *ngIf="activeTab === 'structure'" class="max-w-4xl relative">
+       <!-- Main Content Area -->
+       <div class="relative">
          <!-- Loading Overlay -->
-         <div *ngIf="loading" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 z-10 flex items-center justify-center rounded-lg border border-slate-100 dark:border-slate-700 min-h-[400px]">
+         <div *ngIf="loading" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 z-20 flex items-center justify-center rounded-lg backdrop-blur-sm min-h-[400px]">
             <div class="flex flex-col items-center gap-3">
                 <i class="fas fa-circle-notch fa-spin text-3xl text-blue-500"></i>
                 <span class="text-slate-500 dark:text-slate-400 font-medium">{{ 'LOADING_DATA' | translate }}</span>
             </div>
          </div>
 
-         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-6 min-h-[400px]" [class.opacity-50]="loading" cdkDropListGroup>
-            
-            <!-- Recursive Template for Menu Tree -->
-            <ng-template #nodeTemplate let-nodes="nodes" let-level="level">
-                <div cdkDropList 
-                     [cdkDropListData]="nodes"
-                     (cdkDropListDropped)="drop($event)"
-                     [id]="'list-' + level"
-                     class="min-h-[10px] space-y-2">
-                    
-                    <div *ngFor="let node of nodes; let i = index; trackBy: trackByNode" cdkDrag [cdkDragData]="node"
-                         class="bg-white dark:bg-slate-700 border dark:border-slate-600 rounded-lg shadow-sm group touch-manipulation">
+         <!-- === VIEW A: Standard Vertical Tree (Non-Footer) === -->
+         <ng-container *ngIf="menuCode !== 'footer'">
+             <div class="max-w-4xl bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-6 min-h-[400px]" cdkDropListGroup>
+                
+                <!-- Recursive Template (Legacy Tree) -->
+                <ng-template #nodeTemplate let-nodes="nodes" let-level="level">
+                    <div cdkDropList 
+                         [cdkDropListData]="nodes"
+                         (cdkDropListDropped)="drop($event)"
+                         [id]="'list-' + level"
+                         class="min-h-[10px] space-y-2">
                         
-                        <!-- Drag Placeholder -->
-                        <div *cdkDragPlaceholder class="min-h-[50px] bg-slate-100 dark:bg-slate-700 border-2 border-dashed border-slate-300 dark:border-slate-500 rounded-lg"></div>
+                        <div *ngFor="let node of nodes; let i = index; trackBy: trackByNode" cdkDrag [cdkDragData]="node"
+                             class="bg-white dark:bg-slate-700 border dark:border-slate-600 rounded-lg shadow-sm group touch-manipulation">
+                            
+                            <div *cdkDragPlaceholder class="min-h-[50px] bg-slate-100 dark:bg-slate-700 border-2 border-dashed border-slate-300 dark:border-slate-500 rounded-lg"></div>
 
-                        <!-- Node Heading -->
-                        <div class="p-3 flex flex-wrap sm:flex-nowrap items-center gap-3 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors rounded-lg">
-                            <span cdkDragHandle class="text-slate-400 dark:text-slate-500 cursor-grab active:cursor-grabbing p-2 hover:bg-slate-100 dark:hover:bg-slate-600 rounded touch-none"><i class="fas fa-grip-vertical text-lg"></i></span>
-                            
-                            <!-- Icon -->
-                            <span *ngIf="node.icon" class="text-slate-500 dark:text-slate-400 w-6 text-center hidden sm:block"><i [class]="node.icon"></i></span>
-                            
-                            <!-- Content -->
-                            <div class="flex-1 min-w-[150px]">
-                                <span class="font-medium text-slate-800 dark:text-white block sm:inline">{{ node.label || 'Untitled' }}</span>
-                                <span class="text-xs text-slate-400 sm:ml-2 font-mono block sm:inline" *ngIf="node.link">
-                                    {{ node.link }} 
-                                    <i *ngIf="node.link_type === 'external'" class="fas fa-external-link-alt ml-1 text-[10px]"></i>
-                                </span>
+                            <div class="p-3 flex flex-wrap sm:flex-nowrap items-center gap-3 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors rounded-lg">
+                                <span cdkDragHandle class="text-slate-400 dark:text-slate-500 cursor-grab active:cursor-grabbing p-2 hover:bg-slate-100 dark:hover:bg-slate-600 rounded touch-none"><i class="fas fa-grip-vertical text-lg"></i></span>
+                                <span *ngIf="node.icon" class="text-slate-500 dark:text-slate-400 w-6 text-center hidden sm:block"><i [class]="node.icon"></i></span>
+                                <div class="flex-1 min-w-[150px]">
+                                    <span class="font-medium text-slate-800 dark:text-white block sm:inline">
+                                        {{ (node.labelKey ? (node.labelKey | translate) : node.label) || 'Untitled' }}
+                                        <span *ngIf="node.link_type && node.link_type.includes('widget')" class="ml-2 px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 text-xs font-bold uppercase tracking-wider">
+                                            {{ node.link_type?.replace('-widget', '') }}
+                                        </span>
+                                    </span>
+                                    
+                                    <span class="text-xs text-slate-400 sm:ml-2 font-mono block sm:inline" *ngIf="node.link && !node.link_type?.includes('widget')">
+                                        {{ node.link }} 
+                                        <i *ngIf="node.link_type === 'external'" class="fas fa-external-link-alt ml-1 text-[10px]"></i>
+                                    </span>
+                                </div>
+                                <div class="flex gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ml-auto sm:ml-0">
+                                    <button (click)="editItem(node)" class="p-2 text-blue-500 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+                                    <button (click)="remove(nodes, i, $event)" class="p-2 text-red-500 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded" title="Delete"><i class="fas fa-trash"></i></button>
+                                </div>
                             </div>
 
-                            <!-- Controls: Always visible on mobile, hover on desktop -->
-                            <div class="flex gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ml-auto sm:ml-0">
-                                <button (click)="editItem(node)" class="p-2 text-blue-500 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded" title="Edit">
-                                    <i class="fas fa-pencil-alt"></i>
-                                </button>
-                                <button (click)="remove(nodes, i, $event)" class="p-2 text-red-500 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                            <div class="pl-4 sm:pl-8 pr-2 sm:pr-3 pb-3" *ngIf="level < 3">
+                                <ng-container *ngTemplateOutlet="nodeTemplate; context: { nodes: node.children, level: level + 1 }"></ng-container>
                             </div>
                         </div>
+                    </div>
+                </ng-template>
 
-                        <!-- Children (Nested) - Only if level < 3 -->
-                        <div class="pl-4 sm:pl-8 pr-2 sm:pr-3 pb-3" *ngIf="level < 3">
-                            <ng-container *ngTemplateOutlet="nodeTemplate; context: { nodes: node.children, level: level + 1 }"></ng-container>
+                <ng-container *ngTemplateOutlet="nodeTemplate; context: { nodes: items, level: 1 }"></ng-container>
+                
+                <button (click)="add()" class="mt-4 w-full py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-500 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500 transition-colors font-medium flex items-center justify-center gap-2 active:bg-slate-50 dark:active:bg-slate-700">
+                    <i class="fas fa-plus"></i> {{ 'BTN_ADD_TOP_LEVEL' | translate }}
+                </button>
+             </div>
+         </ng-container>
+
+         <!-- === VIEW B: Horizontal Board (Footer) === -->
+         <div *ngIf="menuCode === 'footer'" class="overflow-x-auto pb-6" cdkDropListGroup>
+            <div cdkDropList 
+                 cdkDropListOrientation="horizontal" 
+                 [cdkDropListData]="items" 
+                 (cdkDropListDropped)="drop($event)" 
+                 class="flex items-start gap-6 min-w-max p-1">
+                
+                <!-- Draggable Columns (Cards) -->
+                <div *ngFor="let node of items; let i = index; trackBy: trackByNode" cdkDrag [cdkDragData]="node"
+                     class="w-72 flex-shrink-0 flex flex-col bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 group h-full max-h-[80vh]">
+                    
+                    <!-- Drag Placeholder (Column) -->
+                    <div *cdkDragPlaceholder class="w-72 h-64 bg-slate-100 dark:bg-slate-800/50 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl flex-shrink-0"></div>
+
+                    <!-- Column Header -->
+                    <div class="p-3 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 rounded-t-xl cursor-grab active:cursor-grabbing handle" cdkDragHandle>
+                        <i class="fas fa-grip-vertical text-slate-400"></i>
+                        
+                        <!-- Header Content -->
+                        <div class="flex-1 font-semibold text-slate-700 dark:text-slate-200 truncate flex items-center gap-2">
+                             <!-- Widget Icon Badge -->
+                             <span *ngIf="node.link_type && node.link_type.includes('widget')" 
+                                   class="inline-flex items-center justify-center w-6 h-6 rounded bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 text-xs shadow-sm">
+                                <i [class]="node.link_type === 'brand-widget' ? 'fas fa-copyright' : node.link_type === 'social-widget' ? 'fas fa-share-alt' : 'fas fa-address-card'"></i>
+                             </span>
+                             {{ (node.labelKey ? (node.labelKey | translate) : node.label) || 'Untitled' }}
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button (click)="editItem(node)" class="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 text-xs"><i class="fas fa-pencil-alt"></i></button>
+                            <button (click)="remove(items, i, $event)" class="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 rounded text-red-500 text-xs"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Column Content (Scrollable) -->
+                    <div class="flex-1 overflow-y-auto p-3 custom-scrollbar">
+                        
+                        <!-- CASE 1: Standard Menu Column (Has Children) -->
+                        <div *ngIf="!node.link_type || !node.link_type.includes('widget')" class="space-y-2">
+                             <div cdkDropList 
+                                  [cdkDropListData]="node.children" 
+                                  (cdkDropListDropped)="drop($event)" 
+                                  class="min-h-[50px] space-y-2">
+                                  
+                                  <div *ngFor="let child of node.children; let j = index" cdkDrag [cdkDragData]="child"
+                                       class="bg-white dark:bg-slate-700 border border-slate-100 dark:border-slate-600 shadow-sm rounded p-2 flex items-center gap-2 text-sm group/child cursor-move hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
+                                       <i class="fas fa-grip-lines text-slate-300 dark:text-slate-600 mr-1"></i>
+                                       <span class="truncate flex-1 text-slate-600 dark:text-slate-300">
+                                           {{ (child.labelKey ? (child.labelKey | translate) : child.label) || 'Untitled' }}
+                                       </span>
+                                       <button (click)="editItem(child)" class="text-slate-400 hover:text-blue-500 opacity-0 group-hover/child:opacity-100"><i class="fas fa-pencil-alt text-xs"></i></button>
+                                       <button (click)="remove(node.children!, j, $event)" class="text-slate-400 hover:text-red-500 opacity-0 group-hover/child:opacity-100"><i class="fas fa-times text-xs"></i></button>
+                                  </div>
+                                  
+                                  <!-- Empty State for Links -->
+                                  <div *ngIf="!node.children?.length" class="text-center py-4 border-2 border-dashed border-slate-100 dark:border-slate-700 rounded text-xs text-slate-400">
+                                      No links
+                                  </div>
+                             </div>
+                             
+                             <button (click)="addLinkToColumn(node)" class="w-full py-2 flex items-center justify-center gap-1.5 text-xs font-medium text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors dashed-border">
+                                <i class="fas fa-plus"></i> Add Link
+                             </button>
+                        </div>
+
+                        <!-- CASE 2: Info Widgets (Static Preview) -->
+                        <div *ngIf="node.link_type === 'brand-widget'" class="text-center py-4 opacity-50 select-none">
+                            <span class="text-3xl font-bold text-slate-300 block mb-2">CMS</span>
+                            <div class="h-2 w-20 bg-slate-200 dark:bg-slate-700 mx-auto rounded mb-1"></div>
+                            <div class="h-2 w-16 bg-slate-200 dark:bg-slate-700 mx-auto rounded"></div>
+                        </div>
+
+                        <div *ngIf="node.link_type === 'social-widget'" class="flex justify-center flex-wrap gap-2 py-4 opacity-70 cursor-default">
+                             <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-500"><i class="fab fa-facebook-f"></i></div>
+                             <div class="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center text-sky-500"><i class="fab fa-twitter"></i></div>
+                             <div class="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-pink-500"><i class="fab fa-instagram"></i></div>
+                        </div>
+
+                        <div *ngIf="node.link_type === 'contact-widget'" class="space-y-2 py-2 opacity-60 text-xs text-slate-500 dark:text-slate-400 select-none">
+                            <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt w-4 text-center"></i> <span>123 Tech Park...</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-envelope w-4 text-center"></i> <span>contact@cms...</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-phone w-4 text-center"></i> <span>+1 (555)...</span></div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Add New Column Button -->
+                <div class="w-72 flex-shrink-0">
+                    <button class="w-full h-16 border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:text-blue-500 text-slate-400 rounded-xl flex items-center justify-center gap-2 font-medium transition-all hover:bg-slate-50 dark:hover:bg-slate-800"
+                            [class.ring-2]="isAdding"
+                            [class.ring-blue-200]="isAdding"
+                             (click)="toggleAddMenu()">
+                        <i class="fas fa-plus-circle text-xl"></i>
+                        <span>Add Column</span>
+                    </button>
+                    
+                    <!-- Quick Add Menu -->
+                    <div *ngIf="isAddMenuOpen" class="mt-4 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-slide-up">
+                        <div class="p-2 space-y-1">
+                            <button (click)="add(); isAddMenuOpen=false" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                <i class="fas fa-list-ul text-slate-400"></i> Standard Menu
+                            </button>
+                            <div class="h-px bg-slate-100 dark:bg-slate-700 my-1"></div>
+                            <button (click)="addWidget('brand-widget'); isAddMenuOpen=false" class="w-full text-left px-3 py-2 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg text-sm text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                                <i class="fas fa-copyright w-4 text-center"></i> Brand Widget
+                            </button>
+                            <button (click)="addWidget('social-widget'); isAddMenuOpen=false" class="w-full text-left px-3 py-2 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg text-sm text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                                <i class="fas fa-share-alt w-4 text-center"></i> Social Widget
+                            </button>
+                            <button (click)="addWidget('contact-widget'); isAddMenuOpen=false" class="w-full text-left px-3 py-2 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg text-sm text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                                <i class="fas fa-address-card w-4 text-center"></i> Contact Widget
+                            </button>
                         </div>
                     </div>
                 </div>
-            </ng-template>
 
-            <!-- Root List -->
-            <ng-container *ngTemplateOutlet="nodeTemplate; context: { nodes: items, level: 1 }"></ng-container>
-
-            <!-- Add Button -->
-            <button (click)="add()" class="mt-4 w-full py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-500 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500 transition-colors font-medium flex items-center justify-center gap-2 active:bg-slate-50 dark:active:bg-slate-700">
-                <i class="fas fa-plus"></i> {{ 'BTN_ADD_TOP_LEVEL' | translate }}
-            </button>
+            </div>
          </div>
-         
-         <div class="mt-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md p-4 text-sm text-blue-700 dark:text-blue-300">
-            <p><i class="fas fa-info-circle mr-2"></i> {{ 'TIP_NESTING' | translate }}</p>
-         </div>
-      </div>
+       </div>
 
       <!-- TAB: Social Links -->
       <div *ngIf="activeTab === 'social'" class="max-w-4xl">
@@ -309,6 +421,21 @@ export class MenuBuilderComponent implements OnInit, OnDestroy {
     this.items.push({ label: 'New Item', link: '/', children: [], is_visible: true, link_type: 'internal' });
   }
 
+  addWidget(type: 'brand-widget' | 'social-widget' | 'contact-widget') {
+    const labels = {
+      'brand-widget': 'Brand Information',
+      'social-widget': 'Social Links',
+      'contact-widget': 'Contact Information'
+    };
+    this.items.push({
+      label: labels[type],
+      link: '#',
+      children: [],
+      is_visible: true,
+      link_type: type
+    });
+  }
+
   addSocial() {
     this.socialLinks.push({ platform: 'custom', name: 'Link', url: '', is_active: true });
   }
@@ -345,6 +472,17 @@ export class MenuBuilderComponent implements OnInit, OnDestroy {
     this.editingItem = null;
   }
 
+  addLinkToColumn(parent: MenuItem) {
+    if (!parent.children) parent.children = [];
+    parent.children.push({ label: 'New Link', link: '/', link_type: 'internal', is_visible: true });
+  }
+
+  isAddMenuOpen = false;
+  isAdding = false;
+  toggleAddMenu() {
+    this.isAddMenuOpen = !this.isAddMenuOpen;
+  }
+
   // Drag & Drop
   // Note: For simple nested lists without connectedTo IDs fully managed, 
   // CDK allows reordering within same list easily. 
@@ -354,16 +492,26 @@ export class MenuBuilderComponent implements OnInit, OnDestroy {
   // BUT, we can try to enable cross-level dragging by grouping IDs.
   // For now, let's implement standard drop which works for reordering safely.
   // Supporting full nested DnD recursively is slightly involved.
-  drop(event: CdkDragDrop<MenuItem[]>) {
-    if (event.previousContainer === event.container) {
+  drop(event: CdkDragDrop<any>) {
+    // If dropping a column in the horizontal list
+    if (this.menuCode === 'footer' && event.container.orientation === 'horizontal') {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      return;
+    }
+
+    if (event.previousContainer === event.container) {
+      if (event.container.data) {
+        moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      }
     } else {
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex,
-      );
+      if (event.previousContainer.data && event.container.data) {
+        transferArrayItem(
+          event.previousContainer.data,
+          event.container.data,
+          event.previousIndex,
+          event.currentIndex,
+        );
+      }
     }
   }
 

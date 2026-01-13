@@ -7,15 +7,16 @@ import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 import { ArrayEditorComponent } from './array-editor.component';
+import { MediaPickerDialogComponent } from '../../../admin/components/media-picker-dialog/media-picker-dialog.component';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-property-panel',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, forwardRef(() => ArrayEditorComponent), TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, forwardRef(() => ArrayEditorComponent), MediaPickerDialogComponent, TranslatePipe],
   template: `
     <div class="h-full flex flex-col bg-slate-50 border-l border-slate-200">
-      <div class="p-4 border-b border-slate-200 bg-white">
+      <div class="p-4 border-b border-slate-200 bg-white" *ngIf="!group">
         <h3 class="font-bold text-slate-800">{{ 'BLOCK_PROP_PANEL_HEADER' | translate }}</h3>
       </div>
       
@@ -27,11 +28,15 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
               <!-- Textarea Widget -->
               <div *ngSwitchCase="'textarea'">
                  <label [for]="key" class="label">
-                   <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
+                   <span class="label-text font-medium">{{ getLabel(key) | translate }}<span *ngIf="isRequired(key)" class="text-red-500 ml-1">*</span></span>
                  </label>
-                 <textarea [id]="key" [formControlName]="key" class="textarea textarea-bordered w-full h-24"></textarea>
-                 <p *ngIf="schema?.properties?.[key]?.description" class="text-xs text-slate-500 mt-1">{{ (schema?.properties?.[key]?.description || '') | translate }}</p>
+                 <textarea [id]="key" [formControlName]="key" 
+                   class="textarea textarea-bordered w-full h-24"
+                   [class.textarea-error]="hasError(key)"></textarea>
+                 <p *ngIf="hasError(key)" class="text-xs text-red-500 mt-1">{{ 'VALIDATION_REQUIRED' | translate }}</p>
+                 <p *ngIf="!hasError(key) && schema?.properties?.[key]?.description" class="text-xs text-slate-500 mt-1">{{ (schema?.properties?.[key]?.description || '') | translate }}</p>
               </div>
+
 
                <!-- Image Widget (Simplistic for now) -->
                <div *ngSwitchCase="'image'">
@@ -40,11 +45,14 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
                  </label>
                  <div class="flex gap-2">
                     <input type="text" [id]="key" [formControlName]="key" class="input input-bordered w-full" [placeholder]="'BLOCK_PROP_IMAGE_URL' | translate">
-                    <button type="button" class="btn btn-square btn-outline">
+                    <button type="button" (click)="openMediaPicker(key)" class="btn btn-square btn-outline">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                           <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                         </svg>
                     </button>
+                 </div>
+                 <div *ngIf="form.get(key)?.value" class="mt-2 relative w-full h-32 rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
+                    <img [src]="form.get(key)?.value" class="w-full h-full object-cover">
                  </div>
               </div>
               
@@ -75,9 +83,12 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
               <!-- Default Text Input -->
               <div *ngSwitchDefault>
                 <label [for]="key" class="label">
-                  <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
+                  <span class="label-text font-medium">{{ getLabel(key) | translate }}<span *ngIf="isRequired(key)" class="text-red-500 ml-1">*</span></span>
                 </label>
-                <input type="text" [id]="key" [formControlName]="key" class="input input-bordered w-full" />
+                <input type="text" [id]="key" [formControlName]="key" 
+                  class="input input-bordered w-full" 
+                  [class.input-error]="hasError(key)" />
+                <p *ngIf="hasError(key)" class="text-xs text-red-500 mt-1">{{ 'VALIDATION_REQUIRED' | translate }}</p>
               </div>
               
               <!-- Color Widget -->
@@ -133,6 +144,12 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
       <div class="p-8 text-center text-slate-400" *ngIf="!form">
         <p>{{ 'BLOCK_PROP_NO_SELECTION' | translate }}</p>
       </div>
+
+       <!-- Media Picker Dialog -->
+       <app-media-picker-dialog *ngIf="showMediaPicker" 
+            (selected)="onMediaSelected($event)" 
+            (cancelled)="showMediaPicker = false">
+       </app-media-picker-dialog>
     </div>
   `
 })
@@ -144,6 +161,12 @@ export class PropertyPanelComponent implements OnChanges, OnDestroy {
 
   form: FormGroup | undefined;
   private sub: Subscription | undefined;
+  hasUnsavedChanges = false;
+  autoSaveEnabled = true;
+
+  // Media Picker State
+  showMediaPicker = false;
+  activeImageKey: string | null = null;
 
   constructor(private sfb: SchemaFormBuilder) { }
 
@@ -164,8 +187,27 @@ export class PropertyPanelComponent implements OnChanges, OnDestroy {
 
       // Full rebuild required (first load or schema change)
       this.form = this.sfb.buildForm(this.schema, this.model);
+      this.hasUnsavedChanges = false;
 
-      // Automatic subscription removed per user request for manual save
+      // Setup auto-save subscription
+      if (this.sub) {
+        this.sub.unsubscribe();
+      }
+
+      if (this.autoSaveEnabled) {
+        this.sub = this.form.valueChanges.pipe(
+          debounceTime(300)  // Reduced to 300ms for better responsiveness
+        ).subscribe(() => {
+          if (this.form?.dirty && this.form?.valid) {
+            this.save();
+          }
+        });
+      }
+
+      // Track unsaved changes
+      this.form.valueChanges.subscribe(() => {
+        this.hasUnsavedChanges = this.form?.dirty ?? false;
+      });
     }
   }
 
@@ -173,10 +215,31 @@ export class PropertyPanelComponent implements OnChanges, OnDestroy {
     if (this.form) {
       this.modelChange.emit(this.processFormValue(this.form.value));
       this.form.markAsPristine(); // Optional: indicate saved state
+      this.hasUnsavedChanges = false;
     }
   }
 
+  // ... (media picker methods)
+  openMediaPicker(key: string) {
+    this.activeImageKey = key;
+    this.showMediaPicker = true;
+  }
+
+  onMediaSelected(url: string) {
+    if (this.activeImageKey && this.form) {
+      this.form.patchValue({
+        [this.activeImageKey]: url
+      });
+      this.form.markAsDirty();
+      this.hasUnsavedChanges = true;
+    }
+    this.showMediaPicker = false;
+    this.activeImageKey = null;
+  }
+
+
   private processFormValue(formValue: any): any {
+    // ... (existing implementation)
     const result = { ...formValue };
     if (this.schema && this.schema.properties) {
       Object.keys(this.schema.properties).forEach(key => {
@@ -201,14 +264,29 @@ export class PropertyPanelComponent implements OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.sub) this.sub.unsubscribe();
+
+    // Auto-save any pending changes on destroy
+    if (this.autoSaveEnabled && this.form?.dirty && this.form?.valid) {
+      // Emit immediately without debounce
+      this.modelChange.emit(this.processFormValue(this.form.value));
+    }
   }
 
-  getKeys(obj: any): string[] {
+  getKeys(obj: Record<string, unknown> | undefined): string[] {
     return obj ? Object.keys(obj) : [];
   }
 
   getLabel(key: string): string {
     return this.schema?.properties[key]?.title || key;
+  }
+
+  isRequired(key: string): boolean {
+    return this.sfb.isFieldRequired(this.schema!, key);
+  }
+
+  hasError(key: string): boolean {
+    const control = this.form?.get(key);
+    return !!(control?.invalid && control?.touched);
   }
 
   getAsFormArray(key: string): FormArray {

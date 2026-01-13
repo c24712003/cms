@@ -1,8 +1,9 @@
-import { Component, Input, ViewChild, ViewContainerRef, OnChanges, SimpleChanges, ComponentRef, OnDestroy } from '@angular/core';
+import { Component, Input, ViewChild, ViewContainerRef, OnChanges, SimpleChanges, ComponentRef, OnDestroy, reflectComponentType } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BlockRegistryService } from './block-registry.service';
 import { StyleInjectorService } from './style-injector.service';
 import { BlockInstance } from './block.types';
+
 @Component({
     selector: 'app-dynamic-block-renderer',
     standalone: true,
@@ -14,12 +15,12 @@ import { BlockInstance } from './block.types';
     </div>
   `
 })
-
 export class DynamicBlockRendererComponent implements OnChanges, OnDestroy {
     @Input() block: BlockInstance | undefined;
     @ViewChild('container', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
 
     componentRef: ComponentRef<any> | undefined;
+    private componentInputs: Set<string> = new Set();
 
     constructor(
         private registry: BlockRegistryService,
@@ -40,7 +41,7 @@ export class DynamicBlockRendererComponent implements OnChanges, OnDestroy {
                 this.updateInputs();
             }
 
-            // Inject Styles
+            // Inject Styles via CSS
             if (curr.styles) {
                 this.styleInjector.injectBlockStyles(curr);
             }
@@ -53,38 +54,92 @@ export class DynamicBlockRendererComponent implements OnChanges, OnDestroy {
         }
     }
 
+    /**
+     * Resolve styles based on current viewport/window width.
+     * Flattens the nested viewport structure (desktop/tablet/mobile) into a single object.
+     */
+    private getResolvedStyles(): any {
+        if (!this.block?.styles) return {};
+
+        const width = typeof window !== 'undefined' ? window.innerWidth : 1024;
+        let viewport: 'desktop' | 'tablet' | 'mobile' = 'desktop';
+        if (width < 480) viewport = 'mobile';
+        else if (width < 768) viewport = 'tablet';
+
+        // Deep merge: desktop as base, then layer viewport-specific styles on top
+        const base = this.block.styles.desktop || {};
+        const specific = this.block.styles[viewport] || {};
+
+        return this.deepMerge(base, specific);
+    }
+
+    private deepMerge(target: any, source: any): any {
+        const result = { ...target };
+        for (const key of Object.keys(source)) {
+            if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                result[key] = this.deepMerge(result[key] || {}, source[key]);
+            } else {
+                result[key] = source[key];
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Safely set an input only if the component has declared it.
+     * This prevents NG0303 errors for legacy data with mismatched property names.
+     */
+    private safeSetInput(ref: ComponentRef<any>, key: string, value: any): void {
+        if (this.componentInputs.has(key)) {
+            ref.setInput(key, value);
+        }
+        // Silently ignore unknown properties - they may be legacy data
+    }
+
     private updateInputs(): void {
         if (!this.componentRef || !this.block || !this.block.data) return;
 
         const ref = this.componentRef;
         Object.keys(this.block.data).forEach(key => {
-            // Check if block and data exist to satisfy TypeScript (though strictly checked above)
             if (this.block && this.block.data) {
-                ref.setInput(key, this.block.data[key]);
+                this.safeSetInput(ref, key, this.block.data[key]);
             }
         });
 
-        // Also pass styles as an input if the component accepts it
-        if (this.block.styles) {
-            ref.setInput('styles', this.block.styles);
+        // Pass resolved (flattened) styles if the component accepts it
+        if (this.block.styles && this.componentInputs.has('styles')) {
+            ref.setInput('styles', this.getResolvedStyles());
+        }
+
+        // Also pass blockId for data-block-id attribute binding
+        if (this.componentInputs.has('blockId')) {
+            ref.setInput('blockId', this.block.id);
         }
 
         // Manually trigger change detection for the child component
-        // This ensures OnPush components or detached views update immediately
         ref.changeDetectorRef.markForCheck();
     }
 
     private renderBlock(): void {
         this.container.clear();
         this.componentRef = undefined;
+        this.componentInputs.clear();
 
         if (!this.block) return;
 
         const componentClass = this.registry.getComponent(this.block.type);
 
         if (componentClass) {
+            // Cache the component's declared inputs using Angular's reflection API
+            const mirror = reflectComponentType(componentClass);
+            if (mirror) {
+                mirror.inputs.forEach(input => {
+                    this.componentInputs.add(input.propName);
+                });
+            }
+
             this.componentRef = this.container.createComponent(componentClass);
-            this.updateInputs(); // Reuse input update logic
+            this.updateInputs();
         }
     }
 }

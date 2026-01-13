@@ -29,7 +29,7 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
           'translate-x-0': isMobileMenuOpen(),
           'w-64': true, 
           'lg:translate-x-0': true,
-          'lg:w-64': true,
+          'lg:w-48': true,
           'sm:w-20 sm:translate-x-0': true
         }"
       >
@@ -298,7 +298,7 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
         </header>
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 dark:bg-slate-900 p-4 lg:p-8 transition-colors duration-200">
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 dark:bg-slate-900 p-2 lg:p-0 transition-colors duration-200">
           <div class="max-w-7xl mx-auto">
             <router-outlet></router-outlet>
           </div>

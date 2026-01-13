@@ -1,13 +1,13 @@
 // Content Block Components - Public API
 export { BlockRendererComponent } from './block-renderer.component';
 export { HeroCarouselComponent } from './hero-carousel.component';
-export { FeatureGridComponent } from './feature-grid.component';
+export { FeatureGridComponent } from './components/feature-grid.component';
 export { CardCarouselComponent } from './card-carousel.component';
-export { StatsCounterComponent } from './stats-counter.component';
+export { StatsCounterComponent } from './components/stats-counter.component';
 export { CtaBannerComponent } from './cta-banner.component';
 export { CaseStudyShowcaseComponent } from './case-study-showcase.component';
 export { PageHeroComponent } from './page-hero.component';
-export { FaqAccordionComponent } from './faq-accordion.component';
+export { FaqAccordionComponent } from './components/faq-accordion.component';
 export { TimelineStepsComponent } from './timeline-steps.component';
 
 // New Block Types

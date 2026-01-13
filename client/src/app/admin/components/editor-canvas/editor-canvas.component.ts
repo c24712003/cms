@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
-import { BlockInstance, ContentBlockManifest } from '../../../features/content-blocks/block.types';
+import { BlockInstance, BlockProperty, BlockSchema, ContentBlockManifest } from '../../../features/content-blocks/block.types';
 import { BlockRegistryService } from '../../../features/content-blocks/block-registry.service';
 import { DynamicBlockRendererComponent } from '../../../features/content-blocks/dynamic-block-renderer.component';
 import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component';
@@ -30,7 +30,7 @@ import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component'
     `],
     template: `
         <!-- Center: Canvas -->
-        <main class="flex-1 bg-slate-100 dark:bg-slate-900 overflow-y-auto p-8 flex justify-center" (click)="clearSelection($event)">
+        <main class="flex-1 bg-slate-100 dark:bg-slate-900 overflow-y-auto p-3 flex justify-center" (click)="clearSelection($event)">
             <div class="transition-all duration-300 ease-in-out shadow-2xl bg-white min-h-[800px] relative"
                  [ngClass]="{
                     'w-full': viewport === 'desktop',
@@ -140,15 +140,8 @@ export class EditorCanvasComponent {
     constructor(private registry: BlockRegistryService) { }
 
     get availableBlocks(): ContentBlockManifest[] {
-        // Quick list for now, same as PageEditor
-        const types = [
-            'page-hero', 'timeline-steps', 'case-study-showcase',
-            'hero-carousel', 'feature-grid', 'card-carousel',
-            'stats-counter', 'cta-banner', 'faq-accordion',
-            'contact-form-cta', 'content-with-image',
-            'parallax-hero', 'text-block'
-        ];
-        return types.map(t => this.registry.getDefinition(t)?.manifest).filter(Boolean) as ContentBlockManifest[];
+        // Dynamic block registration: get all registered manifests from registry
+        return this.registry.getAllManifests();
     }
 
     isMobile(): boolean {
@@ -191,10 +184,13 @@ export class EditorCanvasComponent {
     }
 
     addBlock(type: string) {
+        const manifest = this.registry.getManifest(type);
+        const defaultData = this.buildDefaultsFromSchema(manifest?.schema);
+
         const newBlock: BlockInstance = {
-            id: Math.random().toString(36).substr(2, 9),
+            id: crypto.randomUUID(),
             type: type,
-            data: {}
+            data: defaultData
         };
         this.blocks.push(newBlock);
         this.blocksChange.emit(this.blocks);
@@ -203,6 +199,50 @@ export class EditorCanvasComponent {
         this.selectedBlockChange.emit(newBlock);
 
         this.showBlockPicker = false;
+    }
+
+    /**
+     * Build default data object from block schema
+     * Recursively handles nested objects and arrays with default values
+     */
+    private buildDefaultsFromSchema(schema: BlockSchema | undefined): Record<string, unknown> {
+        if (!schema?.properties) return {};
+
+        const defaults: Record<string, unknown> = {};
+
+        Object.entries(schema.properties).forEach(([key, prop]) => {
+            if (prop.default !== undefined) {
+                defaults[key] = prop.default;
+            } else if (prop.type === 'object' && prop.properties) {
+                // Recurse into nested objects
+                defaults[key] = this.buildDefaultsFromProperty(prop);
+            } else if (prop.type === 'array' && prop.items) {
+                // Initialize arrays with empty array or one default item
+                defaults[key] = [];
+            } else if (prop.type === 'string') {
+                defaults[key] = '';
+            } else if (prop.type === 'number') {
+                defaults[key] = 0;
+            } else if (prop.type === 'boolean') {
+                defaults[key] = false;
+            }
+        });
+
+        return defaults;
+    }
+
+    private buildDefaultsFromProperty(prop: BlockProperty): Record<string, unknown> {
+        if (!prop.properties) return {};
+
+        const defaults: Record<string, unknown> = {};
+        Object.entries(prop.properties).forEach(([key, subProp]) => {
+            if (subProp.default !== undefined) {
+                defaults[key] = subProp.default;
+            } else if (subProp.type === 'object' && subProp.properties) {
+                defaults[key] = this.buildDefaultsFromProperty(subProp);
+            }
+        });
+        return defaults;
     }
 
     updateBlock(updatedBlock: BlockInstance) {

@@ -9,7 +9,7 @@ export interface MenuItem {
     label: string; // Mapped to title in DB
     labelKey?: string;
     link: string;  // Mapped to url in DB
-    link_type?: 'internal' | 'external';
+    link_type?: 'internal' | 'external' | 'brand-widget' | 'social-widget' | 'contact-widget';
     target?: '_self' | '_blank';
     icon?: string;
     is_visible?: boolean;

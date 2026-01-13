@@ -14,7 +14,9 @@ interface FeatureItem {
     standalone: true,
     imports: [CommonModule],
     template: `
-    <div [id]="id" class="py-12 px-6" [class]="customClass">
+    <div [id]="id" class="py-12 px-6" [class]="customClass"
+         [attr.data-block-id]="blockId"
+         [style.background-color]="styles?.background?.color">
         <div class="container mx-auto">
             <!-- Header -->
             <div class="text-center mb-12" *ngIf="headline || subheadline">
@@ -51,7 +53,9 @@ interface FeatureItem {
 })
 export class FeatureGridComponent {
     @Input() id: string = '';
+    @Input() blockId: string = '';
     @Input() customClass: string = '';
+    @Input() styles: any = {};
 
     @Input() headline: string = 'Our Features';
     @Input() subheadline: string = 'Discover what makes our platform unique.';

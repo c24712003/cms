@@ -1,20 +1,21 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BlockInstance, ContentBlockManifest } from '../../../features/content-blocks/block.types';
+import { BlockInstance, BlockSettings, ContentBlockManifest } from '../../../features/content-blocks/block.types';
 import { BlockRegistryService } from '../../../features/content-blocks/block-registry.service';
 import { PropertyPanelComponent } from '../../../features/content-blocks/editor/property-panel.component';
+import { SettingsPanelComponent } from '../settings-panel/settings-panel.component';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
     selector: 'app-block-toolbar',
     standalone: true,
-    imports: [CommonModule, PropertyPanelComponent, TranslatePipe],
+    imports: [CommonModule, PropertyPanelComponent, SettingsPanelComponent, TranslatePipe],
     template: `
     <div class="h-full flex flex-col bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 shadow-xl transition-all">
        <!-- Header -->
        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 shrink-0">
            <div>
-               <h3 class="font-bold text-slate-700 dark:text-white text-sm">{{ block?.type }}</h3>
+               <h3 class="font-bold text-slate-700 dark:text-white text-sm">{{ getBlockDisplayName() }}</h3>
                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">{{ 'BLOCK_TOOLBAR_SETTINGS' | translate }}</p>
            </div>
            <button (click)="close.emit()" class="btn btn-xs btn-ghost text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
@@ -59,8 +60,9 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
        </div>
 
        <!-- Content Panel -->
-       <div class="flex-1 overflow-y-auto" *ngIf="activeTab === 'content'">
+       <div class="flex-1 overflow-hidden" *ngIf="activeTab === 'content'">
             <app-property-panel 
+                class="block h-full"
                 *ngIf="block && manifest"
                 [schema]="manifest.schema"
                 [model]="block.data"
@@ -69,9 +71,9 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
        </div>
 
        <!-- Style Panel -->
-       <div class="flex-1 overflow-y-auto" *ngIf="activeTab === 'styles'">
+       <div class="flex-1 flex flex-col overflow-hidden" *ngIf="activeTab === 'styles'">
             <!-- Viewport Toggle -->
-            <div class="flex justify-center gap-2 p-2 border-b border-slate-100 dark:border-slate-700">
+            <div class="flex justify-center gap-2 p-2 border-b border-slate-100 shrink-0 dark:border-slate-700">
                 <button class="btn btn-sm btn-square" [class.btn-primary]="viewport === 'desktop'" (click)="viewport = 'desktop'">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 </button>
@@ -84,6 +86,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
             </div>
 
             <app-property-panel 
+                class="block flex-1 min-h-0"
                 *ngIf="block && manifest?.styleSchema"
                 [schema]="manifest!.styleSchema"
                 [model]="getCurrentStyles()"
@@ -91,15 +94,18 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
             </app-property-panel>
             
             <div *ngIf="!manifest?.styleSchema" class="p-8 text-center text-slate-400">
-                <p>No stying options available for this block.</p>
+                <p>{{ 'BLOCK_NO_STYLE_OPTIONS' | translate }}</p>
             </div>
        </div>
        
-       <!-- Settings Panel (Animation, Visibility, etc) -->
-       <div class="flex-1 overflow-y-auto p-4" *ngIf="activeTab === 'settings'">
-            <div class="alert alert-info shadow-sm text-xs">
-                <span>Advanced settings (animation, visibility) coming soon.</span>
-            </div>
+       <!-- Settings Panel -->
+       <div class="flex-1 overflow-hidden" *ngIf="activeTab === 'settings'">
+            <app-settings-panel
+                class="block h-full"
+                *ngIf="block"
+                [blockSettings]="block.settings || {}"
+                (settingsChange)="onSettingsChange($event)">
+            </app-settings-panel>
        </div>
 
     </div>
@@ -127,7 +133,11 @@ export class BlockToolbarComponent {
         return this.registry.getDefinition(this.block.type)?.manifest;
     }
 
-    onDataChange(newData: any) {
+    getBlockDisplayName(): string {
+        return this.manifest?.displayName || this.block?.type || 'Block';
+    }
+
+    onDataChange(newData: Record<string, unknown>) {
         if (!this.block) return;
         this.blockChange.emit({
             ...this.block,
@@ -137,11 +147,10 @@ export class BlockToolbarComponent {
 
     getCurrentStyles() {
         if (!this.block || !this.block.styles) return {};
-        // Return specific viewport styles or default to desktop
         return this.block.styles[this.viewport] || {};
     }
 
-    onStyleChange(newStyles: any) {
+    onStyleChange(newStyles: Record<string, unknown>) {
         if (!this.block) return;
 
         const currentStyles = this.block.styles || {};
@@ -154,4 +163,13 @@ export class BlockToolbarComponent {
             }
         });
     }
+
+    onSettingsChange(newSettings: BlockSettings) {
+        if (!this.block) return;
+        this.blockChange.emit({
+            ...this.block,
+            settings: newSettings
+        });
+    }
 }
+

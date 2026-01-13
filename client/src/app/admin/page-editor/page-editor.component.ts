@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild, ElementRef, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, signal, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -7,11 +7,13 @@ import { ActivatedRoute } from '@angular/router';
 import { Language } from '../../core/models/language.model';
 import { I18nService } from '../../core/services/i18n.service';
 import { BlockInstance } from '../../features/content-blocks/block.types';
-import { SeoPanelComponent } from '../components/seo-panel.component';
 import { SeoValidatorService } from '../services/seo-validator.service';
 import { EditorCanvasComponent } from '../components/editor-canvas/editor-canvas.component';
 
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { EditorTabBarComponent, EditorTab } from '../components/editor-tab-bar/editor-tab-bar.component';
+import { PageSettingsPaneComponent } from '../components/page-settings-pane/page-settings-pane.component';
+import { SeoPaneComponent } from '../components/seo-pane/seo-pane.component';
 
 @Component({
   selector: 'app-page-editor',
@@ -19,9 +21,11 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
   imports: [
     CommonModule,
     FormsModule,
-    SeoPanelComponent,
     EditorCanvasComponent,
-    TranslatePipe
+    TranslatePipe,
+    EditorTabBarComponent,
+    PageSettingsPaneComponent,
+    SeoPaneComponent
   ],
   template: `
     <div class="flex flex-col h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden transition-colors">
@@ -92,124 +96,54 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
         </div>
       </header>
 
-      <!-- Main Workspace -->
+      <!-- Main Workspace with Tab Layout -->
       <div class="flex-1 flex overflow-hidden relative" *ngIf="selectedPageSlug(); else noPageSelected">
         
-        <!-- Left: Canvas Wrapper -->
-        <main class="flex-1 flex flex-col overflow-hidden bg-slate-100/50 dark:bg-slate-900 relative transition-colors">
-            
-            <!-- Metadata Headers (Sticky or Top) -->
-            <div class="shrink-0 max-w-5xl mx-auto w-full p-6 pb-0 z-10">
-                <!-- Metadata Card (Collapsible or Top) -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm group transition-colors mb-6 overflow-hidden">
-                    <!-- Card Header -->
-                    <div class="px-6 py-4 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50 cursor-pointer select-none border-b border-transparent"
-                         [class.border-slate-100]="isSettingsExpanded"
-                         [class.dark:border-slate-700]="isSettingsExpanded"
-                         (click)="isSettingsExpanded = !isSettingsExpanded">
-                        <div class="flex items-center gap-3">
-                             <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors transform duration-200"
-                                     [class.rotate-180]="!isSettingsExpanded">
-                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                             </button>
-                             <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ 'PAGE_SETTINGS_HEADER' | translate }}</h3>
-                        </div>
-                        
-                        <div class="flex items-center gap-2">
-                             <!-- SEO Score Badge (Click to toggle details below, stop propagation to prevent card toggle) -->
-                            <button (click)="$event.stopPropagation(); showSeoPanel = !showSeoPanel" 
-                                    class="text-xs font-bold px-3 py-1.5 rounded-full transition-colors flex items-center gap-2"
-                                    [class.bg-emerald-100]="seoScore >= 80" [class.text-emerald-700]="seoScore >= 80"
-                                    [class.dark:bg-emerald-900/30]="seoScore >= 80" [class.dark:text-emerald-400]="seoScore >= 80"
-                                    [class.bg-amber-100]="seoScore < 80 && seoScore >= 50" [class.text-amber-700]="seoScore < 80 && seoScore >= 50"
-                                    [class.dark:bg-amber-900/30]="seoScore < 80 && seoScore >= 50" [class.dark:text-amber-400]="seoScore < 80 && seoScore >= 50"
-                                    [class.bg-red-100]="seoScore < 50" [class.text-red-700]="seoScore < 50"
-                                    [class.dark:bg-red-900/30]="seoScore < 50" [class.dark:text-red-400]="seoScore < 50">
-                                <span class="w-2 h-2 rounded-full" 
-                                      [class.bg-emerald-500]="seoScore >= 80"
-                                      [class.bg-amber-500]="seoScore < 80 && seoScore >= 50"
-                                      [class.bg-red-500]="seoScore < 50"></span>
-                                SEO Score: {{ seoScore }}
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Card Body -->
-                    <div *ngIf="isSettingsExpanded" class="p-6 pt-4 animate-slide-down">
-                        <div class="grid grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ 'PAGE_TITLE_LABEL' | translate }}</label>
-                                <input [(ngModel)]="content.title" class="w-full text-lg font-bold border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 bg-transparent text-slate-900 dark:text-white" placeholder="Page Title" />
-                            </div>
-                                <div>
-                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ 'PAGE_URL_SLUG_LABEL' | translate }}</label>
-                                <div class="flex items-baseline text-slate-500 dark:text-slate-400">
-                                        <span class="text-sm">/{{ activeLang() }}/</span>
-                                        <input [(ngModel)]="content.slug_localized" class="flex-1 bg-transparent border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 px-0 py-1 text-sm font-mono text-slate-700 dark:text-slate-300" />
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-6 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Theme</label>
-                                <select [(ngModel)]="activeThemeId" 
-                                        class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white appearance-none">
-                                    <option [ngValue]="null">No Theme (Default)</option>
-                                    <option *ngFor="let t of themes()" [value]="t.id">
-                                        {{ t.name }} {{ t.is_active ? '(Active)' : '' }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">SEO Title 
-                                    <span class="font-normal text-slate-400 dark:text-slate-500">({{ content.seo_title?.length || 0 }}/60)</span>
-                                </label>
-                                <input [(ngModel)]="content.seo_title" 
-                                        (ngModelChange)="updateSeoScore()"
-                                        class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
-                                        placeholder="SEO 標題（建議 50-60 字元）" />
-                            </div>
-                            <div class="col-span-2 sm:col-span-1">
-                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">OG Image URL</label>
-                                <input [(ngModel)]="content.og_image" 
-                                        class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
-                                        placeholder="https://example.com/image.jpg" />
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Meta Description 
-                                <span class="font-normal text-slate-400 dark:text-slate-500">({{ content.seo_desc?.length || 0 }}/160)</span>
-                            </label>
-                            <textarea [(ngModel)]="content.seo_desc" 
-                                        (ngModelChange)="updateSeoScore()"
-                                        rows="2" 
-                                        class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none bg-white dark:bg-slate-700 text-slate-900 dark:text-white" 
-                                        placeholder="頁面描述（建議 120-160 字元）"></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- SEO Panel (Collapsible) -->
-                <div *ngIf="showSeoPanel" class="max-w-5xl mx-auto mb-6">
-                    <app-seo-panel
-                        [title]="content.seo_title || content.title"
-                        [description]="content.seo_desc"
-                        [content]="blocks"
-                        [language]="activeLang()">
-                    </app-seo-panel>
-                </div>
-            </div>
-
-            <!-- Editor Canvas (Flex 1 to fill remaining space) -->
-            <!-- EditorCanvas handles its own scrolling via :host styles now -->
+        <!-- Left: Vertical Tab Bar (Desktop) -->
+        <app-editor-tab-bar 
+          [activeTab]="activeTab()"
+          (tabChange)="activeTab.set($event)">
+        </app-editor-tab-bar>
+        
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-hidden relative pb-14 md:pb-0">
+          
+          <!-- Settings Pane -->
+          @if (activeTab() === 'settings') {
+            <app-page-settings-pane
+              class="flex-1 w-full min-h-0"
+              [content]="content"
+              [activeLang]="activeLang()"
+              [activeThemeId]="activeThemeId"
+              [themes]="themes()"
+              (contentChange)="onContentFieldChange($event)"
+              (themeChange)="activeThemeId = $event">
+            </app-page-settings-pane>
+          }
+          
+          <!-- Canvas Pane -->
+          @if (activeTab() === 'canvas') {
             <app-editor-canvas
-                class="flex-1"
-                [blocks]="blocks"
-                (blocksChange)="blocks = $event"
-                [(selectedBlock)]="selectedBlock">
+              class="flex-1 w-full"
+              [blocks]="blocks"
+              (blocksChange)="blocks = $event"
+              [(selectedBlock)]="selectedBlock">
             </app-editor-canvas>
-
+          }
+          
+          <!-- SEO Pane -->
+          @if (activeTab() === 'seo') {
+            <app-seo-pane
+              class="flex-1 w-full min-h-0"
+              [content]="content"
+              [blocks]="blocks"
+              [activeLang]="activeLang()"
+              [seoScore]="seoScore"
+              (contentChange)="onContentFieldChange($event)"
+              (seoScoreChange)="updateSeoScore()">
+            </app-seo-pane>
+          }
+          
         </main>
       </div>
 
@@ -281,6 +215,9 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
 })
 export class PageEditorComponent {
 
+  // Tab State
+  activeTab = signal<EditorTab>('canvas');
+
   // State
   pages = signal<any[]>([]);
   themes = signal<any[]>([]);
@@ -296,8 +233,6 @@ export class PageEditorComponent {
   pageId: number | null = null;
   isSaving = false;
   showCreateModal = false;
-  showSeoPanel = false;
-  isSettingsExpanded = true;
   seoScore = 0;
 
   // UI Feedback
@@ -310,9 +245,6 @@ export class PageEditorComponent {
   newPageSlug = '';
   newPageTemplate = 'default';
 
-  // NOTE: showBlockPicker moved to EditorCanvasComponent
-  // Blocks logic moved to EditorCanvasComponent
-
   constructor(
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
@@ -323,7 +255,7 @@ export class PageEditorComponent {
 
   showToast(message: string, type: 'success' | 'error' | 'warning' = 'success') {
     this.toast = { message, type };
-    this.cdr.detectChanges(); // Ensure visible
+    this.cdr.detectChanges();
     setTimeout(() => {
       this.toast.message = '';
       this.cdr.detectChanges();
@@ -390,6 +322,14 @@ export class PageEditorComponent {
       language: this.activeLang()
     });
     this.seoScore = result.score;
+  }
+
+  // Handle content field changes from child components
+  onContentFieldChange(event: { field: string; value: any }) {
+    this.content[event.field] = event.value;
+    if (event.field === 'seo_title' || event.field === 'seo_desc') {
+      this.updateSeoScore();
+    }
   }
 
   fetchContent() {

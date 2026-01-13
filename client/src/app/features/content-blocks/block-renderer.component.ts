@@ -7,13 +7,13 @@ import { DynamicBlockRendererComponent } from './dynamic-block-renderer.componen
 
 // Import all block components
 import { HeroCarouselComponent } from './hero-carousel.component';
-import { FeatureGridComponent } from './feature-grid.component';
+import { FeatureGridComponent } from './components/feature-grid.component';
 import { CardCarouselComponent } from './card-carousel.component';
-import { StatsCounterComponent } from './stats-counter.component';
+import { StatsCounterComponent } from './components/stats-counter.component';
 import { CtaBannerComponent } from './cta-banner.component';
 import { CaseStudyShowcaseComponent } from './case-study-showcase.component';
 import { PageHeroComponent } from './page-hero.component';
-import { FaqAccordionComponent } from './faq-accordion.component';
+import { FaqAccordionComponent } from './components/faq-accordion.component';
 import { TimelineStepsComponent } from './timeline-steps.component';
 import { ContactFormCtaComponent } from './contact-form-cta.component';
 import { ContentWithImageComponent } from './content-with-image.component';
@@ -72,8 +72,9 @@ import { TeamGridComponent } from './team-grid.component';
         <!-- Feature Grid -->
         <app-feature-grid 
           *ngSwitchCase="'feature-grid'" 
-          [title]="block.title" 
-          [items]="block.items || []">
+          [headline]="block.data?.headline || block.title" 
+          [subheadline]="block.data?.subheadline || ''"
+          [features]="block.data?.features || block.items || []">
         </app-feature-grid>
         
         <!-- Card Carousel -->
@@ -87,8 +88,9 @@ import { TeamGridComponent } from './team-grid.component';
         <!-- Stats Counter -->
         <app-stats-counter 
           *ngSwitchCase="'stats-counter'" 
-          [stats]="block.stats || []"
-          [background]="block.background">
+          [header]="{ title: block.data?.header?.title || '' }"
+          [stats]="block.data?.stats || block.stats || []"
+          [styles]="block.styles">
         </app-stats-counter>
         
         <!-- CTA Banner -->
@@ -121,8 +123,9 @@ import { TeamGridComponent } from './team-grid.component';
         <!-- FAQ Accordion -->
         <app-faq-accordion 
           *ngSwitchCase="'faq-accordion'" 
-          [title]="block.title"
-          [items]="block.items || []">
+          [title]="block.data?.title || block.title"
+          [items]="block.data?.items || block.items || []"
+          [styles]="block.styles">
         </app-faq-accordion>
         
         <!-- Timeline Steps (Legacy fallback) -->

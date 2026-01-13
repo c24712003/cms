@@ -33,47 +33,70 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
           <input [(ngModel)]="item.label" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all bg-white dark:bg-slate-700 text-slate-800 dark:text-white" [placeholder]="'PLACEHOLDER_NAV_LABEL' | translate">
         </div>
 
-        <!-- Link Type -->
+        <!-- Translation Key (Optional) -->
         <div class="form-group">
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ 'LABEL_LINK_TYPE' | translate }}</label>
-          <div class="flex gap-4">
-            <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
-              <input type="radio" [(ngModel)]="item.link_type" value="internal" class="text-blue-600 focus:ring-blue-500">
-              <span>{{ 'LABEL_INTERNAL_PAGE' | translate }}</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
-              <input type="radio" [(ngModel)]="item.link_type" value="external" class="text-blue-600 focus:ring-blue-500">
-              <span>{{ 'LABEL_EXTERNAL_URL' | translate }}</span>
-            </label>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+             Translation Key (Optional)
+             <span class="text-xs text-slate-400 font-normal ml-1">Overrides label if translation found</span>
+          </label>
+          <div class="flex gap-2">
+              <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-500 text-sm">
+                <i class="fas fa-language"></i>
+              </span>
+              <input [(ngModel)]="item.labelKey" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-r-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all bg-white dark:bg-slate-700 text-slate-800 dark:text-white font-mono text-sm" placeholder="e.g. NAV_HOME">
           </div>
         </div>
 
-        <!-- Link / URL -->
-        <div class="form-group">
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-            {{ (item.link_type === 'external' ? 'LABEL_EXTERNAL_URL' : 'LABEL_INTERNAL_PATH') | translate }}
-          </label>
-          <input [(ngModel)]="item.link" 
-                 [placeholder]="item.link_type === 'external' ? 'https://example.com' : '/about'"
-                 class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all font-mono text-sm text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-700">
-          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" *ngIf="item.link_type === 'external'">{{ 'TIP_EXTERNAL_URL' | translate }}</p>
-        </div>
+        <!-- Standard Link Fields (Hidden for Widgets) -->
+        <ng-container *ngIf="item.link_type && !item.link_type.includes('widget')">
+            <!-- Link Type -->
+            <div class="form-group">
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ 'LABEL_LINK_TYPE' | translate }}</label>
+            <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="radio" [(ngModel)]="item.link_type" value="internal" class="text-blue-600 focus:ring-blue-500">
+                <span>{{ 'LABEL_INTERNAL_PAGE' | translate }}</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="radio" [(ngModel)]="item.link_type" value="external" class="text-blue-600 focus:ring-blue-500">
+                <span>{{ 'LABEL_EXTERNAL_URL' | translate }}</span>
+                </label>
+            </div>
+            </div>
 
-        <!-- Target -->
-        <div class="form-group">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" 
-                   [checked]="item.target === '_blank'" 
-                   (change)="item.target = $any($event.target).checked ? '_blank' : '_self'"
-                   class="rounded text-blue-600 focus:ring-blue-500">
-            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ 'LABEL_OPEN_NEW_TAB' | translate }}</span>
-          </label>
-        </div>
-        
-        <!-- Icon (Optional) -->
-        <div class="form-group">
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ 'LABEL_ICON_CODE' | translate }}</label>
-          <input [(ngModel)]="item.icon" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all bg-white dark:bg-slate-700 text-slate-800 dark:text-white" [placeholder]="'PLACEHOLDER_ICON' | translate">
+            <!-- Link / URL -->
+            <div class="form-group">
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                {{ (item.link_type === 'external' ? 'LABEL_EXTERNAL_URL' : 'LABEL_INTERNAL_PATH') | translate }}
+            </label>
+            <input [(ngModel)]="item.link" 
+                    [placeholder]="item.link_type === 'external' ? 'https://example.com' : '/about'"
+                    class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all font-mono text-sm text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-700">
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" *ngIf="item.link_type === 'external'">{{ 'TIP_EXTERNAL_URL' | translate }}</p>
+            </div>
+
+            <!-- Target -->
+            <div class="form-group">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" 
+                    [checked]="item.target === '_blank'" 
+                    (change)="item.target = $any($event.target).checked ? '_blank' : '_self'"
+                    class="rounded text-blue-600 focus:ring-blue-500">
+                <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ 'LABEL_OPEN_NEW_TAB' | translate }}</span>
+            </label>
+            </div>
+            
+            <!-- Icon (Optional) -->
+            <div class="form-group">
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ 'LABEL_ICON_CODE' | translate }}</label>
+            <input [(ngModel)]="item.icon" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all bg-white dark:bg-slate-700 text-slate-800 dark:text-white" [placeholder]="'PLACEHOLDER_ICON' | translate">
+            </div>
+        </ng-container>
+
+        <!-- Widget Info -->
+        <div *ngIf="item.link_type && item.link_type.includes('widget')" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded p-4 text-sm text-blue-700 dark:text-blue-300">
+            <p class="font-bold mb-1">Widget Configured</p>
+            <p>This item represents a functional block in your footer. You can only customize its display label here. Content is managed in system settings.</p>
         </div>
 
         <!-- Visibility -->
