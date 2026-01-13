@@ -18,16 +18,20 @@ import { ContentBlockManifest } from '../block.types';
           {{ header.title }}
         </h2>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Auto-fit Grid: Adapts to any screen size without fixed breakpoints -->
+        <div class="grid gap-6 md:gap-8 w-full" 
+             style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+          
           <div *ngFor="let stat of stats; let i = index" 
-               class="text-center p-6 rounded-xl transition-transform hover:-translate-y-1 duration-300"
-               data-aos="zoom-in" [attr.data-aos-delay]="i * 100">
+               class="flex flex-col items-center justify-center p-6 rounded-2xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-100 dark:border-slate-700 hover:border-blue-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+               data-aos="fade-up" [attr.data-aos-delay]="i * 100">
             
-            <div class="text-4xl md:text-5xl font-extrabold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600"
+            <div class="text-3xl md:text-5xl font-extrabold mb-3 bg-clip-text text-transparent bg-gradient-to-br from-blue-600 to-indigo-600 group-hover:scale-110 transition-transform duration-300"
                  [style.color]="styles?.typography?.highlightColor">
               {{ stat.value }}
             </div>
-            <div class="text-lg font-medium text-slate-600 dark:text-slate-300"
+            
+            <div class="text-sm md:text-base font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider break-words text-center leading-relaxed"
                  [style.color]="styles?.typography?.color">
               {{ stat.label }}
             </div>

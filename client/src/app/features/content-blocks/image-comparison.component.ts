@@ -1,12 +1,12 @@
-import { Component, Input, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, ElementRef, ViewChild, AfterViewInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ContentBlockManifest } from './block.types';
 
 @Component({
-    selector: 'app-image-comparison',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-image-comparison',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <section class="py-16 md:py-20 bg-slate-50">
       <div class="max-w-5xl mx-auto px-6">
         <!-- Header -->
@@ -19,45 +19,50 @@ import { ContentBlockManifest } from './block.types';
         <!-- Comparison Container -->
         <div 
           #container
-          class="comparison-container relative overflow-hidden rounded-2xl shadow-2xl shadow-slate-200/50 cursor-ew-resize"
+          class="comparison-container relative overflow-hidden rounded-2xl shadow-2xl shadow-slate-200/50 cursor-ew-resize touch-none"
           [class.horizontal]="orientation === 'horizontal'"
           [class.vertical]="orientation === 'vertical'"
-          (mousedown)="startDrag($event)"
-          (touchstart)="startDrag($event)">
+          (pointerdown)="onPointerDown($event)"
+          (pointermove)="onPointerMove($event)"
+          (pointerup)="onPointerUp($event)"
+          (pointercancel)="onPointerUp($event)"
+          (pointerleave)="onPointerUp($event)">
           
           <!-- Before Image (Full) -->
-          <div class="before-image absolute inset-0">
+          <div class="before-image absolute inset-0 select-none">
             <img 
               *ngIf="beforeImage"
               [src]="beforeImage" 
               alt="Before"
-              class="w-full h-full object-cover" />
+              draggable="false"
+              class="w-full h-full object-cover select-none pointer-events-none" />
             <div 
               *ngIf="beforeLabel" 
-              class="absolute top-4 left-4 px-3 py-1.5 bg-slate-900/70 backdrop-blur-sm text-white text-sm font-medium rounded-lg">
+              class="absolute top-4 left-4 px-3 py-1.5 bg-slate-900/70 backdrop-blur-sm text-white text-sm font-medium rounded-lg z-20">
               {{ beforeLabel }}
             </div>
           </div>
           
           <!-- After Image (Clipped) -->
           <div 
-            class="after-image absolute inset-0 overflow-hidden"
+            class="after-image absolute inset-0 overflow-hidden select-none"
             [style.clip-path]="clipPath">
             <img 
               *ngIf="afterImage"
               [src]="afterImage" 
               alt="After"
-              class="w-full h-full object-cover" />
+              draggable="false"
+              class="w-full h-full object-cover select-none pointer-events-none" />
             <div 
               *ngIf="afterLabel" 
-              class="absolute top-4 right-4 px-3 py-1.5 bg-blue-600/90 backdrop-blur-sm text-white text-sm font-medium rounded-lg">
+              class="absolute top-4 right-4 px-3 py-1.5 bg-blue-600/90 backdrop-blur-sm text-white text-sm font-medium rounded-lg z-20">
               {{ afterLabel }}
             </div>
           </div>
           
           <!-- Slider Handle -->
           <div 
-            class="slider-handle absolute z-10"
+            class="slider-handle absolute z-30 pointer-events-none"
             [class.horizontal]="orientation === 'horizontal'"
             [class.vertical]="orientation === 'vertical'"
             [style.left.%]="orientation === 'horizontal' ? position : null"
@@ -103,10 +108,11 @@ import { ContentBlockManifest } from './block.types';
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     .comparison-container {
       aspect-ratio: 16 / 10;
       user-select: none;
+      -webkit-user-select: none;
     }
     .slider-handle.horizontal {
       top: 0;
@@ -127,100 +133,111 @@ import { ContentBlockManifest } from './block.types';
   `]
 })
 export class ImageComparisonComponent implements AfterViewInit {
-    @ViewChild('container') container!: ElementRef;
+  @ViewChild('container') container!: ElementRef;
 
-    static manifest: ContentBlockManifest = {
-        type: 'image-comparison',
-        displayName: 'Image Comparison',
-        category: 'Media',
-        description: 'Interactive before/after image comparison slider',
-        schema: {
-            properties: {
-                title: { type: 'string', title: 'Title' },
-                beforeImage: { type: 'string', title: 'Before Image', ui: { widget: 'image' } },
-                afterImage: { type: 'string', title: 'After Image', ui: { widget: 'image' } },
-                beforeLabel: { type: 'string', title: 'Before Label', default: 'Before' },
-                afterLabel: { type: 'string', title: 'After Label', default: 'After' },
-                startPosition: {
-                    type: 'number',
-                    title: 'Start Position (%)',
-                    default: 50,
-                    ui: { widget: 'range' }
-                },
-                orientation: {
-                    type: 'string',
-                    title: 'Orientation',
-                    enum: ['horizontal', 'vertical'],
-                    default: 'horizontal',
-                    ui: { widget: 'select' }
-                }
-            }
+  static manifest: ContentBlockManifest = {
+    type: 'image-comparison',
+    displayName: 'Image Comparison',
+    category: 'Media',
+    description: 'Interactive before/after image comparison slider',
+    schema: {
+      properties: {
+        title: { type: 'string', title: 'Title' },
+        beforeImage: { type: 'string', title: 'Before Image', ui: { widget: 'image' } },
+        afterImage: { type: 'string', title: 'After Image', ui: { widget: 'image' } },
+        beforeLabel: { type: 'string', title: 'Before Label', default: 'Before' },
+        afterLabel: { type: 'string', title: 'After Label', default: 'After' },
+        startPosition: {
+          type: 'number',
+          title: 'Start Position (%)',
+          default: 50,
+          ui: { widget: 'range' }
+        },
+        orientation: {
+          type: 'string',
+          title: 'Orientation',
+          enum: ['horizontal', 'vertical'],
+          default: 'horizontal',
+          ui: { widget: 'select' }
         }
-    };
+      }
+    }
+  };
 
-    @Input() title: string = '';
-    @Input() beforeImage: string = '';
-    @Input() afterImage: string = '';
-    @Input() beforeLabel: string = 'Before';
-    @Input() afterLabel: string = 'After';
-    @Input() startPosition: number = 50;
-    @Input() orientation: 'horizontal' | 'vertical' = 'horizontal';
+  @Input() title: string = '';
+  @Input() beforeImage: string = '';
+  @Input() afterImage: string = '';
+  @Input() beforeLabel: string = 'Before';
+  @Input() afterLabel: string = 'After';
+  @Input() startPosition: number = 50;
+  @Input() orientation: 'horizontal' | 'vertical' = 'horizontal';
 
-    position: number = 50;
-    isDragging = false;
+  position: number = 50;
+  isDragging = false;
 
-    get clipPath(): string {
-        if (this.orientation === 'horizontal') {
-            return `inset(0 0 0 ${this.position}%)`;
-        } else {
-            return `inset(${this.position}% 0 0 0)`;
-        }
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
+
+  get clipPath(): string {
+    if (this.orientation === 'horizontal') {
+      return `inset(0 0 0 ${this.position}%)`;
+    } else {
+      return `inset(${this.position}% 0 0 0)`;
+    }
+  }
+
+  ngAfterViewInit() {
+    this.position = this.startPosition;
+  }
+
+  onPointerDown(event: PointerEvent) {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    event.preventDefault(); // Prevent scroll/default
+    event.stopPropagation(); // Prevent parent drag
+
+    this.isDragging = true;
+
+    // Set Pointer Capture to ensure we receive moves even if cursor leaves element
+    const target = event.target as HTMLElement;
+    if (target.setPointerCapture) {
+      target.setPointerCapture(event.pointerId);
     }
 
-    ngAfterViewInit() {
-        this.position = this.startPosition;
+    this.updatePosition(event);
+  }
 
-        // Add global mouse/touch event listeners
-        document.addEventListener('mousemove', this.onDrag.bind(this));
-        document.addEventListener('mouseup', this.stopDrag.bind(this));
-        document.addEventListener('touchmove', this.onDrag.bind(this));
-        document.addEventListener('touchend', this.stopDrag.bind(this));
+  onPointerMove(event: PointerEvent) {
+    if (!this.isDragging) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.updatePosition(event);
+  }
+
+  onPointerUp(event: PointerEvent) {
+    if (!this.isDragging) return;
+
+    this.isDragging = false;
+
+    const target = event.target as HTMLElement;
+    if (target.releasePointerCapture) {
+      target.releasePointerCapture(event.pointerId);
     }
+  }
 
-    startDrag(event: MouseEvent | TouchEvent) {
-        this.isDragging = true;
-        this.updatePosition(event);
+  updatePosition(event: PointerEvent) {
+    if (!this.container) return;
+
+    const rect = this.container.nativeElement.getBoundingClientRect();
+    const clientX = event.clientX;
+    const clientY = event.clientY;
+
+    if (this.orientation === 'horizontal') {
+      const x = clientX - rect.left;
+      this.position = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    } else {
+      const y = clientY - rect.top;
+      this.position = Math.max(0, Math.min(100, (y / rect.height) * 100));
     }
-
-    onDrag(event: MouseEvent | TouchEvent) {
-        if (!this.isDragging) return;
-        this.updatePosition(event);
-    }
-
-    stopDrag() {
-        this.isDragging = false;
-    }
-
-    updatePosition(event: MouseEvent | TouchEvent) {
-        if (!this.container) return;
-
-        const rect = this.container.nativeElement.getBoundingClientRect();
-        let clientX: number, clientY: number;
-
-        if (event instanceof MouseEvent) {
-            clientX = event.clientX;
-            clientY = event.clientY;
-        } else {
-            clientX = event.touches[0].clientX;
-            clientY = event.touches[0].clientY;
-        }
-
-        if (this.orientation === 'horizontal') {
-            const x = clientX - rect.left;
-            this.position = Math.max(0, Math.min(100, (x / rect.width) * 100));
-        } else {
-            const y = clientY - rect.top;
-            this.position = Math.max(0, Math.min(100, (y / rect.height) * 100));
-        }
-    }
+  }
 }

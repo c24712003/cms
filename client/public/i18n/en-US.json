@@ -1,0 +1,20 @@
+{
+    "NAV_PAGES": "Pages",
+    "NAV_EDITOR": "Editor",
+    "SELECT_PLACEHOLDER": "Select a page...",
+    "ACTION_NEW": "New Page",
+    "BTN_SAVE_DRAFT": "Save Draft",
+    "BTN_DEPLOY_PUBLISH": "Publish",
+    "STATUS_DRAFT": "Draft",
+    "EMPTY_TITLE": "No Page Selected",
+    "EMPTY_DESC": "Select a page from the dropdown or create a new one to start editing.",
+    "BTN_CREATE_NEW": "Create New Page",
+    "MODAL_CREATE_TITLE": "Create New Page",
+    "PAGE_URL_SLUG_LABEL": "URL Slug",
+    "MODAL_CANCEL": "Cancel",
+    "MODAL_CONFIRM_CREATE": "Create",
+    "ADD_BLOCK_TITLE": "Add Block",
+    "ADD_BLOCK_DESC": "Choose a block to add to your page",
+    "ADD_FIRST_BLOCK": "Create Your First Block",
+    "ADD_BLOCK_BTN": "Add Block"
+}

@@ -39,69 +39,47 @@ import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component'
                  }"
                  (click)="$event.stopPropagation()">
                  
-                  <div cdkDropList 
-                       [cdkDropListData]="blocks" 
-                       (cdkDropListDropped)="drop($event)"
-                       class="min-h-full pb-32">
-                       
-                     <div *ngFor="let block of blocks; let i = index; trackBy: trackBlockId" 
-                          cdkDrag
-                          class="group relative transition-all">
-                          
-                         <!-- Drag Handle (Left) -->
-                         <div class="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-move z-20 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-l-xl transition-all" cdkDragHandle>
-                             <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor"><path d="M7 19h2v2H7zM7 15h2v2H7zM7 11h2v2H7zM7 7h2v2H7zM11 19h2v2h-2zM11 15h2v2h-2zM11 11h2v2h-2zM11 7h2v2h-2zM15 19h2v2h-2zM15 15h2v2h-2zM15 11h2v2h-2zM15 11h2v2h-2zM15 7h2v2h-2z"/></svg>
-                         </div>
+                 <div cdkDropList 
+                      [cdkDropListData]="blocks" 
+                      (cdkDropListDropped)="drop($event)"
+                      class="min-h-full pb-32">
+                      
+                    <div *ngFor="let block of blocks; let i = index; trackBy: trackBlockId" 
+                         cdkDrag
+                         class="group relative hover:ring-2 hover:ring-blue-400/50 transition-all"
+                         [class.ring-2]="selectedBlock?.id === block.id"
+                         [class.ring-blue-500]="selectedBlock?.id === block.id"
+                         [class.z-20]="selectedBlock?.id === block.id">
                          
-                         <!-- Remove Button (Right) -->
-                         <button (click)="removeBlock(block, $event)" class="absolute -right-3 -top-3 bg-white dark:bg-slate-700 text-slate-400 hover:text-red-500 shadow-sm border border-slate-200 dark:border-slate-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-30 hover:scale-110">
-                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                         </button>
+                        <!-- Drag Handle (Left) -->
+                        <div class="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-move z-20 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-l-xl transition-all" cdkDragHandle>
+                            <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor"><path d="M7 19h2v2H7zM7 15h2v2H7zM7 11h2v2H7zM7 7h2v2H7zM11 19h2v2h-2zM11 15h2v2h-2zM11 11h2v2h-2zM11 7h2v2h-2zM15 19h2v2h-2zM15 15h2v2h-2zM15 11h2v2h-2zM15 11h2v2h-2zM15 7h2v2h-2z"/></svg>
+                        </div>
+                        
+                        <!-- Remove Button (Right) -->
+                        <button (click)="removeBlock(block, $event)" class="absolute -right-3 -top-3 bg-white dark:bg-slate-700 text-slate-400 hover:text-red-500 shadow-sm border border-slate-200 dark:border-slate-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-30 hover:scale-110">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
 
-                         <!-- Rendered Block -->
-                         <div (click)="selectBlock(block, $event)" 
-                              class="cursor-pointer hover:ring-2 hover:ring-blue-400/50 rounded-lg transition-all"
-                              [class.ring-2]="selectedBlock?.id === block.id"
-                              [class.ring-blue-500]="selectedBlock?.id === block.id"
-                              [class.z-20]="selectedBlock?.id === block.id">
-                             <app-dynamic-block-renderer [block]="block"></app-dynamic-block-renderer>
-                         </div>
+                        <!-- Rendered Block -->
+                        <div (click)="selectBlock(block, $event)" class="cursor-pointer">
+                            <app-dynamic-block-renderer [block]="block"></app-dynamic-block-renderer>
+                        </div>
+                    </div>
 
-                         <!-- Insert Between Zone (Bottom of each block) -->
-                         <div class="h-4 -mb-2 relative group/insert z-10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                            <div class="absolute inset-x-0 h-px bg-blue-500"></div>
-                            <button (click)="openBlockPicker(i + 1)" class="relative btn btn-circle btn-xs btn-primary transform scale-0 group-hover/insert:scale-100 transition-transform shadow-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            </button>
-                         </div>
-                     </div>
+                    <!-- Empty State -->
+                    <div *ngIf="blocks.length === 0" class="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 m-8 rounded-xl text-slate-400">
+                        <svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <p>Drag blocks here or add one to start</p>
+                    </div>
 
-                     <!-- Empty State -->
-                     <button *ngIf="blocks.length === 0" 
-                             (click)="openBlockPicker(0)"
-                             class="w-full h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 m-0 rounded-xl text-slate-400 hover:text-blue-500 transition-all cursor-pointer">
-                         <div class="p-4 bg-slate-100 dark:bg-slate-800 rounded-full mb-4">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                         </div>
-                         <h3 class="font-bold text-lg mb-1">{{ 'ADD_FIRST_BLOCK' | translate }}</h3>
-                         <p class="text-sm opacity-80">Click to add your first content block</p>
-                     </button>
+                 </div>
+            </div>
 
-                     <!-- Bottom Add Button (Always visible if not empty) -->
-                     <button *ngIf="blocks.length > 0"
-                             (click)="openBlockPicker(blocks.length)"
-                             class="w-full mt-8 py-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 hover:text-blue-500 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all flex flex-col items-center justify-center gap-2">
-                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                         <span class="font-bold">{{ 'ADD_BLOCK_BTN' | translate }}</span>
-                     </button>
-
-                  </div>
-             </div>
-
-             <!-- Floating Add Button (Mobile/Quick) -->
-             <button class="fixed bottom-8 right-8 md:hidden btn btn-circle btn-primary shadow-xl z-40" (click)="openBlockPicker(blocks.length); $event.stopPropagation()">
-                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-             </button>
+            <!-- Floating Add Button (Mobile/Quick) -->
+            <button class="fixed bottom-8 right-8 md:hidden btn btn-circle btn-primary shadow-xl z-40" (click)="showBlockPicker = true; $event.stopPropagation()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </button>
         </main>
 
         <!-- Right: Block Toolbar -->
@@ -205,14 +183,6 @@ export class EditorCanvasComponent {
         }
     }
 
-    // State for tracking where to insert a new block
-    pendingInsertIndex: number | null = null;
-
-    openBlockPicker(index?: number) {
-        this.pendingInsertIndex = index !== undefined ? index : null;
-        this.showBlockPicker = true;
-    }
-
     addBlock(type: string) {
         const manifest = this.registry.getManifest(type);
         const defaultData = this.buildDefaultsFromSchema(manifest?.schema);
@@ -222,20 +192,13 @@ export class EditorCanvasComponent {
             type: type,
             data: defaultData
         };
-
-        if (this.pendingInsertIndex !== null && this.pendingInsertIndex >= 0 && this.pendingInsertIndex <= this.blocks.length) {
-            this.blocks.splice(this.pendingInsertIndex, 0, newBlock);
-        } else {
-            this.blocks.push(newBlock);
-        }
-
+        this.blocks.push(newBlock);
         this.blocksChange.emit(this.blocks);
 
         this.selectedBlock = newBlock;
         this.selectedBlockChange.emit(newBlock);
 
         this.showBlockPicker = false;
-        this.pendingInsertIndex = null;
     }
 
     /**
