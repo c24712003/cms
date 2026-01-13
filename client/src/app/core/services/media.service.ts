@@ -30,8 +30,9 @@ export class MediaService {
             params = params.set('type', typeFilter);
         }
 
-        this.http.get<MediaAsset[]>('/api/media', { params }).subscribe(data => {
-            this.assets.set(data);
+        this.http.get<any>('/api/media', { params }).subscribe(data => {
+            const assets = Array.isArray(data) ? data : (data.data || []);
+            this.assets.set(Array.isArray(assets) ? assets : []);
         });
     }
 

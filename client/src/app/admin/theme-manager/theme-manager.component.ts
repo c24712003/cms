@@ -72,7 +72,7 @@ interface Theme {
 
                 <!-- Page List Preview -->
                 <div class="flex flex-wrap gap-2 mb-6">
-                    @for (page of theme.pages; track page.slug) {
+                    @for (page of (theme.pages || []); track page.slug) {
                         <span class="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-xs font-medium text-slate-600 dark:text-slate-300">
                             /{{ page.slug }}
                         </span>

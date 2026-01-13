@@ -36,9 +36,9 @@ export class GlobalSearchService {
             map(res => {
                 // console.log(`Search response (${mode}):`, res);
                 return {
-                    pages: res.pages || [],
-                    users: res.users || [],
-                    media: res.media || []
+                    pages: Array.isArray(res.pages) ? res.pages : [],
+                    users: Array.isArray(res.users) ? res.users : [],
+                    media: Array.isArray(res.media) ? res.media : []
                 };
             }),
             catchError(err => {

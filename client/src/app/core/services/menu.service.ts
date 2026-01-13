@@ -67,7 +67,7 @@ export class MenuService {
 
                 return {
                     code: response.code,
-                    items: (response.items || []).map(mapItem)
+                    items: Array.isArray(response.items) ? response.items.map(mapItem) : []
                 };
             })
         );
@@ -79,7 +79,12 @@ export class MenuService {
     }
 
     getSocialLinks() {
-        return this.http.get<SocialLink[]>('/api/menus/social/links');
+        return this.http.get<any>('/api/menus/social/links').pipe(
+            map(res => {
+                const links = Array.isArray(res) ? res : (res.links || []);
+                return Array.isArray(links) ? links : [];
+            })
+        );
     }
 
     saveSocialLinks(links: SocialLink[]) {

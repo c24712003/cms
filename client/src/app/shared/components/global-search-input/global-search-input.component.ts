@@ -19,6 +19,7 @@ import { I18nService } from '../../../core/services/i18n.service';
         <input 
           type="text" 
           [(ngModel)]="searchQuery"
+          name="searchQuery"
           (ngModelChange)="onSearchInput($event)"
           [placeholder]="placeholder"
           class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm transition-all outline-none"

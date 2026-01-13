@@ -25,8 +25,8 @@ interface FormField {
             <p class="text-lg text-slate-300 mb-8 leading-relaxed">{{ description }}</p>
             
             <!-- Contact Info Cards -->
-            <div class="space-y-4" *ngIf="contactInfo">
-              <div *ngFor="let info of contactInfo" class="flex items-center gap-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+            <div class="space-y-4" *ngIf="safeContactInfo.length > 0">
+              <div *ngFor="let info of safeContactInfo" class="flex items-center gap-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
                 <span class="text-2xl" [ngSwitch]="info.icon">
                   <ng-container *ngSwitchCase="'email'">📧</ng-container>
                   <ng-container *ngSwitchCase="'phone'">📞</ng-container>
@@ -46,7 +46,7 @@ interface FormField {
           <div class="bg-white rounded-2xl p-8 shadow-2xl">
             <form (ngSubmit)="handleSubmit()" #contactForm="ngForm">
               <div class="space-y-5">
-                <ng-container *ngFor="let field of fields">
+                <ng-container *ngFor="let field of safeFields; let i = index">
                   <!-- Text/Email/Tel Input -->
                   <div *ngIf="field.type !== 'textarea' && field.type !== 'select'">
                     <label class="block text-sm font-semibold text-slate-700 mb-2">
@@ -54,8 +54,8 @@ interface FormField {
                       <span *ngIf="field.required" class="text-red-500">*</span>
                     </label>
                     <input [type]="field.type" 
-                           [name]="field.name"
-                           [(ngModel)]="formData[field.name]"
+                           [name]="field.name || ('field_' + i)"
+                           [(ngModel)]="formData[field.name || ('field_' + i)]"
                            [required]="!!field.required"
                            class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                            [placeholder]="'請輸入' + field.label" />
@@ -67,8 +67,8 @@ interface FormField {
                       {{ field.label }}
                       <span *ngIf="field.required" class="text-red-500">*</span>
                     </label>
-                    <textarea [name]="field.name"
-                              [(ngModel)]="formData[field.name]"
+                    <textarea [name]="field.name || ('field_' + i)"
+                              [(ngModel)]="formData[field.name || ('field_' + i)]"
                               [required]="!!field.required"
                               rows="4"
                               class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none resize-none"
@@ -81,8 +81,8 @@ interface FormField {
                       {{ field.label }}
                       <span *ngIf="field.required" class="text-red-500">*</span>
                     </label>
-                    <select [name]="field.name"
-                            [(ngModel)]="formData[field.name]"
+                    <select [name]="field.name || ('field_' + i)"
+                            [(ngModel)]="formData[field.name || ('field_' + i)]"
                             [required]="!!field.required"
                             class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none bg-white">
                       <option value="">請選擇...</option>
@@ -180,6 +180,14 @@ export class ContactFormCtaComponent {
 
   formData: { [key: string]: string } = {};
   submitted = false;
+
+  get safeFields(): FormField[] {
+    return Array.isArray(this.fields) ? this.fields : [];
+  }
+
+  get safeContactInfo(): any[] {
+    return Array.isArray(this.contactInfo) ? this.contactInfo : [];
+  }
 
   handleSubmit() {
     console.log('Form submitted:', this.formData);

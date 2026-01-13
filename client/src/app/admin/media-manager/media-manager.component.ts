@@ -63,7 +63,7 @@ import { I18nService } from '../../core/services/i18n.service';
         <div class="flex gap-4 w-full md:w-auto">
             <!-- Search -->
             <div class="relative flex-1 md:w-64">
-                <input type="text" [(ngModel)]="searchQuery" [placeholder]="'SEARCH_FILES' | translate" 
+                <input type="text" [(ngModel)]="searchQuery" name="searchQuery" [placeholder]="'SEARCH_FILES' | translate" 
                        class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
                 <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -231,7 +231,7 @@ import { I18nService } from '../../core/services/i18n.service';
             <div class="mb-4">
               <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ 'LABEL_YOUTUBE_URL' | translate }}</label>
               <div class="flex gap-2">
-                <input type="text" [(ngModel)]="videoUrl" placeholder="https://youtube.com/watch?v=..." 
+                <input type="text" [(ngModel)]="videoUrl" name="videoUrl" placeholder="https://youtube.com/watch?v=..." 
                        class="flex-1 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-blue-500 shadow-sm"
                        (input)="parseVideoUrl()" />
               </div>
