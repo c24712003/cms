@@ -135,21 +135,27 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
         </form>
       </div>
       
-      <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 sticky bottom-0 z-10" *ngIf="!group">
-        <button type="button" class="btn btn-primary w-full" (click)="save()" [disabled]="form?.invalid || form?.pristine">
-          {{ 'BLOCK_PROP_SAVE' | translate }}
-        </button>
-      </div>
+      @if (!group) { 
+        <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 sticky bottom-0 z-10">
+          <button type="button" class="btn btn-primary w-full" (click)="save()" [disabled]="form?.invalid || form?.pristine">
+            {{ 'BLOCK_PROP_SAVE' | translate }}
+          </button>
+        </div>
+      }
       
-      <div class="p-8 text-center text-slate-400 dark:text-slate-500" *ngIf="!form">
-        <p>{{ 'BLOCK_PROP_NO_SELECTION' | translate }}</p>
-      </div>
+      @if (!form) { 
+        <div class="p-8 text-center text-slate-400 dark:text-slate-500">
+          <p>{{ 'BLOCK_PROP_NO_SELECTION' | translate }}</p>
+        </div>
+      }
 
        <!-- Media Picker Dialog -->
-       <app-media-picker-dialog *ngIf="showMediaPicker" 
+       @if (showMediaPicker) {
+        <app-media-picker-dialog 
             (selected)="onMediaSelected($event)" 
             (cancelled)="showMediaPicker = false">
-       </app-media-picker-dialog>
+        </app-media-picker-dialog>
+       }
     </div>
   `
 })
