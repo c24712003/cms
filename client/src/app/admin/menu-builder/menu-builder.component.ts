@@ -9,11 +9,13 @@ import { Subject, of, forkJoin, merge, concat } from 'rxjs';
 import { takeUntil, switchMap, tap, catchError, map, finalize, timeout } from 'rxjs/operators';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { I18nService } from '../../core/services/i18n.service';
+import { SiteSettingsService, SiteSettings } from '../../core/services/site-settings.service';
+import { MediaPickerDialogComponent } from '../components/media-picker-dialog/media-picker-dialog.component';
 
 @Component({
   selector: 'app-menu-builder',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule, MenuItemEditorComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, DragDropModule, MenuItemEditorComponent, TranslatePipe, MediaPickerDialogComponent],
   template: `
     <div class="relative min-h-[calc(100vh-4rem)] max-w-7xl mx-auto">
       <!-- Page Header -->
@@ -67,6 +69,30 @@ import { I18nService } from '../../core/services/i18n.service';
 
          <!-- === VIEW A: Standard Vertical Tree (Non-Footer) === -->
          <ng-container *ngIf="menuCode !== 'footer'">
+             <!-- Header Logo Configuration Panel (Only for 'main' menu) -->
+             <div *ngIf="menuCode === 'main'" class="mb-6 max-w-4xl bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
+                 <div class="flex items-start gap-4">
+                     <div class="w-20 h-20 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-700 flex-shrink-0">
+                         <img *ngIf="logoUrl" [src]="logoUrl" alt="Header Logo" class="max-w-full max-h-full object-contain">
+                         <i *ngIf="!logoUrl" class="fas fa-image text-2xl text-slate-400"></i>
+                     </div>
+                     <div class="flex-1">
+                         <h3 class="font-semibold text-slate-800 dark:text-white mb-1">Header Logo</h3>
+                         <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Logo displayed in the site header navigation</p>
+                         <div class="flex gap-2">
+                             <button (click)="showHeaderLogoPicker = true" 
+                                     class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors">
+                                 <i class="fas fa-image mr-1"></i> {{ logoUrl ? 'Change' : 'Select Logo' }}
+                             </button>
+                             <button *ngIf="logoUrl" (click)="removeHeaderLogo()" 
+                                     class="px-3 py-1.5 border border-red-300 text-red-600 rounded text-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                 <i class="fas fa-times mr-1"></i> Remove
+                             </button>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+
              <div class="max-w-4xl bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-6 min-h-[400px]" cdkDropListGroup>
                 
                 <!-- Recursive Template (Legacy Tree) -->
@@ -187,8 +213,9 @@ import { I18nService } from '../../core/services/i18n.service';
                         </div>
 
                         <!-- CASE 2: Info Widgets (Static Preview) -->
-                        <div *ngIf="node.link_type === 'brand-widget'" class="text-center py-4 opacity-50 select-none">
-                            <span class="text-3xl font-bold text-slate-300 block mb-2">CMS</span>
+                        <div *ngIf="node.link_type === 'brand-widget'" class="text-center py-4 select-none">
+                            <img *ngIf="logoUrl" [src]="logoUrl" alt="Logo" class="h-12 max-w-full object-contain mx-auto mb-2">
+                            <span *ngIf="!logoUrl" class="text-3xl font-bold text-slate-300 block mb-2">{{ siteName || 'CMS' }}</span>
                             <div class="h-2 w-20 bg-slate-200 dark:bg-slate-700 mx-auto rounded mb-1"></div>
                             <div class="h-2 w-16 bg-slate-200 dark:bg-slate-700 mx-auto rounded"></div>
                         </div>
@@ -325,6 +352,13 @@ import { I18nService } from '../../core/services/i18n.service';
         </div>
       </div>
     </div>
+
+    <!-- Header Logo Media Picker -->
+    <app-media-picker-dialog 
+        *ngIf="showHeaderLogoPicker"
+        (selected)="onHeaderLogoSelected($event)"
+        (cancelled)="showHeaderLogoPicker = false">
+    </app-media-picker-dialog>
   `
 })
 export class MenuBuilderComponent implements OnInit, OnDestroy {
@@ -341,6 +375,11 @@ export class MenuBuilderComponent implements OnInit, OnDestroy {
   // Custom Delete State
   deleteState: { type: 'item' | 'social', list: any[], index: number } | null = null;
 
+  // Logo settings from site settings
+  logoUrl: string | null = null;
+  siteName = 'CMS.Demo';
+  showHeaderLogoPicker = false;
+
 
   private refresh$ = new Subject<void>();
   private destroy$ = new Subject<void>();
@@ -349,7 +388,8 @@ export class MenuBuilderComponent implements OnInit, OnDestroy {
     private menuService: MenuService,
     private route: ActivatedRoute,
     private cd: ChangeDetectorRef,
-    private i18n: I18nService
+    private i18n: I18nService,
+    private siteSettingsService: SiteSettingsService
   ) { }
 
   ngOnInit() {
@@ -396,6 +436,13 @@ export class MenuBuilderComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.cd.markForCheck();
       }
+    });
+
+    // Load site settings for logo preview
+    this.siteSettingsService.loadSettings().subscribe(settings => {
+      this.logoUrl = settings.header_logo_url || settings.logo_url;
+      this.siteName = settings.site_name || 'CMS.Demo';
+      this.cd.markForCheck();
     });
 
   }
@@ -581,6 +628,28 @@ export class MenuBuilderComponent implements OnInit, OnDestroy {
         this.saveStatus = { type: 'error', message: 'MSG_SAVE_ERROR' };
         this.cd.detectChanges();
       }
+    });
+  }
+
+  // Header logo methods
+  onHeaderLogoSelected(url: string) {
+    this.logoUrl = url;
+    this.showHeaderLogoPicker = false;
+    this.siteSettingsService.updateSettings([
+      { key: 'header_logo_url', value: url }
+    ]).subscribe({
+      next: () => this.cd.markForCheck(),
+      error: (err) => console.error('Failed to save header logo:', err)
+    });
+  }
+
+  removeHeaderLogo() {
+    this.logoUrl = null;
+    this.siteSettingsService.updateSettings([
+      { key: 'header_logo_url', value: null }
+    ]).subscribe({
+      next: () => this.cd.markForCheck(),
+      error: (err) => console.error('Failed to remove header logo:', err)
     });
   }
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MenuService, MenuItem, SocialLink } from '../../core/services/menu.service';
 import { I18nService } from '../../core/services/i18n.service';
+import { SiteSettingsService, SiteSettings } from '../../core/services/site-settings.service';
 
 @Component({
   selector: 'app-site-footer',
@@ -16,7 +17,19 @@ import { I18nService } from '../../core/services/i18n.service';
           <ng-container *ngFor="let item of footerItems()">
             <!-- Case: Brand Widget (3 cols) -->
             <div *ngIf="item.link_type === 'brand-widget'" class="lg:col-span-3">
-                <h3 class="text-lg font-bold mb-4">CMS<span class="text-blue-400">.Demo</span></h3>
+                <!-- Dynamic Logo -->
+                <div class="mb-4">
+                    <a routerLink="/" class="inline-block">
+                        <img *ngIf="settings().logo_url || settings().footer_logo_url" 
+                             [src]="settings().footer_logo_url || settings().logo_url" 
+                             [alt]="settings().logo_alt_text || 'Logo'"
+                             class="h-10 max-w-[180px] object-contain brightness-0 invert">
+                        <span *ngIf="!settings().logo_url && !settings().footer_logo_url" 
+                              class="text-lg font-bold">
+                            {{ settings().site_name || 'CMS' }}<span class="text-blue-400">.Demo</span>
+                        </span>
+                    </a>
+                </div>
                 <p class="text-slate-400 text-sm mb-6">
                     {{ i18n.translate('FOOTER_DESC') }}
                 </p>
@@ -82,10 +95,18 @@ import { I18nService } from '../../core/services/i18n.service';
 export class SiteFooterComponent implements OnInit {
   footerItems = signal<MenuItem[]>([]);
   socialLinks = signal<SocialLink[]>([]);
+  settings = signal<SiteSettings>({
+    logo_url: null,
+    logo_alt_text: 'Site Logo',
+    site_name: 'CMS.Demo',
+    header_logo_url: null,
+    footer_logo_url: null
+  });
 
   constructor(
     private menuService: MenuService,
-    public i18n: I18nService
+    public i18n: I18nService,
+    private siteSettingsService: SiteSettingsService
   ) { }
 
   ngOnInit() {
@@ -101,6 +122,11 @@ export class SiteFooterComponent implements OnInit {
 
     this.menuService.getSocialLinks().subscribe({
       next: (links) => this.socialLinks.set(links.filter(l => l.is_active))
+    });
+
+    // Load site settings for logo
+    this.siteSettingsService.loadSettings().subscribe(settings => {
+      this.settings.set(settings);
     });
   }
 
@@ -121,3 +147,4 @@ export class SiteFooterComponent implements OnInit {
     return link.startsWith('/') ? `/${this.i18n.currentLang()}${link}` : link;
   }
 }
+

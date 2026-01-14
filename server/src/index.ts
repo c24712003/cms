@@ -80,6 +80,24 @@ let db: any;
         console.log('Theme schema file not found or error, skipping', e);
     }
 
+    // Load Site Settings Schema
+    try {
+        const siteSettingsSql = fs.readFileSync(path.join(__dirname, 'db', 'schema_site_settings.sql'), 'utf8');
+        const statements = siteSettingsSql.split(';').filter((s: string) => s.trim());
+        for (const stmt of statements) {
+            try {
+                await db.exec(stmt + ';');
+            } catch (e: any) {
+                if (!e.message?.includes('duplicate column') && !e.message?.includes('UNIQUE constraint failed')) {
+                    console.warn('Site settings schema statement warning:', e.message);
+                }
+            }
+        }
+        console.log('Site settings schema loaded');
+    } catch (e) {
+        console.log('Site settings schema file not found or error, skipping', e);
+    }
+
     // Seed Admin
     const { seedAdmin } = require('./routes/auth');
     await seedAdmin();
@@ -107,6 +125,7 @@ import auditLogsRouter from './routes/audit-logs';
 import healthRouter from './routes/health';
 import templatesRouter from './routes/templates';
 import themesRouter from './routes/themes';
+import siteSettingsRouter from './routes/site-settings';
 
 // Import Middleware
 import redirectMiddleware from './middleware/redirects';
@@ -137,6 +156,7 @@ app.use('/api/audit-logs', auditLogsRouter);
 app.use('/api/health', healthRouter);
 app.use('/api/templates', templatesRouter);
 app.use('/api/themes', themesRouter);
+app.use('/api/site-settings', siteSettingsRouter);
 app.use('/', sitemapRouter); // Root level for /sitemap.xml
 app.use('/', robotsRouter);  // Root level for /robots.txt
 

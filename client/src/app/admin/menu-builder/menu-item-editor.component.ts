@@ -1,14 +1,16 @@
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MenuItem } from '../../core/services/menu.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { SiteSettingsService } from '../../core/services/site-settings.service';
+import { MediaPickerDialogComponent } from '../components/media-picker-dialog/media-picker-dialog.component';
 
 @Component({
   selector: 'app-menu-item-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, MediaPickerDialogComponent],
   template: `
     <div class="fixed inset-y-0 right-0 w-96 bg-white dark:bg-slate-800 shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col"
          [class.translate-x-0]="isOpen"
@@ -93,10 +95,65 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
             </div>
         </ng-container>
 
-        <!-- Widget Info -->
-        <div *ngIf="item.link_type && item.link_type.includes('widget')" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded p-4 text-sm text-blue-700 dark:text-blue-300">
+        <!-- Brand Widget Logo Configuration -->
+        <div *ngIf="item.link_type === 'brand-widget'" class="space-y-4">
+            <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-lg p-4">
+                <h4 class="font-bold text-purple-700 dark:text-purple-300 mb-3 flex items-center gap-2">
+                    <i class="fas fa-image"></i> Logo Configuration
+                </h4>
+                
+                <!-- Logo Preview -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Current Logo</label>
+                    <div class="flex items-center gap-4">
+                        <div class="w-24 h-24 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center overflow-hidden bg-white dark:bg-slate-700">
+                            <img *ngIf="logoUrl" [src]="logoUrl" alt="Logo" class="max-w-full max-h-full object-contain">
+                            <span *ngIf="!logoUrl" class="text-slate-400 text-xs text-center px-2">No logo set</span>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <button (click)="showMediaPicker = true" 
+                                    class="px-3 py-1.5 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 transition-colors">
+                                <i class="fas fa-upload mr-1"></i> {{ logoUrl ? 'Change Logo' : 'Select Logo' }}
+                            </button>
+                            <button *ngIf="logoUrl" (click)="removeLogo()" 
+                                    class="px-3 py-1.5 border border-red-300 text-red-600 rounded text-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                <i class="fas fa-trash mr-1"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logo Alt Text -->
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Alt Text</label>
+                    <input [(ngModel)]="logoAltText" 
+                           (ngModelChange)="onLogoSettingsChange()"
+                           class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm" 
+                           placeholder="Site Logo">
+                </div>
+
+                <!-- Site Name (Fallback) -->
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        Site Name <span class="text-xs text-slate-400">(shown if no logo)</span>
+                    </label>
+                    <input [(ngModel)]="siteName" 
+                           (ngModelChange)="onLogoSettingsChange()"
+                           class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm" 
+                           placeholder="CMS.Demo">
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+                <i class="fas fa-info-circle mr-1"></i>
+                The logo applies to both header and footer. Upload images via the Media Library.
+            </p>
+        </div>
+
+        <!-- Other Widget Info -->
+        <div *ngIf="item.link_type && item.link_type.includes('widget') && item.link_type !== 'brand-widget'" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded p-4 text-sm text-blue-700 dark:text-blue-300">
             <p class="font-bold mb-1">Widget Configured</p>
-            <p>This item represents a functional block in your footer. You can only customize its display label here. Content is managed in system settings.</p>
+            <p>This item represents a functional block in your footer. You can only customize its display label here.</p>
         </div>
 
         <!-- Visibility -->
@@ -120,14 +177,82 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
     
     <!-- Backdrop -->
     <div *ngIf="isOpen" (click)="close()" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity"></div>
+
+    <!-- Media Picker Dialog -->
+    <app-media-picker-dialog 
+        *ngIf="showMediaPicker"
+        (selected)="onLogoSelected($event)"
+        (cancelled)="showMediaPicker = false">
+    </app-media-picker-dialog>
   `
 })
-export class MenuItemEditorComponent {
+export class MenuItemEditorComponent implements OnInit, OnChanges {
   @Input() item: MenuItem | null = null;
   @Input() isOpen = false;
   @Output() closeEvent = new EventEmitter<void>();
+
+  // Logo settings (for brand-widget)
+  logoUrl: string | null = null;
+  logoAltText = 'Site Logo';
+  siteName = 'CMS.Demo';
+  showMediaPicker = false;
+
+  private pendingChanges = false;
+
+  constructor(private siteSettings: SiteSettingsService) { }
+
+  ngOnInit() {
+    this.loadSiteSettings();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isOpen'] && this.isOpen && this.item?.link_type === 'brand-widget') {
+      this.loadSiteSettings();
+    }
+  }
+
+  loadSiteSettings() {
+    this.siteSettings.loadSettings().subscribe(settings => {
+      this.logoUrl = settings.logo_url;
+      this.logoAltText = settings.logo_alt_text || 'Site Logo';
+      this.siteName = settings.site_name || 'CMS.Demo';
+    });
+  }
+
+  onLogoSelected(url: string) {
+    this.logoUrl = url;
+    this.showMediaPicker = false;
+    this.saveSiteSettings();
+  }
+
+  removeLogo() {
+    this.logoUrl = null;
+    this.saveSiteSettings();
+  }
+
+  onLogoSettingsChange() {
+    // Debounce saving
+    if (!this.pendingChanges) {
+      this.pendingChanges = true;
+      setTimeout(() => {
+        this.saveSiteSettings();
+        this.pendingChanges = false;
+      }, 500);
+    }
+  }
+
+  saveSiteSettings() {
+    this.siteSettings.updateSettings([
+      { key: 'logo_url', value: this.logoUrl },
+      { key: 'logo_alt_text', value: this.logoAltText },
+      { key: 'site_name', value: this.siteName }
+    ]).subscribe({
+      error: (err) => console.error('Failed to save logo settings:', err)
+    });
+  }
 
   close() {
     this.closeEvent.emit();
   }
 }
+

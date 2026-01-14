@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { MenuService, MenuItem } from '../../core/services/menu.service';
 import { I18nService } from '../../core/services/i18n.service';
+import { SiteSettingsService, SiteSettings } from '../../core/services/site-settings.service';
 import { GlobalSearchInputComponent } from '../../shared/components/global-search-input/global-search-input.component';
 
 @Component({
@@ -14,8 +15,14 @@ import { GlobalSearchInputComponent } from '../../shared/components/global-searc
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
-          <a routerLink="/" class="text-xl font-bold text-slate-900 hover:text-blue-600 transition-colors">
-            CMS<span class="text-blue-600">.Demo</span>
+          <a routerLink="/" class="flex items-center hover:opacity-80 transition-opacity">
+            <img *ngIf="settings().header_logo_url || settings().logo_url" 
+                 [src]="settings().header_logo_url || settings().logo_url" 
+                 [alt]="settings().logo_alt_text || 'Logo'"
+                 class="h-10 max-w-[180px] object-contain">
+            <span *ngIf="!settings().header_logo_url && !settings().logo_url" class="text-xl font-bold text-slate-900">
+              {{ getSiteName() }}
+            </span>
           </a>
 
           <!-- Desktop Nav -->
@@ -71,11 +78,19 @@ import { GlobalSearchInputComponent } from '../../shared/components/global-searc
 })
 export class SiteHeaderComponent implements OnInit {
   menuItems = signal<MenuItem[]>([]);
+  settings = signal<SiteSettings>({
+    logo_url: null,
+    logo_alt_text: 'Site Logo',
+    site_name: 'CMS.Demo',
+    header_logo_url: null,
+    footer_logo_url: null
+  });
 
   constructor(
     private menuService: MenuService,
     public i18n: I18nService,
-    private router: Router
+    private router: Router,
+    private siteSettingsService: SiteSettingsService
   ) { }
 
   ngOnInit() {
@@ -86,6 +101,17 @@ export class SiteHeaderComponent implements OnInit {
       },
       error: () => { this.menuItems.set([{ label: 'Home', link: '/home' }, { label: 'Contact', link: '/contact' }]); }
     });
+
+    // Load site settings for logo
+    this.siteSettingsService.loadSettings().subscribe(settings => {
+      this.settings.set(settings);
+    });
+  }
+
+  getSiteName(): string {
+    const name = this.settings().site_name || 'CMS.Demo';
+    // If contains a dot, make the part after the dot blue (for styling like "CMS.Demo")
+    return name;
   }
 
   getLocalizedLink(link: string): string {
@@ -107,3 +133,4 @@ export class SiteHeaderComponent implements OnInit {
     }
   }
 }
+
