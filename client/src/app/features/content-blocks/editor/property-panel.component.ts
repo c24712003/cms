@@ -15,9 +15,9 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, forwardRef(() => ArrayEditorComponent), MediaPickerDialogComponent, TranslatePipe],
   template: `
-    <div class="h-full flex flex-col bg-slate-50 border-l border-slate-200">
-      <div class="p-4 border-b border-slate-200 bg-white" *ngIf="!group">
-        <h3 class="font-bold text-slate-800">{{ 'BLOCK_PROP_PANEL_HEADER' | translate }}</h3>
+    <div class="h-full flex flex-col bg-slate-50 dark:bg-slate-900 border-l border-slate-200 dark:border-slate-700 transition-colors duration-200">
+      <div class="p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-colors duration-200" *ngIf="!group">
+        <h3 class="font-bold text-slate-800 dark:text-slate-100">{{ 'BLOCK_PROP_PANEL_HEADER' | translate }}</h3>
       </div>
       
       <div class="flex-1 overflow-y-auto p-4" *ngIf="form">
@@ -28,10 +28,10 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
               <!-- Textarea Widget -->
               <div *ngSwitchCase="'textarea'">
                  <label [for]="key" class="label">
-                   <span class="label-text font-medium">{{ getLabel(key) | translate }}<span *ngIf="isRequired(key)" class="text-red-500 ml-1">*</span></span>
+                   <span class="label-text font-medium dark:text-slate-300">{{ getLabel(key) | translate }}<span *ngIf="isRequired(key)" class="text-red-500 ml-1">*</span></span>
                  </label>
                  <textarea [id]="key" [formControlName]="key" 
-                   class="textarea textarea-bordered w-full h-24"
+                   class="textarea textarea-bordered w-full h-24 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                    [class.textarea-error]="hasError(key)"></textarea>
                  <p *ngIf="hasError(key)" class="text-xs text-red-500 mt-1">{{ 'VALIDATION_REQUIRED' | translate }}</p>
                  <p *ngIf="!hasError(key) && schema?.properties?.[key]?.description" class="text-xs text-slate-500 mt-1">{{ (schema?.properties?.[key]?.description || '') | translate }}</p>
@@ -41,17 +41,17 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
                <!-- Image Widget (Simplistic for now) -->
                <div *ngSwitchCase="'image'">
                  <label [for]="key" class="label">
-                   <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
+                   <span class="label-text font-medium dark:text-slate-300">{{ getLabel(key) | translate }}</span>
                  </label>
                  <div class="flex gap-2">
-                    <input type="text" [id]="key" [formControlName]="key" class="input input-bordered w-full" [placeholder]="'BLOCK_PROP_IMAGE_URL' | translate">
-                    <button type="button" (click)="openMediaPicker(key)" class="btn btn-square btn-outline">
+                    <input type="text" [id]="key" [formControlName]="key" class="input input-bordered w-full dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100" [placeholder]="'BLOCK_PROP_IMAGE_URL' | translate">
+                    <button type="button" (click)="openMediaPicker(key)" class="btn btn-square btn-outline dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-800">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                           <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                         </svg>
                     </button>
                  </div>
-                 <div *ngIf="form.get(key)?.value" class="mt-2 relative w-full h-32 rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
+                 <div *ngIf="form.get(key)?.value" class="mt-2 relative w-full h-32 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
                     <img [src]="form.get(key)?.value" class="w-full h-full object-cover">
                  </div>
               </div>
@@ -72,8 +72,8 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
               </div>
               
               <!-- Nested Object -->
-              <div *ngSwitchCase="'object'" class="border border-slate-200 rounded-lg p-3 bg-slate-50/50">
-                  <h4 class="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">{{ getLabel(key) | translate }}</h4>
+              <div *ngSwitchCase="'object'" class="border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50/50 dark:bg-slate-800/50">
+                  <h4 class="font-bold text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">{{ getLabel(key) | translate }}</h4>
                   <app-property-panel
                       [schema]="asSchema(schema?.properties?.[key]!)"
                       [group]="getAsFormGroup(key)">
@@ -83,10 +83,10 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
               <!-- Default Text Input -->
               <div *ngSwitchDefault>
                 <label [for]="key" class="label">
-                  <span class="label-text font-medium">{{ getLabel(key) | translate }}<span *ngIf="isRequired(key)" class="text-red-500 ml-1">*</span></span>
+                  <span class="label-text font-medium dark:text-slate-300">{{ getLabel(key) | translate }}<span *ngIf="isRequired(key)" class="text-red-500 ml-1">*</span></span>
                 </label>
                 <input type="text" [id]="key" [formControlName]="key" 
-                  class="input input-bordered w-full" 
+                  class="input input-bordered w-full dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100" 
                   [class.input-error]="hasError(key)" />
                 <p *ngIf="hasError(key)" class="text-xs text-red-500 mt-1">{{ 'VALIDATION_REQUIRED' | translate }}</p>
               </div>
@@ -97,17 +97,17 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
                    <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
                  </label>
                  <div class="flex items-center gap-3">
-                   <input type="color" [id]="key" [formControlName]="key" class="h-10 w-10 p-1 rounded cursor-pointer bg-white border border-slate-200">
-                   <input type="text" [formControlName]="key" class="input input-bordered flex-1 h-10 font-mono text-sm" placeholder="#000000">
+                   <input type="color" [id]="key" [formControlName]="key" class="h-10 w-10 p-1 rounded cursor-pointer bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600">
+                   <input type="text" [formControlName]="key" class="input input-bordered flex-1 h-10 font-mono text-sm dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100" placeholder="#000000">
                  </div>
               </div>
 
                <!-- Select Widget -->
                <div *ngSwitchCase="'select'">
                  <label [for]="key" class="label">
-                   <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
+                   <span class="label-text font-medium dark:text-slate-300">{{ getLabel(key) | translate }}</span>
                  </label>
-                 <select [id]="key" [formControlName]="key" class="select select-bordered w-full">
+                 <select [id]="key" [formControlName]="key" class="select select-bordered w-full dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100">
                      <option [ngValue]="null">Select...</option>
                      <option *ngFor="let opt of schema?.properties?.[key]?.enum" [value]="opt">{{ opt }}</option>
                  </select>
@@ -116,8 +116,8 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
                 <!-- Range Widget -->
                <div *ngSwitchCase="'range'">
                  <label [for]="key" class="label">
-                   <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
-                   <span class="label-text-alt">{{ form!.get(key)?.value }}</span>
+                   <span class="label-text font-medium dark:text-slate-300">{{ getLabel(key) | translate }}</span>
+                   <span class="label-text-alt dark:text-slate-400">{{ form!.get(key)?.value }}</span>
                  </label>
                  <input type="range" [id]="key" [formControlName]="key" class="range range-primary range-sm" min="0" max="100" step="1">
                </div>
@@ -125,9 +125,9 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
                <!-- Rich Text Widget (Basic for now) -->
                <div *ngSwitchCase="'rich-text'">
                  <label [for]="key" class="label">
-                   <span class="label-text font-medium">{{ getLabel(key) | translate }}</span>
+                   <span class="label-text font-medium dark:text-slate-300">{{ getLabel(key) | translate }}</span>
                  </label>
-                 <textarea [id]="key" [formControlName]="key" class="textarea textarea-bordered w-full h-32 font-serif text-lg leading-relaxed" placeholder="Type your content here..."></textarea>
+                 <textarea [id]="key" [formControlName]="key" class="textarea textarea-bordered w-full h-32 font-serif text-lg leading-relaxed dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100" placeholder="Type your content here..."></textarea>
                </div>
 
               </ng-container>
@@ -135,13 +135,13 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
         </form>
       </div>
       
-      <div class="p-4 border-t border-slate-200 bg-slate-50 sticky bottom-0 z-10" *ngIf="!group">
+      <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 sticky bottom-0 z-10" *ngIf="!group">
         <button type="button" class="btn btn-primary w-full" (click)="save()" [disabled]="form?.invalid || form?.pristine">
           {{ 'BLOCK_PROP_SAVE' | translate }}
         </button>
       </div>
       
-      <div class="p-8 text-center text-slate-400" *ngIf="!form">
+      <div class="p-8 text-center text-slate-400 dark:text-slate-500" *ngIf="!form">
         <p>{{ 'BLOCK_PROP_NO_SELECTION' | translate }}</p>
       </div>
 
