@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContentBlockManifest } from '../block.types';
 
@@ -14,22 +14,22 @@ interface FeatureItem {
     standalone: true,
     imports: [CommonModule],
     template: `
-    <div [id]="id" class="py-12 px-6" [class]="customClass"
-         [attr.data-block-id]="blockId"
-         [style.background-color]="styles?.background?.color">
+    <div [id]="id()" class="py-12 px-6" [class]="customClass()"
+         [attr.data-block-id]="blockId()"
+         [style.background-color]="styles()?.background?.color">
         <div class="container mx-auto">
             <!-- Header -->
             <div class="text-center mb-12" *ngIf="headline || subheadline">
-                <h2 class="text-3xl font-bold mb-4" *ngIf="headline">{{ headline }}</h2>
-                <p class="text-slate-600 max-w-2xl mx-auto" *ngIf="subheadline">{{ subheadline }}</p>
+                <h2 class="text-3xl font-bold mb-4" *ngIf="headline()">{{ headline() }}</h2>
+                <p class="text-slate-600 max-w-2xl mx-auto" *ngIf="subheadline()">{{ subheadline() }}</p>
             </div>
 
             <!-- Grid -->
             <div class="grid gap-8" 
                  [style.grid-template-columns]="getGridColumns()"
-                 [style.gap]="gap">
+                 [style.gap]="gap()">
                 
-                <div *ngFor="let item of features" class="feature-card p-6 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                <div *ngFor="let item of features()" class="feature-card p-6 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                     <!-- Icon -->
                     <div class="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4 text-2xl" 
                          *ngIf="item.icon">
@@ -52,20 +52,20 @@ interface FeatureItem {
   `
 })
 export class FeatureGridComponent {
-    @Input() id: string = '';
-    @Input() blockId: string = '';
-    @Input() customClass: string = '';
-    @Input() styles: any = {};
+    readonly id = input<string>('');
+    readonly blockId = input<string>('');
+    readonly customClass = input<string>('');
+    readonly styles = input<any>({});
 
-    @Input() headline: string = 'Our Features';
-    @Input() subheadline: string = 'Discover what makes our platform unique.';
-    @Input() features: FeatureItem[] = [
+    readonly headline = input<string>('Our Features');
+    readonly subheadline = input<string>('Discover what makes our platform unique.');
+    readonly features = input<FeatureItem[]>([
         { icon: '🚀', title: 'Fast Performance', description: 'Optimized for speed and efficiency.' },
         { icon: '🛡️', title: 'Secure by Default', description: 'Enterprise-grade security built-in.' },
         { icon: '🎨', title: 'Customizable', description: 'Adapt text, colors, and layout easily.' }
-    ];
-    @Input() columns: number = 3;
-    @Input() gap: string = '2rem';
+    ]);
+    readonly columns = input<number>(3);
+    readonly gap = input<string>('2rem');
 
     getGridColumns(): string {
         // Basic responsive grid mapping can be handled here or via style schema

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 // Import services and new renderer
@@ -56,202 +56,202 @@ import { TeamGridComponent } from './team-grid.component';
   template: `
     <!-- Check if the block is registered in the new system -->
     <app-dynamic-block-renderer 
-      *ngIf="isDynamic(block?.type); else legacyRenderer" 
-      [block]="block">
+      *ngIf="isDynamic(block()?.type); else legacyRenderer" 
+      [block]="block()">
     </app-dynamic-block-renderer>
 
     <!-- Fallback to legacy ngSwitch renderer -->
     <ng-template #legacyRenderer>
-      <ng-container [ngSwitch]="block?.type">
+      <ng-container [ngSwitch]="block()?.type">
         <!-- Hero Carousel -->
         <app-hero-carousel 
           *ngSwitchCase="'hero-carousel'" 
-          [slides]="block.slides || []">
+          [slides]="block().slides || []">
         </app-hero-carousel>
         
         <!-- Feature Grid -->
         <app-feature-grid 
           *ngSwitchCase="'feature-grid'" 
-          [headline]="block.data?.headline || block.title" 
-          [subheadline]="block.data?.subheadline || ''"
-          [features]="block.data?.features || block.items || []">
+          [headline]="block().data?.headline || block().title" 
+          [subheadline]="block().data?.subheadline || ''"
+          [features]="block().data?.features || block().items || []">
         </app-feature-grid>
         
         <!-- Card Carousel -->
         <app-card-carousel 
           *ngSwitchCase="'card-carousel'" 
-          [title]="block.title" 
-          [subtitle]="block.subtitle"
-          [cards]="block.cards || []">
+          [title]="block().title" 
+          [subtitle]="block().subtitle"
+          [cards]="block().cards || []">
         </app-card-carousel>
         
         <!-- Stats Counter -->
         <app-stats-counter 
           *ngSwitchCase="'stats-counter'" 
-          [header]="{ title: block.data?.header?.title || '' }"
-          [stats]="block.data?.stats || block.stats || []"
-          [styles]="block.styles">
+          [header]="{ title: block().data?.header?.title || '' }"
+          [stats]="block().data?.stats || block().stats || []"
+          [styles]="block().styles">
         </app-stats-counter>
         
         <!-- CTA Banner -->
         <app-cta-banner 
           *ngSwitchCase="'cta-banner'" 
-          [title]="block.title"
-          [description]="block.description"
-          [primaryCta]="block.primaryCta"
-          [secondaryCta]="block.secondaryCta">
+          [title]="block().title"
+          [description]="block().description"
+          [primaryCta]="block().primaryCta"
+          [secondaryCta]="block().secondaryCta">
         </app-cta-banner>
         
         <!-- Case Study Showcase -->
         <app-case-study-showcase 
           *ngSwitchCase="'case-study-showcase'" 
-          [title]="block.title"
-          [cases]="block.cases || []"
-          [viewMoreText]="block.viewMoreText"
-          [viewMoreLink]="block.viewMoreLink">
+          [title]="block().title"
+          [cases]="block().cases || []"
+          [viewMoreText]="block().viewMoreText"
+          [viewMoreLink]="block().viewMoreLink">
         </app-case-study-showcase>
         
         <!-- Page Hero (Legacy fallback, though now it's registered) -->
         <app-page-hero 
           *ngSwitchCase="'page-hero'" 
-          [title]="block.title"
-          [subtitle]="block.subtitle"
-          [breadcrumb]="block.breadcrumb || []"
-          [image]="block.image">
+          [title]="block().title"
+          [subtitle]="block().subtitle"
+          [breadcrumb]="block().breadcrumb || []"
+          [image]="block().image">
         </app-page-hero>
         
         <!-- FAQ Accordion -->
         <app-faq-accordion 
           *ngSwitchCase="'faq-accordion'" 
-          [title]="block.data?.title || block.title"
-          [items]="block.data?.items || block.items || []"
-          [styles]="block.styles">
+          [title]="block().data?.title || block().title"
+          [items]="block().data?.items || block().items || []"
+          [styles]="block().styles">
         </app-faq-accordion>
         
         <!-- Timeline Steps (Legacy fallback) -->
         <app-timeline-steps 
           *ngSwitchCase="'timeline-steps'" 
-          [title]="block.title"
-          [subtitle]="block.subtitle"
-          [steps]="block.steps || []">
+          [title]="block().title"
+          [subtitle]="block().subtitle"
+          [steps]="block().steps || []">
         </app-timeline-steps>
         
         <!-- Contact Form CTA -->
         <app-contact-form-cta 
           *ngSwitchCase="'contact-form-cta'" 
-          [title]="block.title"
-          [description]="block.description"
-          [fields]="block.fields"
-          [submitButton]="block.submitButton"
-          [privacy]="block.privacy"
-          [contactInfo]="block.contactInfo">
+          [title]="block().title"
+          [description]="block().description"
+          [fields]="block().fields"
+          [submitButton]="block().submitButton"
+          [privacy]="block().privacy"
+          [contactInfo]="block().contactInfo">
         </app-contact-form-cta>
 
         <!-- Content With Image -->
         <app-content-with-image 
           *ngSwitchCase="'content-with-image'" 
-          [title]="block.title"
-          [items]="block.items || []"
-          [image]="block.image"
-          [imagePosition]="block.imagePosition || 'right'">
+          [title]="block().title"
+          [items]="block().items || []"
+          [image]="block().image"
+          [imagePosition]="block().imagePosition || 'right'">
         </app-content-with-image>
         
         <!-- Video Hero -->
         <app-video-hero 
           *ngSwitchCase="'video-hero'" 
-          [videoUrl]="block.videoUrl"
-          [posterImage]="block.posterImage"
-          [title]="block.title"
-          [subtitle]="block.subtitle"
-          [cta]="block.cta"
-          [overlayOpacity]="block.overlayOpacity || 60"
-          [autoplay]="block.autoplay !== false"
-          [loop]="block.loop !== false"
-          [muted]="block.muted !== false">
+          [videoUrl]="block().videoUrl"
+          [posterImage]="block().posterImage"
+          [title]="block().title"
+          [subtitle]="block().subtitle"
+          [cta]="block().cta"
+          [overlayOpacity]="block().overlayOpacity || 60"
+          [autoplay]="block().autoplay !== false"
+          [loop]="block().loop !== false"
+          [muted]="block().muted !== false">
         </app-video-hero>
         
         <!-- Split Hero -->
         <app-split-hero 
           *ngSwitchCase="'split-hero'" 
-          [title]="block.title"
-          [subtitle]="block.subtitle"
-          [image]="block.image"
-          [mediaPosition]="block.mediaPosition || 'right'"
-          [cta]="block.cta"
-          [secondaryCta]="block.secondaryCta"
-          [features]="block.features || []">
+          [title]="block().title"
+          [subtitle]="block().subtitle"
+          [image]="block().image"
+          [mediaPosition]="block().mediaPosition || 'right'"
+          [cta]="block().cta"
+          [secondaryCta]="block().secondaryCta"
+          [features]="block().features || []">
         </app-split-hero>
         
         <!-- Masonry Gallery -->
         <app-masonry-gallery 
           *ngSwitchCase="'masonry-gallery'" 
-          [title]="block.title"
-          [subtitle]="block.subtitle"
-          [images]="block.images || []"
-          [columns]="block.columns || 3"
-          [gap]="block.gap || 'md'"
-          [enableLightbox]="block.enableLightbox !== false">
+          [title]="block().title"
+          [subtitle]="block().subtitle"
+          [images]="block().images || []"
+          [columns]="block().columns || 3"
+          [gap]="block().gap || 'md'"
+          [enableLightbox]="block().enableLightbox !== false">
         </app-masonry-gallery>
         
         <!-- Image Comparison -->
         <app-image-comparison 
           *ngSwitchCase="'image-comparison'" 
-          [title]="block.title"
-          [beforeImage]="block.beforeImage"
-          [afterImage]="block.afterImage"
-          [beforeLabel]="block.beforeLabel || 'Before'"
-          [afterLabel]="block.afterLabel || 'After'"
-          [startPosition]="block.startPosition || 50"
-          [orientation]="block.orientation || 'horizontal'">
+          [title]="block().title"
+          [beforeImage]="block().beforeImage"
+          [afterImage]="block().afterImage"
+          [beforeLabel]="block().beforeLabel || 'Before'"
+          [afterLabel]="block().afterLabel || 'After'"
+          [startPosition]="block().startPosition || 50"
+          [orientation]="block().orientation || 'horizontal'">
         </app-image-comparison>
         
         <!-- Pricing Table -->
         <app-pricing-table 
           *ngSwitchCase="'pricing-table'" 
-          [title]="block.title"
-          [subtitle]="block.subtitle"
-          [currency]="block.currency || '¥'"
-          [plans]="block.plans || []">
+          [title]="block().title"
+          [subtitle]="block().subtitle"
+          [currency]="block().currency || '¥'"
+          [plans]="block().plans || []">
         </app-pricing-table>
         
         <!-- Testimonial Slider -->
         <app-testimonial-slider 
           *ngSwitchCase="'testimonial-slider'" 
-          [title]="block.title"
-          [testimonials]="block.testimonials || []"
-          [autoRotate]="block.autoRotate !== false"
-          [rotateInterval]="block.rotateInterval || 5">
+          [title]="block().title"
+          [testimonials]="block().testimonials || []"
+          [autoRotate]="block().autoRotate !== false"
+          [rotateInterval]="block().rotateInterval || 5">
         </app-testimonial-slider>
         
         <!-- Team Grid -->
         <app-team-grid 
           *ngSwitchCase="'team-grid'" 
-          [title]="block.title"
-          [subtitle]="block.subtitle"
-          [columns]="block.columns || 3"
-          [cardStyle]="block.cardStyle || 'minimal'"
-          [members]="block.members || []">
+          [title]="block().title"
+          [subtitle]="block().subtitle"
+          [columns]="block().columns || 3"
+          [cardStyle]="block().cardStyle || 'minimal'"
+          [members]="block().members || []">
         </app-team-grid>
         
         <!-- Fallback: Basic text/html blocks -->
         <div *ngSwitchCase="'text'" class="max-w-4xl mx-auto px-6 py-4">
-          <p class="text-slate-600 leading-relaxed text-lg">{{ block.content }}</p>
+          <p class="text-slate-600 leading-relaxed text-lg">{{ block().content }}</p>
         </div>
         
         <div *ngSwitchCase="'html'" class="max-w-4xl mx-auto px-6 py-4">
-          <div [innerHTML]="block.content" class="prose prose-lg prose-slate"></div>
+          <div [innerHTML]="block().content" class="prose prose-lg prose-slate"></div>
         </div>
         
         <!-- Unknown block type -->
         <div *ngSwitchDefault class="max-w-4xl mx-auto px-6 py-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p class="text-yellow-800 text-sm">Unknown block type: {{ block?.type }}</p>
+            <p class="bg-yellow-50 border border-yellow-300 text-yellow-800 text-sm">Unknown block type: {{ block()?.type }}</p>
         </div>
       </ng-container>
     </ng-template>
   `
 })
 export class BlockRendererComponent {
-  @Input() block: any;
+  readonly block = input.required<any>();
 
   constructor(private registry: BlockRegistryService) { }
 

@@ -1,4 +1,4 @@
-import { Component, Input, ElementRef, ViewChild, AfterViewInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, input, ElementRef, ViewChild, AfterViewInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ContentBlockManifest } from './block.types';
 
@@ -10,9 +10,9 @@ import { ContentBlockManifest } from './block.types';
     <section class="py-16 md:py-20 bg-slate-50">
       <div class="max-w-5xl mx-auto px-6">
         <!-- Header -->
-        <div *ngIf="title" class="text-center mb-12">
+        <div *ngIf="title()" class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-            {{ title }}
+            {{ title() }}
           </h2>
         </div>
         
@@ -20,8 +20,8 @@ import { ContentBlockManifest } from './block.types';
         <div 
           #container
           class="comparison-container relative overflow-hidden rounded-2xl shadow-2xl shadow-slate-200/50 cursor-ew-resize touch-none"
-          [class.horizontal]="orientation === 'horizontal'"
-          [class.vertical]="orientation === 'vertical'"
+          [class.horizontal]="orientation() === 'horizontal'"
+          [class.vertical]="orientation() === 'vertical'"
           (pointerdown)="onPointerDown($event)"
           (pointermove)="onPointerMove($event)"
           (pointerup)="onPointerUp($event)"
@@ -31,15 +31,15 @@ import { ContentBlockManifest } from './block.types';
           <!-- Before Image (Full) -->
           <div class="before-image absolute inset-0 select-none">
             <img 
-              *ngIf="beforeImage"
-              [src]="beforeImage" 
+              *ngIf="beforeImage()"
+              [src]="beforeImage()" 
               alt="Before"
               draggable="false"
               class="w-full h-full object-cover select-none pointer-events-none" />
             <div 
-              *ngIf="beforeLabel" 
+              *ngIf="beforeLabel()" 
               class="absolute top-4 left-4 px-3 py-1.5 bg-slate-900/70 backdrop-blur-sm text-white text-sm font-medium rounded-lg z-20">
-              {{ beforeLabel }}
+              {{ beforeLabel() }}
             </div>
           </div>
           
@@ -48,41 +48,41 @@ import { ContentBlockManifest } from './block.types';
             class="after-image absolute inset-0 overflow-hidden select-none"
             [style.clip-path]="clipPath">
             <img 
-              *ngIf="afterImage"
-              [src]="afterImage" 
+              *ngIf="afterImage()"
+              [src]="afterImage()" 
               alt="After"
               draggable="false"
               class="w-full h-full object-cover select-none pointer-events-none" />
             <div 
-              *ngIf="afterLabel" 
+              *ngIf="afterLabel()" 
               class="absolute top-4 right-4 px-3 py-1.5 bg-blue-600/90 backdrop-blur-sm text-white text-sm font-medium rounded-lg z-20">
-              {{ afterLabel }}
+              {{ afterLabel() }}
             </div>
           </div>
           
           <!-- Slider Handle -->
           <div 
             class="slider-handle absolute z-30 pointer-events-none"
-            [class.horizontal]="orientation === 'horizontal'"
-            [class.vertical]="orientation === 'vertical'"
-            [style.left.%]="orientation === 'horizontal' ? position : null"
-            [style.top.%]="orientation === 'vertical' ? position : null">
+            [class.horizontal]="orientation() === 'horizontal'"
+            [class.vertical]="orientation() === 'vertical'"
+            [style.left.%]="orientation() === 'horizontal' ? position : null"
+            [style.top.%]="orientation() === 'vertical' ? position : null">
             
             <!-- Line -->
             <div 
               class="handle-line bg-white shadow-lg"
-              [class.w-1]="orientation === 'horizontal'"
-              [class.h-full]="orientation === 'horizontal'"
-              [class.h-1]="orientation === 'vertical'"
-              [class.w-full]="orientation === 'vertical'">
+              [class.w-1]="orientation() === 'horizontal'"
+              [class.h-full]="orientation() === 'horizontal'"
+              [class.h-1]="orientation() === 'vertical'"
+              [class.w-full]="orientation() === 'vertical'">
             </div>
             
             <!-- Circle Handle -->
             <div class="handle-circle absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-slate-100">
-              <svg *ngIf="orientation === 'horizontal'" class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg *ngIf="orientation() === 'horizontal'" class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
               </svg>
-              <svg *ngIf="orientation === 'vertical'" class="w-6 h-6 text-slate-600 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg *ngIf="orientation() === 'vertical'" class="w-6 h-6 text-slate-600 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
               </svg>
             </div>
@@ -164,13 +164,13 @@ export class ImageComparisonComponent implements AfterViewInit {
     }
   };
 
-  @Input() title: string = '';
-  @Input() beforeImage: string = '';
-  @Input() afterImage: string = '';
-  @Input() beforeLabel: string = 'Before';
-  @Input() afterLabel: string = 'After';
-  @Input() startPosition: number = 50;
-  @Input() orientation: 'horizontal' | 'vertical' = 'horizontal';
+    readonly title = input<string>('');
+    readonly beforeImage = input<string>('');
+    readonly afterImage = input<string>('');
+    readonly beforeLabel = input<string>('Before');
+    readonly afterLabel = input<string>('After');
+    readonly startPosition = input<number>(50);
+    readonly orientation = input<'horizontal' | 'vertical'>('horizontal');
 
   position: number = 50;
   isDragging = false;
@@ -178,7 +178,7 @@ export class ImageComparisonComponent implements AfterViewInit {
   constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
 
   get clipPath(): string {
-    if (this.orientation === 'horizontal') {
+    if (this.orientation() === 'horizontal') {
       return `inset(0 0 0 ${this.position}%)`;
     } else {
       return `inset(${this.position}% 0 0 0)`;
@@ -186,7 +186,7 @@ export class ImageComparisonComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.position = this.startPosition;
+    this.position = this.startPosition();
   }
 
   onPointerDown(event: PointerEvent) {
@@ -232,7 +232,7 @@ export class ImageComparisonComponent implements AfterViewInit {
     const clientX = event.clientX;
     const clientY = event.clientY;
 
-    if (this.orientation === 'horizontal') {
+    if (this.orientation() === 'horizontal') {
       const x = clientX - rect.left;
       this.position = Math.max(0, Math.min(100, (x / rect.width) * 100));
     } else {

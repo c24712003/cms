@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, Output, OnInit, signal } from '@angular/core';
+import { Component, input, output, EventEmitter, Output, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MediaService, MediaAsset } from '../../core/services/media.service';
 
@@ -67,8 +67,8 @@ import { MediaService, MediaAsset } from '../../core/services/media.service';
   `
 })
 export class MediaPickerComponent implements OnInit {
-  @Output() onSelect = new EventEmitter<MediaAsset>();
-  @Output() onCancel = new EventEmitter<void>();
+    readonly onSelect = output<MediaAsset>();
+    readonly onCancel = output<void>();
 
   constructor(public mediaService: MediaService) { }
 

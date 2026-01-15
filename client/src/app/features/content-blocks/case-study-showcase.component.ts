@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ContentBlockManifest } from './block.types';
@@ -20,9 +20,9 @@ interface Case {
   template: `
     <section class="py-20 bg-white">
       <div class="max-w-7xl mx-auto px-6">
-        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-16">{{ title }}</h2>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-16">{{ title() }}</h2>
         
-        <div *ngFor="let c of cases" class="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 p-8 md:p-12 mb-8">
+        <div *ngFor="let c of cases()" class="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 p-8 md:p-12 mb-8">
           <div class="flex flex-col md:flex-row gap-8">
             <!-- Left: Info -->
             <div class="md:w-2/3">
@@ -65,9 +65,9 @@ interface Case {
           </div>
         </div>
         
-        <div class="text-center mt-12" *ngIf="viewMoreLink">
-          <a [routerLink]="viewMoreLink" class="btn btn-secondary">
-            {{ viewMoreText }}
+        <div class="text-center mt-12" *ngIf="viewMoreLink()">
+          <a [routerLink]="viewMoreLink()" class="btn btn-secondary">
+            {{ viewMoreText() }}
             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
             </svg>
@@ -108,8 +108,8 @@ export class CaseStudyShowcaseComponent {
     }
   };
 
-  @Input() title: string = '';
-  @Input() cases: Case[] = [];
-  @Input() viewMoreText: string = '';
-  @Input() viewMoreLink: string = '';
+    readonly title = input<string>('');
+    readonly cases = input<Case[]>([]);
+    readonly viewMoreText = input<string>('');
+    readonly viewMoreLink = input<string>('');
 }

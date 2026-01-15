@@ -356,7 +356,7 @@ import { MediaPickerDialogComponent } from '../components/media-picker-dialog/me
     <!-- Header Logo Media Picker -->
     <app-media-picker-dialog 
         *ngIf="showHeaderLogoPicker"
-        (selected)="onHeaderLogoSelected($event)"
+        (selected)="onHeaderLogoSelected($any($event))"
         (cancelled)="showHeaderLogoPicker = false">
     </app-media-picker-dialog>
   `

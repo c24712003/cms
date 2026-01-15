@@ -1,14 +1,14 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, input, output, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { BlockSettings, BlockAnimation } from '../../../features/content-blocks/block.types';
 
 @Component({
-    selector: 'app-settings-panel',
-    standalone: true,
-    imports: [CommonModule, FormsModule, TranslatePipe],
-    template: `
+  selector: 'app-settings-panel',
+  standalone: true,
+  imports: [CommonModule, FormsModule, TranslatePipe],
+  template: `
     <div class="h-full flex flex-col bg-slate-50 dark:bg-slate-900">
       <div class="flex-1 overflow-y-auto p-4 space-y-6">
         
@@ -213,48 +213,48 @@ import { BlockSettings, BlockAnimation } from '../../../features/content-blocks/
   `
 })
 export class SettingsPanelComponent implements OnChanges {
-    @Input() blockSettings: BlockSettings = {};
-    @Output() settingsChange = new EventEmitter<BlockSettings>();
+  readonly blockSettings = input<BlockSettings>({});
+  readonly settingsChange = output<BlockSettings>();
 
-    settings: BlockSettings = this.getDefaultSettings();
-    animationTriggers: Array<'visible' | 'hover' | 'click'> = ['visible', 'hover', 'click'];
+  settings: BlockSettings = this.getDefaultSettings();
+  animationTriggers: Array<'visible' | 'hover' | 'click'> = ['visible', 'hover', 'click'];
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['blockSettings']) {
-            this.settings = this.mergeWithDefaults(this.blockSettings || {});
-        }
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['blockSettings']) {
+      this.settings = this.mergeWithDefaults(this.blockSettings() || {});
     }
+  }
 
-    private getDefaultSettings(): BlockSettings {
-        return {
-            animation: {
-                type: 'none',
-                duration: 500,
-                delay: 0,
-                trigger: 'visible'
-            },
-            visibility: {
-                hideOnMobile: false,
-                hideOnTablet: false,
-                hideOnDesktop: false,
-                requiresAuth: false
-            },
-            customClass: '',
-            id: ''
-        };
-    }
+  private getDefaultSettings(): BlockSettings {
+    return {
+      animation: {
+        type: 'none',
+        duration: 500,
+        delay: 0,
+        trigger: 'visible'
+      },
+      visibility: {
+        hideOnMobile: false,
+        hideOnTablet: false,
+        hideOnDesktop: false,
+        requiresAuth: false
+      },
+      customClass: '',
+      id: ''
+    };
+  }
 
-    private mergeWithDefaults(input: BlockSettings): BlockSettings {
-        const defaults = this.getDefaultSettings();
-        return {
-            animation: { ...defaults.animation!, ...input.animation } as BlockSettings['animation'],
-            visibility: { ...defaults.visibility!, ...input.visibility },
-            customClass: input.customClass || '',
-            id: input.id || ''
-        };
-    }
+  private mergeWithDefaults(input: BlockSettings): BlockSettings {
+    const defaults = this.getDefaultSettings();
+    return {
+      animation: { ...defaults.animation!, ...input.animation } as BlockSettings['animation'],
+      visibility: { ...defaults.visibility!, ...input.visibility },
+      customClass: input.customClass || '',
+      id: input.id || ''
+    };
+  }
 
-    emitChange(): void {
-        this.settingsChange.emit({ ...this.settings });
-    }
+  emitChange(): void {
+    this.settingsChange.emit({ ...this.settings });
+  }
 }

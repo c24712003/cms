@@ -1,5 +1,5 @@
 
-import { Component, Input, forwardRef } from '@angular/core';
+import { Component, forwardRef, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormGroup, FormControl, AbstractControl } from '@angular/forms';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -16,7 +16,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
     <div class="space-y-4">
        <!-- Header -->
        <div class="flex items-center justify-between">
-         <label class="label-text font-medium">{{ label }}</label>
+         <label class="label-text font-medium">{{ label() }}</label>
          <button type="button" (click)="addItem()" class="btn btn-xs btn-primary gap-1 text-white">
            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
            {{ 'BLOCK_PROP_ADD_ITEM' | translate }}
@@ -25,7 +25,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
        <!-- List -->
        <div cdkDropList (cdkDropListDropped)="drop($event)" class="space-y-3">
-         <div *ngFor="let control of formArray.controls; let i = index" cdkDrag class="card bg-base-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm group">
+         <div *ngFor="let control of formArray().controls; let i = index" cdkDrag class="card bg-base-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm group">
             <!-- Item Header -->
             <div class="card-body p-4">
               <div class="flex items-center justify-between mb-3">
@@ -39,9 +39,9 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
               </div>
 
               <!-- Nested Property Panel for Object Items -->
-              <ng-container *ngIf="itemSchema.properties; else primitiveInput">
+              <ng-container *ngIf="itemSchema().properties; else primitiveInput">
                  <app-property-panel 
-                     [schema]="asSchema(itemSchema)"
+                     [schema]="asSchema(itemSchema())"
                      [group]="asFormGroup(control)">
                  </app-property-panel>
               </ng-container>
@@ -53,7 +53,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
             </div>
          </div>
          
-         <div *ngIf="formArray.controls.length === 0" class="text-center py-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-slate-400 dark:text-slate-500 text-sm border border-dashed border-slate-300 dark:border-slate-700">
+         <div *ngIf="formArray().controls.length === 0" class="text-center py-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-slate-400 dark:text-slate-500 text-sm border border-dashed border-slate-300 dark:border-slate-700">
             {{ 'BLOCK_PROP_NO_ITEMS' | translate }}
          </div>
        </div>
@@ -61,25 +61,26 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
   `
 })
 export class ArrayEditorComponent {
-  @Input() formArray!: FormArray;
-  @Input() label: string = '';
-  @Input() itemSchema!: BlockProperty;
+  readonly formArray = input.required<FormArray>();
+  readonly label = input<string>('');
+  readonly itemSchema = input.required<BlockProperty>();
 
   constructor(private sfb: SchemaFormBuilder) { }
 
   drop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.formArray.controls, event.previousIndex, event.currentIndex);
-    this.formArray.updateValueAndValidity();
+    moveItemInArray(this.formArray().controls, event.previousIndex, event.currentIndex);
+    this.formArray().updateValueAndValidity();
   }
 
   addItem() {
-    if (!this.itemSchema) return;
-    const control = this.sfb.createArrayItem(this.itemSchema);
-    this.formArray.push(control);
+    const schema = this.itemSchema();
+    if (!schema) return;
+    const control = this.sfb.createArrayItem(schema);
+    this.formArray().push(control);
   }
 
   removeItem(index: number) {
-    this.formArray.removeAt(index);
+    this.formArray().removeAt(index);
   }
 
   asFormGroup(control: AbstractControl): FormGroup {

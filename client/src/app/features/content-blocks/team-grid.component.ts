@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContentBlockManifest } from './block.types';
 
@@ -24,41 +24,41 @@ interface TeamMember {
       <div class="max-w-7xl mx-auto px-6">
         <!-- Header -->
         <div class="text-center mb-16">
-          <h2 *ngIf="title" class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-            {{ title }}
+          <h2 *ngIf="title()" class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+            {{ title() }}
           </h2>
-          <p *ngIf="subtitle" class="text-lg text-slate-600 max-w-2xl mx-auto">
-            {{ subtitle }}
+          <p *ngIf="subtitle()" class="text-lg text-slate-600 max-w-2xl mx-auto">
+            {{ subtitle() }}
           </p>
         </div>
         
         <!-- Team Grid -->
         <div 
           class="grid gap-8"
-          [class.md:grid-cols-2]="columns === 2"
-          [class.md:grid-cols-3]="columns === 3"
-          [class.md:grid-cols-4]="columns === 4">
+          [class.md:grid-cols-2]="columns() === 2"
+          [class.md:grid-cols-3]="columns() === 3"
+          [class.md:grid-cols-4]="columns() === 4">
           
           <div 
-            *ngFor="let member of members" 
+            *ngFor="let member of members()" 
             class="group"
-            [class.text-center]="cardStyle === 'minimal'"
-            [class.bg-slate-50]="cardStyle === 'detailed'"
-            [class.rounded-2xl]="cardStyle === 'detailed'"
-            [class.p-6]="cardStyle === 'detailed'"
-            [class.hover:shadow-xl]="cardStyle === 'detailed'"
-            [class.transition-all]="cardStyle === 'detailed'"
-            [class.duration-300]="cardStyle === 'detailed'">
+            [class.text-center]="cardStyle() === 'minimal'"
+            [class.bg-slate-50]="cardStyle() === 'detailed'"
+            [class.rounded-2xl]="cardStyle() === 'detailed'"
+            [class.p-6]="cardStyle() === 'detailed'"
+            [class.hover:shadow-xl]="cardStyle() === 'detailed'"
+            [class.transition-all]="cardStyle() === 'detailed'"
+            [class.duration-300]="cardStyle() === 'detailed'">
             
             <!-- Photo -->
             <div 
               class="relative mb-4 overflow-hidden"
               [class.aspect-square]="true"
-              [class.rounded-full]="cardStyle === 'minimal'"
-              [class.mx-auto]="cardStyle === 'minimal'"
-              [class.w-40]="cardStyle === 'minimal'"
-              [class.h-40]="cardStyle === 'minimal'"
-              [class.rounded-xl]="cardStyle === 'detailed'">
+              [class.rounded-full]="cardStyle() === 'minimal'"
+              [class.mx-auto]="cardStyle() === 'minimal'"
+              [class.w-40]="cardStyle() === 'minimal'"
+              [class.h-40]="cardStyle() === 'minimal'"
+              [class.rounded-xl]="cardStyle() === 'detailed'">
               <img 
                 *ngIf="member.photo"
                 [src]="member.photo" 
@@ -72,7 +72,7 @@ interface TeamMember {
               
               <!-- Social Overlay (Detailed style) -->
               <div 
-                *ngIf="cardStyle === 'detailed' && member.socials?.length"
+                *ngIf="cardStyle() === 'detailed' && member.socials?.length"
                 class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
                 <div class="flex gap-3">
                   <a 
@@ -113,14 +113,14 @@ interface TeamMember {
                 {{ member.role }}
               </p>
               <p 
-                *ngIf="member.bio && cardStyle === 'detailed'" 
+                *ngIf="member.bio && cardStyle() === 'detailed'" 
                 class="text-sm text-slate-600 leading-relaxed">
                 {{ member.bio }}
               </p>
               
               <!-- Social Links (Minimal style) -->
               <div 
-                *ngIf="cardStyle === 'minimal' && member.socials?.length" 
+                *ngIf="cardStyle() === 'minimal' && member.socials?.length" 
                 class="flex justify-center gap-2 mt-4">
                 <a 
                   *ngFor="let social of member.socials" 
@@ -210,9 +210,9 @@ export class TeamGridComponent {
     }
   };
 
-  @Input() title: string = '';
-  @Input() subtitle: string = '';
-  @Input() columns: number = 3;
-  @Input() cardStyle: 'minimal' | 'detailed' = 'minimal';
-  @Input() members: TeamMember[] = [];
+    readonly title = input<string>('');
+    readonly subtitle = input<string>('');
+    readonly columns = input<number>(3);
+    readonly cardStyle = input<'minimal' | 'detailed'>('minimal');
+    readonly members = input<TeamMember[]>([]);
 }

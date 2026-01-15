@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
     standalone: true,
     imports: [CommonModule],
     template: `
-        <div class="skeleton" [ngClass]="variant" [ngStyle]="customStyle">
+        <div class="skeleton" [ngClass]="variant()" [ngStyle]="customStyle">
             <ng-content></ng-content>
         </div>
     `,
@@ -99,14 +99,14 @@ import { CommonModule } from '@angular/common';
     `]
 })
 export class SkeletonComponent {
-    @Input() variant: 'text' | 'text-short' | 'title' | 'avatar' | 'button' | 'card' | 'image' | 'image-square' | 'paragraph' = 'text';
-    @Input() width?: string;
-    @Input() height?: string;
+    readonly variant = input<'text' | 'text-short' | 'title' | 'avatar' | 'button' | 'card' | 'image' | 'image-square' | 'paragraph'>('text');
+    readonly width = input<string>();
+    readonly height = input<string>();
 
     get customStyle(): Record<string, string> {
         const style: Record<string, string> = {};
-        if (this.width) style['width'] = this.width;
-        if (this.height) style['height'] = this.height;
+        if (this.width()) style['width'] = this.width()!;
+        if (this.height()) style['height'] = this.height()!;
         return style;
     }
 }
@@ -120,7 +120,7 @@ export class SkeletonComponent {
     standalone: true,
     imports: [CommonModule, SkeletonComponent],
     template: `
-        <div class="content-skeleton" [ngSwitch]="type">
+        <div class="content-skeleton" [ngSwitch]="type()">
             <!-- Hero Skeleton -->
             <div *ngSwitchCase="'hero-carousel'" class="hero-skeleton">
                 <app-skeleton variant="image" height="400px"></app-skeleton>
@@ -249,5 +249,5 @@ export class SkeletonComponent {
     `]
 })
 export class ContentSkeletonComponent {
-    @Input() type: string = 'default';
+    readonly type = input<string>('default');
 }

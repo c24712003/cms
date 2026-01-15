@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ContentBlockManifest } from './block.types';
@@ -27,11 +27,11 @@ interface PricingPlan {
       <div class="max-w-7xl mx-auto px-6">
         <!-- Header -->
         <div class="text-center mb-16">
-          <h2 *ngIf="title" class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-            {{ title }}
+          <h2 *ngIf="title()" class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+            {{ title() }}
           </h2>
-          <p *ngIf="subtitle" class="text-lg text-slate-600 max-w-2xl mx-auto">
-            {{ subtitle }}
+          <p *ngIf="subtitle()" class="text-lg text-slate-600 max-w-2xl mx-auto">
+            {{ subtitle() }}
           </p>
         </div>
         
@@ -43,7 +43,7 @@ interface PricingPlan {
           [class.lg:grid-cols-3]="plans.length >= 3">
           
           <div 
-            *ngFor="let plan of plans" 
+            *ngFor="let plan of plans()" 
             class="relative rounded-2xl p-8 transition-all duration-300"
             [class.bg-white]="!plan.highlighted"
             [class.border]="!plan.highlighted"
@@ -79,7 +79,7 @@ interface PricingPlan {
                   class="text-sm font-medium"
                   [class.text-slate-500]="!plan.highlighted"
                   [class.text-blue-200]="plan.highlighted">
-                  {{ currency }}
+                  {{ currency() }}
                 </span>
                 <span 
                   class="text-5xl font-bold tracking-tight"
@@ -203,8 +203,8 @@ export class PricingTableComponent {
         }
     };
 
-    @Input() title: string = '';
-    @Input() subtitle: string = '';
-    @Input() currency: string = '¥';
-    @Input() plans: PricingPlan[] = [];
+    readonly title = input<string>('');
+    readonly subtitle = input<string>('');
+    readonly currency = input<string>('¥');
+    readonly plans = input<PricingPlan[]>([]);
 }

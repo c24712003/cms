@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ContentBlockManifest } from './block.types';
@@ -22,7 +22,7 @@ interface Breadcrumb {
       <div class="relative z-10 max-w-7xl mx-auto px-6">
         <!-- Breadcrumb -->
         <nav *ngIf="breadcrumb.length" class="mb-8 flex items-center gap-2 text-sm">
-          <ng-container *ngFor="let item of breadcrumb; let last = last">
+          <ng-container *ngFor="let item of breadcrumb(); let last = last">
             <a *ngIf="item.link" [routerLink]="item.link" class="text-blue-300 hover:text-white transition-colors">
               {{ item.label }}
             </a>
@@ -35,10 +35,10 @@ interface Breadcrumb {
         
         <div class="max-w-3xl">
           <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-            {{ title }}
+            {{ title() }}
           </h1>
           <p class="text-xl text-slate-300 leading-relaxed">
-            {{ subtitle }}
+            {{ subtitle() }}
           </p>
         </div>
       </div>
@@ -75,8 +75,8 @@ export class PageHeroComponent {
     }
   };
 
-  @Input() title: string = '';
-  @Input() subtitle: string = '';
-  @Input() breadcrumb: Breadcrumb[] = [];
-  @Input() image: string = '';
+    readonly title = input<string>('');
+    readonly subtitle = input<string>('');
+    readonly breadcrumb = input<Breadcrumb[]>([]);
+    readonly image = input<string>('');
 }

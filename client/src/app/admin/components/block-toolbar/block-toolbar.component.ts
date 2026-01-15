@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BlockInstance, BlockSettings, ContentBlockManifest } from '../../../features/content-blocks/block.types';
 import { BlockRegistryService } from '../../../features/content-blocks/block-registry.service';
@@ -63,9 +63,9 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
        <div class="flex-1 overflow-hidden" *ngIf="activeTab === 'content'">
             <app-property-panel 
                 class="block h-full"
-                *ngIf="block && manifest"
+                *ngIf="block() && manifest"
                 [schema]="manifest.schema"
-                [model]="block.data"
+                [model]="block()!.data"
                 (modelChange)="onDataChange($event)">
             </app-property-panel>
        </div>
@@ -87,7 +87,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
             <app-property-panel 
                 class="block flex-1 min-h-0"
-                *ngIf="block && manifest?.styleSchema"
+                *ngIf="block() && manifest?.styleSchema"
                 [schema]="manifest!.styleSchema"
                 [model]="getCurrentStyles()"
                 (modelChange)="onStyleChange($event)">
@@ -102,8 +102,8 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
        <div class="flex-1 overflow-hidden" *ngIf="activeTab === 'settings'">
             <app-settings-panel
                 class="block h-full"
-                *ngIf="block"
-                [blockSettings]="block.settings || {}"
+                *ngIf="block()"
+                [blockSettings]="block()?.settings || {}"
                 (settingsChange)="onSettingsChange($event)">
             </app-settings-panel>
        </div>
@@ -112,10 +112,10 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
   `
 })
 export class BlockToolbarComponent {
-    @Input() block: BlockInstance | null = null;
-    @Output() blockChange = new EventEmitter<BlockInstance>();
-    @Output() close = new EventEmitter<void>();
-    @Output() viewportChange = new EventEmitter<'desktop' | 'tablet' | 'mobile'>();
+    readonly block = input<BlockInstance | null>(null);
+    readonly blockChange = output<BlockInstance>();
+    readonly close = output<void>();
+    readonly viewportChange = output<'desktop' | 'tablet' | 'mobile'>();
 
     activeTab: 'content' | 'styles' | 'settings' = 'content';
     _viewport: 'desktop' | 'tablet' | 'mobile' = 'desktop';
@@ -129,34 +129,34 @@ export class BlockToolbarComponent {
     constructor(private registry: BlockRegistryService) { }
 
     get manifest(): ContentBlockManifest | undefined {
-        if (!this.block) return undefined;
-        return this.registry.getDefinition(this.block.type)?.manifest;
+        if (!this.block()) return undefined;
+        return this.registry.getDefinition(this.block()!.type)?.manifest;
     }
 
     getBlockDisplayName(): string {
-        return this.manifest?.displayName || this.block?.type || 'Block';
+        return this.manifest?.displayName || this.block()?.type || 'Block';
     }
 
     onDataChange(newData: Record<string, unknown>) {
-        if (!this.block) return;
+        if (!this.block()) return;
         this.blockChange.emit({
-            ...this.block,
+            ...this.block()!,
             data: newData
         });
     }
 
     getCurrentStyles() {
-        if (!this.block || !this.block.styles) return {};
-        return this.block.styles[this.viewport] || {};
+        if (!this.block() || !this.block()!.styles) return {};
+        return this.block()!.styles![this.viewport] || {};
     }
 
     onStyleChange(newStyles: Record<string, unknown>) {
-        if (!this.block) return;
+        if (!this.block()) return;
 
-        const currentStyles = this.block.styles || {};
+        const currentStyles = this.block()!.styles || {};
 
         this.blockChange.emit({
-            ...this.block,
+            ...this.block()!,
             styles: {
                 ...currentStyles,
                 [this.viewport]: newStyles
@@ -165,9 +165,9 @@ export class BlockToolbarComponent {
     }
 
     onSettingsChange(newSettings: BlockSettings) {
-        if (!this.block) return;
+        if (!this.block()) return;
         this.blockChange.emit({
-            ...this.block,
+            ...this.block()!,
             settings: newSettings
         });
     }

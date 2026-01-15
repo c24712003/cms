@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
@@ -40,11 +40,11 @@ import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component'
                  (click)="$event.stopPropagation()">
                  
                   <div cdkDropList 
-                       [cdkDropListData]="blocks" 
+                       [cdkDropListData]="blocks()" 
                        (cdkDropListDropped)="drop($event)"
                        class="min-h-full pb-32">
                        
-                     <div *ngFor="let block of blocks; let i = index; trackBy: trackBlockId" 
+                     <div *ngFor="let block of blocks(); let i = index; trackBy: trackBlockId" 
                           cdkDrag
                           class="group relative transition-all">
                           
@@ -61,9 +61,9 @@ import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component'
                          <!-- Rendered Block -->
                          <div (click)="selectBlock(block, $event)" 
                               class="cursor-pointer hover:ring-2 hover:ring-blue-400/50 rounded-lg transition-all"
-                              [class.ring-2]="selectedBlock?.id === block.id"
-                              [class.ring-blue-500]="selectedBlock?.id === block.id"
-                              [class.z-20]="selectedBlock?.id === block.id">
+                              [class.ring-2]="selectedBlock()?.id === block.id"
+                              [class.ring-blue-500]="selectedBlock()?.id === block.id"
+                              [class.z-20]="selectedBlock()?.id === block.id">
                              <app-dynamic-block-renderer [block]="block"></app-dynamic-block-renderer>
                          </div>
 
@@ -77,7 +77,7 @@ import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component'
                      </div>
 
                      <!-- Empty State -->
-                     <button *ngIf="blocks.length === 0" 
+                     <button *ngIf="blocks().length === 0" 
                              (click)="openBlockPicker(0)"
                              class="w-full h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 m-0 rounded-xl text-slate-400 hover:text-blue-500 transition-all cursor-pointer">
                          <div class="p-4 bg-slate-100 dark:bg-slate-800 rounded-full mb-4">
@@ -88,8 +88,8 @@ import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component'
                      </button>
 
                      <!-- Bottom Add Button (Always visible if not empty) -->
-                     <button *ngIf="blocks.length > 0"
-                             (click)="openBlockPicker(blocks.length)"
+                     <button *ngIf="blocks().length > 0"
+                             (click)="openBlockPicker(blocks().length)"
                              class="w-full mt-8 py-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 hover:text-blue-500 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all flex flex-col items-center justify-center gap-2">
                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                          <span class="font-bold">{{ 'ADD_BLOCK_BTN' | translate }}</span>
@@ -99,20 +99,20 @@ import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component'
              </div>
 
              <!-- Floating Add Button (Mobile/Quick) -->
-             <button class="fixed bottom-8 right-8 md:hidden btn btn-circle btn-primary shadow-xl z-40" (click)="openBlockPicker(blocks.length); $event.stopPropagation()">
+             <button class="fixed bottom-8 right-8 md:hidden btn btn-circle btn-primary shadow-xl z-40" (click)="openBlockPicker(blocks().length); $event.stopPropagation()">
                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
              </button>
         </main>
 
         <!-- Right: Block Toolbar -->
         <aside class="absolute inset-y-0 right-0 z-30 w-full md:w-80 transition-transform duration-300 md:static md:z-auto h-full border-l border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
-               [class.translate-x-0]="selectedBlock"
-               [class.translate-x-full]="!selectedBlock"
-               [class.hidden]="!selectedBlock && !isMobile()"> 
+               [class.translate-x-0]="selectedBlock()"
+               [class.translate-x-full]="!selectedBlock()"
+               [class.hidden]="!selectedBlock() && !isMobile()"> 
              
              <app-block-toolbar
-                *ngIf="selectedBlock"
-                [block]="selectedBlock"
+                *ngIf="selectedBlock()"
+                [block]="selectedBlock()"
                 (blockChange)="updateBlock($event)"
                 (close)="clearSelection()"
                 (viewportChange)="viewport = $event">
@@ -150,11 +150,11 @@ import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component'
     `
 })
 export class EditorCanvasComponent {
-    @Input() blocks: BlockInstance[] = [];
-    @Output() blocksChange = new EventEmitter<BlockInstance[]>();
+    readonly blocks = input<BlockInstance[]>([]);
+    readonly blocksChange = output<BlockInstance[]>();
 
-    @Input() selectedBlock: BlockInstance | null = null;
-    @Output() selectedBlockChange = new EventEmitter<BlockInstance | null>();
+    readonly selectedBlock = input<BlockInstance | null>(null);
+    readonly selectedBlockChange = output<BlockInstance | null>();
 
     showBlockPicker = false;
     viewport: 'desktop' | 'tablet' | 'mobile' = 'desktop';
@@ -171,21 +171,20 @@ export class EditorCanvasComponent {
     }
 
     clearSelection(event?: Event) {
-        if (this.selectedBlock) {
-            this.selectedBlock = null;
+        if (this.selectedBlock()) {
             this.selectedBlockChange.emit(null);
         }
     }
 
     selectBlock(block: BlockInstance, event: MouseEvent) {
         event.stopPropagation();
-        this.selectedBlock = block;
         this.selectedBlockChange.emit(block);
     }
 
     drop(event: CdkDragDrop<BlockInstance[]>) {
-        moveItemInArray(this.blocks, event.previousIndex, event.currentIndex);
-        this.blocksChange.emit(this.blocks);
+        const updated = [...this.blocks()];
+        moveItemInArray(updated, event.previousIndex, event.currentIndex);
+        this.blocksChange.emit(updated);
     }
 
     trackBlockId(index: number, block: BlockInstance) {
@@ -194,14 +193,14 @@ export class EditorCanvasComponent {
 
     removeBlock(block: BlockInstance, event?: Event) {
         if (event) event.stopPropagation();
-        const index = this.blocks.indexOf(block);
+        const updated = [...this.blocks()];
+        const index = updated.indexOf(block);
         if (index > -1) {
-            this.blocks.splice(index, 1);
-            if (this.selectedBlock === block) {
-                this.selectedBlock = null;
+            updated.splice(index, 1);
+            if (this.selectedBlock() === block) {
                 this.selectedBlockChange.emit(null);
             }
-            this.blocksChange.emit(this.blocks);
+            this.blocksChange.emit(updated);
         }
     }
 
@@ -223,15 +222,14 @@ export class EditorCanvasComponent {
             data: defaultData
         };
 
-        if (this.pendingInsertIndex !== null && this.pendingInsertIndex >= 0 && this.pendingInsertIndex <= this.blocks.length) {
-            this.blocks.splice(this.pendingInsertIndex, 0, newBlock);
+        const updated = [...this.blocks()];
+        if (this.pendingInsertIndex !== null && this.pendingInsertIndex >= 0 && this.pendingInsertIndex <= updated.length) {
+            updated.splice(this.pendingInsertIndex, 0, newBlock);
         } else {
-            this.blocks.push(newBlock);
+            updated.push(newBlock);
         }
 
-        this.blocksChange.emit(this.blocks);
-
-        this.selectedBlock = newBlock;
+        this.blocksChange.emit(updated);
         this.selectedBlockChange.emit(newBlock);
 
         this.showBlockPicker = false;
@@ -283,37 +281,32 @@ export class EditorCanvasComponent {
     }
 
     updateBlock(updatedBlock: BlockInstance) {
-        if (!this.selectedBlock) return;
+        if (!this.selectedBlock()) return;
 
-        // Update in array
-        const index = this.blocks.findIndex(b => b.id === updatedBlock.id);
+        const updated = [...this.blocks()];
+        const index = updated.findIndex(b => b.id === updatedBlock.id);
         if (index > -1) {
-            this.blocks[index] = updatedBlock;
-            this.blocksChange.emit(this.blocks);
+            updated[index] = updatedBlock;
+            this.blocksChange.emit(updated);
         }
 
-        // Update active selection reference
-        this.selectedBlock = updatedBlock;
         this.selectedBlockChange.emit(updatedBlock);
     }
 
     updateBlockData(newData: any) {
-        if (this.selectedBlock) {
-            // Create new immutable reference with updated data
+        if (this.selectedBlock()) {
             const updatedBlock = {
-                ...this.selectedBlock,
+                ...this.selectedBlock()!,
                 data: { ...newData }
             };
 
-            // Update in array
-            const index = this.blocks.findIndex(b => b.id === updatedBlock.id);
+            const updated = [...this.blocks()];
+            const index = updated.findIndex(b => b.id === updatedBlock.id);
             if (index > -1) {
-                this.blocks[index] = updatedBlock;
-                this.blocksChange.emit(this.blocks);
+                updated[index] = updatedBlock;
+                this.blocksChange.emit(updated);
             }
 
-            // Update active selection reference
-            this.selectedBlock = updatedBlock;
             this.selectedBlockChange.emit(updatedBlock);
         }
     }

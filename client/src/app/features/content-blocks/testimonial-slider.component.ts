@@ -1,27 +1,27 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, input, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContentBlockManifest } from './block.types';
 
 interface Testimonial {
-    quote: string;
-    author: string;
-    role?: string;
-    company?: string;
-    avatar?: string;
-    rating?: number;
+  quote: string;
+  author: string;
+  role?: string;
+  company?: string;
+  avatar?: string;
+  rating?: number;
 }
 
 @Component({
-    selector: 'app-testimonial-slider',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-testimonial-slider',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <section class="py-16 md:py-24 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 overflow-hidden">
       <div class="max-w-7xl mx-auto px-6">
         <!-- Header -->
-        <div *ngIf="title" class="text-center mb-16">
+        <div *ngIf="title()" class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
-            {{ title }}
+            {{ title() }}
           </h2>
         </div>
         
@@ -35,12 +35,12 @@ interface Testimonial {
             </svg>
             
             <!-- Rating Stars -->
-            <div *ngIf="testimonials[currentIndex]?.rating" class="flex justify-center gap-1 mb-6">
+            <div *ngIf="testimonials()[currentIndex]?.rating" class="flex justify-center gap-1 mb-6">
               <svg 
                 *ngFor="let star of [1,2,3,4,5]"
                 class="w-6 h-6"
-                [class.text-amber-400]="star <= (testimonials[currentIndex]?.rating || 0)"
-                [class.text-slate-600]="star > (testimonials[currentIndex]?.rating || 0)"
+                [class.text-amber-400]="star <= (testimonials()[currentIndex]?.rating || 0)"
+                [class.text-slate-600]="star > (testimonials()[currentIndex]?.rating || 0)"
                 fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
@@ -48,38 +48,38 @@ interface Testimonial {
             
             <!-- Quote Text -->
             <blockquote class="text-xl md:text-2xl text-white leading-relaxed mb-8 animate-fade-in">
-              "{{ testimonials[currentIndex]?.quote }}"
+              "{{ testimonials()[currentIndex]?.quote }}"
             </blockquote>
             
             <!-- Author Info -->
             <div class="flex items-center justify-center gap-4">
               <img 
-                *ngIf="testimonials[currentIndex]?.avatar"
-                [src]="testimonials[currentIndex]?.avatar" 
-                [alt]="testimonials[currentIndex]?.author"
+                *ngIf="testimonials()[currentIndex]?.avatar"
+                [src]="testimonials()[currentIndex]?.avatar" 
+                [alt]="testimonials()[currentIndex]?.author"
                 class="w-14 h-14 rounded-full object-cover border-2 border-blue-400/50" />
               <div 
-                *ngIf="!testimonials[currentIndex]?.avatar"
+                *ngIf="!testimonials()[currentIndex]?.avatar"
                 class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold">
-                {{ testimonials[currentIndex]?.author?.charAt(0) }}
+                {{ testimonials()[currentIndex]?.author?.charAt(0) }}
               </div>
               <div class="text-left">
                 <div class="font-semibold text-white">
-                  {{ testimonials[currentIndex]?.author }}
+                  {{ testimonials()[currentIndex]?.author }}
                 </div>
                 <div class="text-sm text-blue-200">
-                  <span *ngIf="testimonials[currentIndex]?.role">{{ testimonials[currentIndex]?.role }}</span>
-                  <span *ngIf="testimonials[currentIndex]?.role && testimonials[currentIndex]?.company">, </span>
-                  <span *ngIf="testimonials[currentIndex]?.company">{{ testimonials[currentIndex]?.company }}</span>
+                  <span *ngIf="testimonials()[currentIndex]?.role">{{ testimonials()[currentIndex]?.role }}</span>
+                  <span *ngIf="testimonials()[currentIndex]?.role && testimonials()[currentIndex]?.company">, </span>
+                  <span *ngIf="testimonials()[currentIndex]?.company">{{ testimonials()[currentIndex]?.company }}</span>
                 </div>
               </div>
             </div>
           </div>
           
           <!-- Navigation Dots -->
-          <div *ngIf="testimonials.length > 1" class="flex justify-center gap-2 mt-12">
+          <div *ngIf="testimonials().length > 1" class="flex justify-center gap-2 mt-12">
             <button 
-              *ngFor="let t of testimonials; let i = index"
+              *ngFor="let t of testimonials(); let i = index"
               (click)="goToSlide(i)"
               class="w-3 h-3 rounded-full transition-all duration-300"
               [class.bg-blue-400]="i === currentIndex"
@@ -90,7 +90,7 @@ interface Testimonial {
           
           <!-- Navigation Arrows -->
           <button 
-            *ngIf="testimonials.length > 1"
+            *ngIf="testimonials().length > 1"
             (click)="prevSlide()"
             class="absolute left-0 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all hidden md:block">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +109,7 @@ interface Testimonial {
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     .animate-fade-in {
       animation: fadeIn 0.5s ease-out;
     }
@@ -119,95 +119,99 @@ interface Testimonial {
     }
   `]
 })
-export class TestimonialSliderComponent implements OnInit, OnDestroy {
-    static manifest: ContentBlockManifest = {
-        type: 'testimonial-slider',
-        displayName: 'Testimonial Slider',
-        category: 'Content',
-        description: 'Customer testimonial carousel',
-        schema: {
+export class TestimonialSliderComponent implements OnDestroy {
+  static manifest: ContentBlockManifest = {
+    type: 'testimonial-slider',
+    displayName: 'Testimonial Slider',
+    category: 'Content',
+    description: 'Customer testimonial carousel',
+    schema: {
+      properties: {
+        title: { type: 'string', title: 'Title' },
+        testimonials: {
+          type: 'array',
+          title: 'Testimonials',
+          ui: { widget: 'array', addLabel: 'Add Testimonial' },
+          items: {
+            type: 'object',
             properties: {
-                title: { type: 'string', title: 'Title' },
-                testimonials: {
-                    type: 'array',
-                    title: 'Testimonials',
-                    ui: { widget: 'array', addLabel: 'Add Testimonial' },
-                    items: {
-                        type: 'object',
-                        properties: {
-                            quote: { type: 'string', title: 'Quote', ui: { widget: 'textarea' } },
-                            author: { type: 'string', title: 'Author Name' },
-                            role: { type: 'string', title: 'Role/Title' },
-                            company: { type: 'string', title: 'Company' },
-                            avatar: { type: 'string', title: 'Avatar', ui: { widget: 'image' } },
-                            rating: {
-                                type: 'number',
-                                title: 'Rating (1-5)',
-                                enum: [1, 2, 3, 4, 5],
-                                default: 5,
-                                ui: { widget: 'select' }
-                            }
-                        }
-                    }
-                },
-                autoRotate: { type: 'boolean', title: 'Auto Rotate', default: true, ui: { widget: 'toggle' } },
-                rotateInterval: {
-                    type: 'number',
-                    title: 'Rotation Interval (seconds)',
-                    default: 5,
-                    ui: { widget: 'range' }
-                }
+              quote: { type: 'string', title: 'Quote', ui: { widget: 'textarea' } },
+              author: { type: 'string', title: 'Author Name' },
+              role: { type: 'string', title: 'Role/Title' },
+              company: { type: 'string', title: 'Company' },
+              avatar: { type: 'string', title: 'Avatar', ui: { widget: 'image' } },
+              rating: {
+                type: 'number',
+                title: 'Rating (1-5)',
+                enum: [1, 2, 3, 4, 5],
+                default: 5,
+                ui: { widget: 'select' }
+              }
             }
+          }
+        },
+        autoRotate: { type: 'boolean', title: 'Auto Rotate', default: true, ui: { widget: 'toggle' } },
+        rotateInterval: {
+          type: 'number',
+          title: 'Rotation Interval (seconds)',
+          default: 5,
+          ui: { widget: 'range' }
         }
-    };
-
-    @Input() title: string = '';
-    @Input() testimonials: Testimonial[] = [];
-    @Input() autoRotate: boolean = true;
-    @Input() rotateInterval: number = 5;
-
-    currentIndex = 0;
-    private intervalId: any;
-
-    ngOnInit() {
-        if (this.autoRotate && this.testimonials.length > 1) {
-            this.startAutoRotate();
-        }
+      }
     }
+  };
 
-    ngOnDestroy() {
+  readonly title = input<string>('');
+  readonly testimonials = input<Testimonial[]>([]);
+  readonly autoRotate = input<boolean>(true);
+  readonly rotateInterval = input<number>(5);
+
+  currentIndex = 0;
+  private intervalId: any;
+
+  constructor() {
+    effect(() => {
+      if (this.autoRotate() && this.testimonials().length > 1) {
+        this.startAutoRotate();
+      } else {
         this.stopAutoRotate();
-    }
+      }
+    });
+  }
 
-    startAutoRotate() {
-        this.intervalId = setInterval(() => {
-            this.nextSlide();
-        }, this.rotateInterval * 1000);
-    }
+  ngOnDestroy() {
+    this.stopAutoRotate();
+  }
 
-    stopAutoRotate() {
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-        }
-    }
+  startAutoRotate() {
+    this.intervalId = setInterval(() => {
+      this.nextSlide();
+    }, this.rotateInterval() * 1000);
+  }
 
-    goToSlide(index: number) {
-        this.currentIndex = index;
-        if (this.autoRotate) {
-            this.stopAutoRotate();
-            this.startAutoRotate();
-        }
+  stopAutoRotate() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
     }
+  }
 
-    nextSlide() {
-        this.currentIndex = (this.currentIndex + 1) % this.testimonials.length;
+  goToSlide(index: number) {
+    this.currentIndex = index;
+    if (this.autoRotate()) {
+      this.stopAutoRotate();
+      this.startAutoRotate();
     }
+  }
 
-    prevSlide() {
-        this.currentIndex = (this.currentIndex - 1 + this.testimonials.length) % this.testimonials.length;
-        if (this.autoRotate) {
-            this.stopAutoRotate();
-            this.startAutoRotate();
-        }
+  nextSlide() {
+    this.currentIndex = (this.currentIndex + 1) % this.testimonials().length;
+  }
+
+  prevSlide() {
+    this.currentIndex = (this.currentIndex - 1 + this.testimonials().length) % this.testimonials().length;
+    if (this.autoRotate()) {
+      this.stopAutoRotate();
+      this.startAutoRotate();
     }
+  }
 }
