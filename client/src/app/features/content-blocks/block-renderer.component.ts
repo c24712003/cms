@@ -261,7 +261,7 @@ import { TeamGridComponent } from './team-grid.component';
   `
 })
 export class BlockRendererComponent {
-  @Input() block: any;
+  readonly block = input.required<any>();
 
   private registry = inject(BlockRegistryService);
   private styleValidator = inject(StyleValidatorService);

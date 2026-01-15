@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ContentBlockManifest } from './block.types';
@@ -18,12 +18,12 @@ interface Card {
     <section class="py-20 bg-slate-50">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">{{ title }}</h2>
-          <p class="text-lg text-slate-600 max-w-2xl mx-auto">{{ subtitle }}</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">{{ title() }}</h2>
+          <p class="text-lg text-slate-600 max-w-2xl mx-auto">{{ subtitle() }}</p>
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
-          <a *ngFor="let card of cards" 
+          <a *ngFor="let card of cards()" 
              [routerLink]="card.link"
              class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-100 hover:border-transparent transition-all duration-300 hover:-translate-y-1">
             <!-- Image -->
@@ -83,7 +83,7 @@ export class CardCarouselComponent {
     }
   };
 
-  @Input() title: string = '';
-  @Input() subtitle: string = '';
-  @Input() cards: Card[] = [];
+    readonly title = input<string>('');
+    readonly subtitle = input<string>('');
+    readonly cards = input<Card[]>([]);
 }

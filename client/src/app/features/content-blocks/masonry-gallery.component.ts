@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContentBlockManifest } from './block.types';
 
@@ -17,27 +17,27 @@ interface GalleryImage {
       <div class="max-w-7xl mx-auto px-6">
         <!-- Header -->
         <div *ngIf="title || subtitle" class="text-center mb-12">
-          <h2 *ngIf="title" class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-            {{ title }}
+          <h2 *ngIf="title()" class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+            {{ title() }}
           </h2>
-          <p *ngIf="subtitle" class="text-lg text-slate-600 max-w-2xl mx-auto">
-            {{ subtitle }}
+          <p *ngIf="subtitle()" class="text-lg text-slate-600 max-w-2xl mx-auto">
+            {{ subtitle() }}
           </p>
         </div>
         
         <!-- Masonry Grid -->
         <div 
           class="masonry-grid"
-          [class.columns-2]="columns === 2"
-          [class.columns-3]="columns === 3"
-          [class.columns-4]="columns === 4"
-          [class.gap-2]="gap === 'sm'"
-          [class.gap-4]="gap === 'md'"
-          [class.gap-6]="gap === 'lg'">
+          [class.columns-2]="columns() === 2"
+          [class.columns-3]="columns() === 3"
+          [class.columns-4]="columns() === 4"
+          [class.gap-2]="gap() === 'sm'"
+          [class.gap-4]="gap() === 'md'"
+          [class.gap-6]="gap() === 'lg'">
           <div 
-            *ngFor="let image of images; let i = index" 
+            *ngFor="let image of images(); let i = index" 
             class="masonry-item group cursor-pointer"
-            (click)="enableLightbox && openLightbox(i)">
+            (click)="enableLightbox() && openLightbox(i)">
             <div class="relative overflow-hidden rounded-xl">
               <img 
                 [src]="image.src" 
@@ -51,7 +51,7 @@ interface GalleryImage {
                     {{ image.caption }}
                   </p>
                 </div>
-                <div *ngIf="enableLightbox" class="absolute top-4 right-4">
+                <div *ngIf="enableLightbox()" class="absolute top-4 right-4">
                   <span class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
@@ -78,7 +78,7 @@ interface GalleryImage {
         </button>
         
         <button 
-          *ngIf="images.length > 1"
+          *ngIf="images().length > 1"
           class="absolute left-4 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
           (click)="prevImage($event)">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,13 +87,13 @@ interface GalleryImage {
         </button>
         
         <img 
-          [src]="images[currentIndex]?.src" 
-          [alt]="images[currentIndex]?.alt"
+          [src]="images()[currentIndex]?.src" 
+          [alt]="images()[currentIndex]?.alt"
           class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
           (click)="$event.stopPropagation()" />
         
         <button 
-          *ngIf="images.length > 1"
+          *ngIf="images().length > 1"
           class="absolute right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
           (click)="nextImage($event)">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,10 +103,10 @@ interface GalleryImage {
         
         <!-- Caption -->
         <div 
-          *ngIf="images[currentIndex]?.caption" 
+          *ngIf="images()[currentIndex]?.caption" 
           class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white text-center">
-          <p class="text-lg font-medium">{{ images[currentIndex].caption }}</p>
-          <p class="text-sm text-white/60 mt-1">{{ currentIndex + 1 }} / {{ images.length }}</p>
+          <p class="text-lg font-medium">{{ images()[currentIndex].caption }}</p>
+          <p class="text-sm text-white/60 mt-1">{{ currentIndex + 1 }} / {{ images().length }}</p>
         </div>
       </div>
     </section>
@@ -186,12 +186,12 @@ export class MasonryGalleryComponent {
         }
     };
 
-    @Input() title: string = '';
-    @Input() subtitle: string = '';
-    @Input() images: GalleryImage[] = [];
-    @Input() columns: number = 3;
-    @Input() gap: 'sm' | 'md' | 'lg' = 'md';
-    @Input() enableLightbox: boolean = true;
+    readonly title = input<string>('');
+    readonly subtitle = input<string>('');
+    readonly images = input<GalleryImage[]>([]);
+    readonly columns = input<number>(3);
+    readonly gap = input<'sm' | 'md' | 'lg'>('md');
+    readonly enableLightbox = input<boolean>(true);
 
     lightboxOpen = false;
     currentIndex = 0;
@@ -209,11 +209,11 @@ export class MasonryGalleryComponent {
 
     nextImage(event: Event) {
         event.stopPropagation();
-        this.currentIndex = (this.currentIndex + 1) % this.images.length;
+        this.currentIndex = (this.currentIndex + 1) % this.images().length;
     }
 
     prevImage(event: Event) {
         event.stopPropagation();
-        this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+        this.currentIndex = (this.currentIndex - 1 + this.images().length) % this.images().length;
     }
 }

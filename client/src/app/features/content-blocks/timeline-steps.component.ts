@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContentBlockManifest } from './block.types';
 
@@ -17,8 +17,8 @@ interface TimelineStep {
     <section class="py-20 bg-white">
       <div class="max-w-5xl mx-auto px-6">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">{{ title }}</h2>
-          <p *ngIf="subtitle" class="text-lg text-slate-600">{{ subtitle }}</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">{{ title() }}</h2>
+          <p *ngIf="subtitle()" class="text-lg text-slate-600">{{ subtitle() }}</p>
         </div>
         
         <div class="relative">
@@ -27,7 +27,7 @@ interface TimelineStep {
           
           <!-- Steps -->
           <div class="space-y-8">
-            <div *ngFor="let step of steps" class="relative flex gap-6">
+            <div *ngFor="let step of steps()" class="relative flex gap-6">
               <!-- Number -->
               <div class="flex-shrink-0 w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl font-bold shadow-lg shadow-blue-600/30 z-10">
                 {{ step.number }}
@@ -79,7 +79,7 @@ export class TimelineStepsComponent {
     }
   };
 
-  @Input() title: string = '';
-  @Input() subtitle: string = '';
-  @Input() steps: TimelineStep[] = [];
+  readonly title = input<string>('');
+  readonly subtitle = input<string>('');
+  readonly steps = input<TimelineStep[]>([]);
 }

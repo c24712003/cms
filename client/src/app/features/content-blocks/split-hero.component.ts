@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ContentBlockManifest } from './block.types';
@@ -22,20 +22,20 @@ interface FeatureItem {
       <div class="max-w-7xl mx-auto px-6">
         <div 
           class="grid md:grid-cols-2 gap-12 md:gap-16 items-center"
-          [class.md:flex-row-reverse]="mediaPosition === 'left'">
+          [class.md:flex-row-reverse]="mediaPosition() === 'left'">
           
           <!-- Content Side -->
-          <div [class.order-2]="mediaPosition === 'left'" [class.md:order-1]="mediaPosition === 'left'">
+          <div [class.order-2]="mediaPosition() === 'left'" [class.md:order-1]="mediaPosition() === 'left'">
             <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-6 leading-tight">
-              {{ title }}
+              {{ title() }}
             </h1>
-            <p *ngIf="subtitle" class="text-lg text-slate-600 mb-8 leading-relaxed">
-              {{ subtitle }}
+            <p *ngIf="subtitle()" class="text-lg text-slate-600 mb-8 leading-relaxed">
+              {{ subtitle() }}
             </p>
             
             <!-- Features List -->
             <ul *ngIf="features.length" class="space-y-4 mb-8">
-              <li *ngFor="let feature of features" class="flex items-start gap-3">
+              <li *ngFor="let feature of features()" class="flex items-start gap-3">
                 <span class="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
                   <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -47,22 +47,22 @@ interface FeatureItem {
             
             <!-- CTAs -->
             <div class="flex flex-wrap gap-4">
-              <a *ngIf="cta?.text" [routerLink]="cta?.link" class="btn-primary">
-                {{ cta?.text }}
+              <a *ngIf="cta()?.text" [routerLink]="cta()?.link" class="btn-primary">
+                {{ cta()?.text }}
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                 </svg>
               </a>
-              <a *ngIf="secondaryCta?.text" [routerLink]="secondaryCta?.link" class="btn-secondary">
-                {{ secondaryCta?.text }}
+              <a *ngIf="secondaryCta()?.text" [routerLink]="secondaryCta()?.link" class="btn-secondary">
+                {{ secondaryCta()?.text }}
               </a>
             </div>
           </div>
           
           <!-- Media Side -->
           <div 
-            [class.order-1]="mediaPosition === 'left'" 
-            [class.md:order-2]="mediaPosition === 'left'"
+            [class.order-1]="mediaPosition() === 'left'" 
+            [class.md:order-2]="mediaPosition() === 'left'"
             class="relative">
             <!-- Decorative Elements -->
             <div class="absolute -top-4 -right-4 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl"></div>
@@ -71,9 +71,9 @@ interface FeatureItem {
             <!-- Image Container -->
             <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl shadow-slate-200/50">
               <img 
-                *ngIf="image"
-                [src]="image" 
-                [alt]="title"
+                *ngIf="image()"
+                [src]="image()" 
+                [alt]="title()"
                 class="w-full h-auto object-cover" />
               <div 
                 *ngIf="!image" 
@@ -148,11 +148,11 @@ export class SplitHeroComponent {
     }
   };
 
-  @Input() title: string = '';
-  @Input() subtitle: string = '';
-  @Input() image: string = '';
-  @Input() mediaPosition: 'left' | 'right' = 'right';
-  @Input() cta: CtaButton | null = null;
-  @Input() secondaryCta: CtaButton | null = null;
-  @Input() features: FeatureItem[] = [];
+  readonly title = input<string>('');
+  readonly subtitle = input<string>('');
+  readonly image = input<string>('');
+  readonly mediaPosition = input<'left' | 'right'>('right');
+  readonly cta = input<CtaButton | null>(null);
+  readonly secondaryCta = input<CtaButton | null>(null);
+  readonly features = input<FeatureItem[]>([]);
 }

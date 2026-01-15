@@ -222,9 +222,9 @@ export class AuditLogsComponent implements OnInit {
   }
 
   loadLogs() {
-    this.http.get<AuditLog[]>('/api/audit-logs').subscribe(data => {
+    this.http.get<{ data: AuditLog[]; total: number; limit: number; offset: number }>('/api/audit-logs').subscribe(response => {
       // Sort by id desc for now since timestamp might be same
-      this.logs.set(data.sort((a, b) => b.id - a.id));
+      this.logs.set((response.data || []).sort((a, b) => b.id - a.id));
     });
   }
 

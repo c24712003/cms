@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -102,8 +102,8 @@ interface MediaAsset {
     `
 })
 export class MediaPickerDialogComponent implements OnInit {
-    @Output() selected = new EventEmitter<string>();
-    @Output() cancelled = new EventEmitter<void>();
+    readonly selected = output<string>();
+    readonly cancelled = output<void>();
 
     assets: MediaAsset[] = [];
     filteredAssets: MediaAsset[] = [];

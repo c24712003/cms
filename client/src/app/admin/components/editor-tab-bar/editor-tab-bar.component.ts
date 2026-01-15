@@ -1,34 +1,34 @@
-import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, input, output, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 export type EditorTab = 'settings' | 'canvas' | 'seo';
 
 @Component({
-    selector: 'app-editor-tab-bar',
-    standalone: true,
-    imports: [CommonModule, TranslatePipe],
-    template: `
+  selector: 'app-editor-tab-bar',
+  standalone: true,
+  imports: [CommonModule, TranslatePipe],
+  template: `
     <!-- Desktop: Vertical Left Tab Bar -->
     <nav class="hidden md:flex flex-col w-14 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 py-4 gap-1 shrink-0">
       @for (tab of tabs; track tab.id) {
         <button 
           (click)="selectTab(tab.id)"
-          [class.bg-blue-50]="activeTab === tab.id"
-          [class.dark:bg-blue-900/30]="activeTab === tab.id"
-          [class.text-blue-600]="activeTab === tab.id"
-          [class.dark:text-blue-400]="activeTab === tab.id"
-          [class.text-slate-500]="activeTab !== tab.id"
-          [class.dark:text-slate-400]="activeTab !== tab.id"
-          [class.hover:bg-slate-50]="activeTab !== tab.id"
-          [class.dark:hover:bg-slate-700]="activeTab !== tab.id"
+          [class.bg-blue-50]="activeTab() === tab.id"
+          [class.dark:bg-blue-900/30]="activeTab() === tab.id"
+          [class.text-blue-600]="activeTab() === tab.id"
+          [class.dark:text-blue-400]="activeTab() === tab.id"
+          [class.text-slate-500]="activeTab() !== tab.id"
+          [class.dark:text-slate-400]="activeTab() !== tab.id"
+          [class.hover:bg-slate-50]="activeTab() !== tab.id"
+          [class.dark:hover:bg-slate-700]="activeTab() !== tab.id"
           class="w-full flex flex-col items-center justify-center py-3 px-2 transition-all duration-200 relative group"
           [attr.title]="tab.label | translate"
-          [attr.aria-selected]="activeTab === tab.id"
+          [attr.aria-selected]="activeTab() === tab.id"
           role="tab">
           
           <!-- Active Indicator -->
-          <div *ngIf="activeTab === tab.id" 
+          <div *ngIf="activeTab() === tab.id" 
                class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full"></div>
           
           <!-- Icon -->
@@ -54,16 +54,16 @@ export type EditorTab = 'settings' | 'canvas' | 'seo';
       @for (tab of tabs; track tab.id) {
         <button 
           (click)="selectTab(tab.id)"
-          [class.text-blue-600]="activeTab === tab.id"
-          [class.dark:text-blue-400]="activeTab === tab.id"
-          [class.text-slate-500]="activeTab !== tab.id"
-          [class.dark:text-slate-400]="activeTab !== tab.id"
+          [class.text-blue-600]="activeTab() === tab.id"
+          [class.dark:text-blue-400]="activeTab() === tab.id"
+          [class.text-slate-500]="activeTab() !== tab.id"
+          [class.dark:text-slate-400]="activeTab() !== tab.id"
           class="flex-1 flex flex-col items-center justify-center py-2 transition-colors relative"
-          [attr.aria-selected]="activeTab === tab.id"
+          [attr.aria-selected]="activeTab() === tab.id"
           role="tab">
           
           <!-- Active Indicator -->
-          <div *ngIf="activeTab === tab.id" 
+          <div *ngIf="activeTab() === tab.id" 
                class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-blue-500 rounded-b-full"></div>
           
           <span class="text-lg">{{ tab.icon }}</span>
@@ -72,7 +72,7 @@ export type EditorTab = 'settings' | 'canvas' | 'seo';
       }
     </nav>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: contents;
     }
@@ -84,34 +84,33 @@ export type EditorTab = 'settings' | 'canvas' | 'seo';
   `]
 })
 export class EditorTabBarComponent {
-    @Input() activeTab: EditorTab = 'canvas';
-    @Output() tabChange = new EventEmitter<EditorTab>();
+  readonly activeTab = input<EditorTab>('canvas');
+  readonly tabChange = output<EditorTab>();
 
-    tabs: { id: EditorTab; icon: string; label: string; shortLabel: string }[] = [
-        { id: 'settings', icon: '⚙️', label: 'TAB_SETTINGS', shortLabel: 'SET' },
-        { id: 'canvas', icon: '🎨', label: 'TAB_CANVAS', shortLabel: 'EDIT' },
-        { id: 'seo', icon: '📊', label: 'TAB_SEO', shortLabel: 'SEO' }
-    ];
+  tabs: { id: EditorTab; icon: string; label: string; shortLabel: string }[] = [
+    { id: 'settings', icon: '⚙️', label: 'TAB_SETTINGS', shortLabel: 'SET' },
+    { id: 'canvas', icon: '🎨', label: 'TAB_CANVAS', shortLabel: 'EDIT' },
+    { id: 'seo', icon: '📊', label: 'TAB_SEO', shortLabel: 'SEO' }
+  ];
 
-    selectTab(tabId: EditorTab) {
-        this.activeTab = tabId;
-        this.tabChange.emit(tabId);
+  selectTab(tabId: EditorTab) {
+    this.tabChange.emit(tabId);
+  }
+
+  // Keyboard shortcuts: Ctrl+1/2/3
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey || event.metaKey) {
+      const keyToTab: Record<string, EditorTab> = {
+        '1': 'settings',
+        '2': 'canvas',
+        '3': 'seo'
+      };
+
+      if (keyToTab[event.key]) {
+        event.preventDefault();
+        this.selectTab(keyToTab[event.key]);
+      }
     }
-
-    // Keyboard shortcuts: Ctrl+1/2/3
-    @HostListener('document:keydown', ['$event'])
-    onKeyDown(event: KeyboardEvent) {
-        if (event.ctrlKey || event.metaKey) {
-            const keyToTab: Record<string, EditorTab> = {
-                '1': 'settings',
-                '2': 'canvas',
-                '3': 'seo'
-            };
-
-            if (keyToTab[event.key]) {
-                event.preventDefault();
-                this.selectTab(keyToTab[event.key]);
-            }
-        }
-    }
+  }
 }

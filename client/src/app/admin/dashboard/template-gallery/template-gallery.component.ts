@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, OnInit, signal } from '@angular/core';
+import { Component, input, output, EventEmitter, Output, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TemplateService } from '../../services/template.service';
 import { BoardingTemplate } from '../../../shared/models/template.types';
@@ -105,8 +105,8 @@ import { BoardingTemplate } from '../../../shared/models/template.types';
   `]
 })
 export class TemplateGalleryComponent implements OnInit {
-  @Output() close = new EventEmitter<void>();
-  @Output() select = new EventEmitter<BoardingTemplate>();
+    readonly close = output<void>();
+    readonly select = output<BoardingTemplate>();
 
   templates = signal<BoardingTemplate[]>([]);
   activeCategory = signal<string>('All');

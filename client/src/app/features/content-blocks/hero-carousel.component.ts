@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ContentBlockManifest } from './block.types';
@@ -19,8 +19,8 @@ interface Slide {
       <!-- Background Image with Overlay -->
       <div class="absolute inset-0">
         <div class="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-transparent z-10"></div>
-        <img *ngIf="slides[currentSlide]?.image" 
-             [src]="slides[currentSlide].image" 
+        <img *ngIf="slides()[currentSlide]?.image" 
+             [src]="slides()[currentSlide].image" 
              alt="Hero background"
              class="w-full h-full object-cover opacity-40" />
       </div>
@@ -29,15 +29,15 @@ interface Slide {
       <div class="relative z-20 h-full max-w-7xl mx-auto px-6 flex items-center">
         <div class="max-w-2xl">
           <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight animate-fade-in">
-            {{ slides[currentSlide]?.title }}
+            {{ slides()[currentSlide]?.title }}
           </h1>
           <p class="text-xl md:text-2xl text-slate-300 mb-8 leading-relaxed">
-            {{ slides[currentSlide]?.subtitle }}
+            {{ slides()[currentSlide]?.subtitle }}
           </p>
-          <div class="flex gap-4" *ngIf="slides[currentSlide]?.cta">
-            <a [routerLink]="slides[currentSlide].cta!.link" 
+          <div class="flex gap-4" *ngIf="slides()[currentSlide]?.cta">
+            <a [routerLink]="slides()[currentSlide].cta!.link" 
                class="btn-hero-primary">
-              {{ slides[currentSlide].cta!.text }}
+              {{ slides()[currentSlide].cta!.text }}
               <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
               </svg>
@@ -48,7 +48,7 @@ interface Slide {
 
       <!-- Slide Indicators -->
       <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3" *ngIf="slides.length > 1">
-        <button *ngFor="let slide of slides; let i = index"
+        <button *ngFor="let slide of slides(); let i = index"
                 (click)="currentSlide = i"
                 [class.bg-white]="currentSlide === i"
                 [class.bg-white/40]="currentSlide !== i"
@@ -117,14 +117,14 @@ export class HeroCarouselComponent {
     }
   };
 
-  @Input() slides: Slide[] = [];
+    readonly slides = input<Slide[]>([]);
   currentSlide = 0;
 
   nextSlide() {
-    this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+    this.currentSlide = (this.currentSlide + 1) % this.slides().length;
   }
 
   prevSlide() {
-    this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+    this.currentSlide = (this.currentSlide - 1 + this.slides().length) % this.slides().length;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContentBlockManifest } from '../block.types';
 
@@ -7,12 +7,12 @@ import { ContentBlockManifest } from '../block.types';
     standalone: true,
     imports: [CommonModule],
     template: `
-    <div [id]="id" [innerHTML]="content"></div>
+    <div [id]="id()" [innerHTML]="content()"></div>
   `
 })
 export class TextBlockComponent {
-    @Input() content: string = '';
-    @Input() id: string = '';
+    readonly content = input<string>('');
+    readonly id = input<string>('');
 
     static manifest: ContentBlockManifest = {
         type: 'text-block',

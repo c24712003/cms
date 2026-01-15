@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnDestroy, forwardRef } from '@angular/core';
+import { Component, input, output, OnChanges, SimpleChanges, OnDestroy, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormArray } from '@angular/forms';
 import { SchemaFormBuilder } from './schema-form-builder.service';
@@ -22,8 +22,8 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
       
       <div class="flex-1 overflow-y-auto p-4" *ngIf="form">
         <form [formGroup]="form" class="space-y-6">
-          <div *ngFor="let key of getKeys(schema?.properties)" class="form-control">
-            <ng-container [ngSwitch]="schema?.properties?.[key]?.ui?.widget || schema?.properties?.[key]?.type">
+          <div *ngFor="let key of getKeys(schema()?.properties)" class="form-control">
+            <ng-container [ngSwitch]="schema()?.properties?.[key]?.ui?.widget || schema()?.properties?.[key]?.type">
               
               <!-- Textarea Widget -->
               <div *ngSwitchCase="'textarea'">
@@ -34,7 +34,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
                    class="textarea textarea-bordered w-full h-24 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                    [class.textarea-error]="hasError(key)"></textarea>
                  <p *ngIf="hasError(key)" class="text-xs text-red-500 mt-1">{{ 'VALIDATION_REQUIRED' | translate }}</p>
-                 <p *ngIf="!hasError(key) && schema?.properties?.[key]?.description" class="text-xs text-slate-500 mt-1">{{ (schema?.properties?.[key]?.description || '') | translate }}</p>
+                 <p *ngIf="!hasError(key) && schema()?.properties?.[key]?.description" class="text-xs text-slate-500 mt-1">{{ (schema()?.properties?.[key]?.description || '') | translate }}</p>
               </div>
 
 
@@ -60,13 +60,13 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
               <!-- Array Editor -->
               <div *ngSwitchCase="'array'">
                   <app-array-editor
-                     *ngIf="schema?.properties?.[key]?.items"
+                     *ngIf="schema()?.properties?.[key]?.items"
                      [label]="getLabel(key) | translate"
                      [formArray]="getAsFormArray(key)"
-                     [itemSchema]="schema?.properties?.[key]?.items!">
+                     [itemSchema]="schema()?.properties?.[key]?.items!">
                   </app-array-editor>
                   
-                  <div *ngIf="!schema?.properties?.[key]?.items" class="alert alert-warning text-xs">
+                  <div *ngIf="!schema()?.properties?.[key]?.items" class="alert alert-warning text-xs">
                      Array defined without 'items' schema. Cannot render editor.
                   </div>
               </div>
@@ -75,7 +75,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
               <div *ngSwitchCase="'object'" class="border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50/50 dark:bg-slate-800/50">
                   <h4 class="font-bold text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">{{ getLabel(key) | translate }}</h4>
                   <app-property-panel
-                      [schema]="asSchema(schema?.properties?.[key]!)"
+                      [schema]="asSchema(schema()?.properties?.[key]!)"
                       [group]="getAsFormGroup(key)">
                   </app-property-panel>
               </div>
@@ -109,7 +109,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
                  </label>
                  <select [id]="key" [formControlName]="key" class="select select-bordered w-full dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100">
                      <option [ngValue]="null">Select...</option>
-                     <option *ngFor="let opt of schema?.properties?.[key]?.enum" [value]="opt">{{ opt }}</option>
+                     <option *ngFor="let opt of schema()?.properties?.[key]?.enum" [value]="opt">{{ opt }}</option>
                  </select>
                </div>
 
@@ -135,7 +135,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
         </form>
       </div>
       
-      @if (!group) { 
+      @if (!group()) { 
         <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 sticky bottom-0 z-10">
           <button type="button" class="btn btn-primary w-full" (click)="save()" [disabled]="form?.invalid || form?.pristine">
             {{ 'BLOCK_PROP_SAVE' | translate }}
@@ -152,7 +152,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
        <!-- Media Picker Dialog -->
        @if (showMediaPicker) {
         <app-media-picker-dialog 
-            (selected)="onMediaSelected($event)" 
+            (selected)="onMediaSelected($any($event))" 
             (cancelled)="showMediaPicker = false">
         </app-media-picker-dialog>
        }
@@ -160,10 +160,10 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
   `
 })
 export class PropertyPanelComponent implements OnChanges, OnDestroy {
-  @Input() schema: BlockSchema | undefined;
-  @Input() model: any = {};
-  @Input() group: FormGroup | undefined; // Input for nested usage
-  @Output() modelChange = new EventEmitter<any>();
+  readonly schema = input<BlockSchema | undefined>();
+  readonly model = input<any>({});
+  readonly group = input<FormGroup | undefined>();
+  readonly modelChange = output<any>();
 
   form: FormGroup | undefined;
   private sub: Subscription | undefined;
@@ -178,21 +178,24 @@ export class PropertyPanelComponent implements OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     // If group is provided, use it.
-    if (this.group) {
-      this.form = this.group;
+    if (this.group()) {
+      this.form = this.group();
       return;
     }
 
-    if ((changes['schema'] || changes['model']) && this.schema) {
+    if ((changes['schema'] || changes['model']) && this.schema()) {
       // If we already have a form and the schema hasn't changed, 
       // just update the values to preserve focus/state.
       if (this.form && !changes['schema']) {
-        this.form.patchValue(this.model, { emitEvent: false });
+        this.form.patchValue(this.model(), { emitEvent: false });
         return;
       }
 
       // Full rebuild required (first load or schema change)
-      this.form = this.sfb.buildForm(this.schema, this.model);
+      const currentSchema = this.schema();
+      if (!currentSchema) return;
+
+      this.form = this.sfb.buildForm(currentSchema, this.model());
       this.hasUnsavedChanges = false;
 
       // Setup auto-save subscription
@@ -220,12 +223,12 @@ export class PropertyPanelComponent implements OnChanges, OnDestroy {
   save() {
     if (this.form) {
       this.modelChange.emit(this.processFormValue(this.form.value));
-      this.form.markAsPristine(); // Optional: indicate saved state
+      this.form.markAsPristine();
       this.hasUnsavedChanges = false;
     }
   }
 
-  // ... (media picker methods)
+  // Media picker methods
   openMediaPicker(key: string) {
     this.activeImageKey = key;
     this.showMediaPicker = true;
@@ -243,17 +246,13 @@ export class PropertyPanelComponent implements OnChanges, OnDestroy {
     this.activeImageKey = null;
   }
 
-
   private processFormValue(formValue: any): any {
-    // ... (existing implementation)
     const result = { ...formValue };
-    if (this.schema && this.schema.properties) {
-      Object.keys(this.schema.properties).forEach(key => {
-        const prop = this.schema!.properties[key];
-        // If we forced it to be a JSON string in textarea, try to parse it back
+    if (this.schema() && this.schema()!.properties) {
+      Object.keys(this.schema()!.properties).forEach(key => {
+        const prop = this.schema()!.properties[key];
         if (prop.ui?.widget === 'textarea' && typeof result[key] === 'string') {
           try {
-            // Only parse if it looks like an object or array to avoid parsing simple strings
             const trimmed = result[key].trim();
             if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
               (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
@@ -271,9 +270,7 @@ export class PropertyPanelComponent implements OnChanges, OnDestroy {
   ngOnDestroy(): void {
     if (this.sub) this.sub.unsubscribe();
 
-    // Auto-save any pending changes on destroy
     if (this.autoSaveEnabled && this.form?.dirty && this.form?.valid) {
-      // Emit immediately without debounce
       this.modelChange.emit(this.processFormValue(this.form.value));
     }
   }
@@ -283,11 +280,11 @@ export class PropertyPanelComponent implements OnChanges, OnDestroy {
   }
 
   getLabel(key: string): string {
-    return this.schema?.properties[key]?.title || key;
+    return this.schema()?.properties[key]?.title || key;
   }
 
   isRequired(key: string): boolean {
-    return this.sfb.isFieldRequired(this.schema!, key);
+    return this.sfb.isFieldRequired(this.schema()!, key);
   }
 
   hasError(key: string): boolean {
@@ -303,11 +300,10 @@ export class PropertyPanelComponent implements OnChanges, OnDestroy {
     return this.form?.get(key) as FormGroup;
   }
 
-  // Helper to convert a property definition (which might have nested properties) into a schema
-  // so we can recurse.
   asSchema(prop: any): BlockSchema {
     return {
       properties: prop.properties || {}
     };
   }
 }
+

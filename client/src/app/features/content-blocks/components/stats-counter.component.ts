@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, Input, input, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContentBlockManifest } from '../block.types';
 

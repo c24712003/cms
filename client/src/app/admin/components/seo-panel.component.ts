@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SeoValidatorService, SeoValidationSummary, SeoValidationResult } from '../services/seo-validator.service';
 
@@ -233,10 +233,10 @@ import { SeoValidatorService, SeoValidationSummary, SeoValidationResult } from '
     `]
 })
 export class SeoPanelComponent implements OnChanges {
-    @Input() title: string = '';
-    @Input() description: string = '';
-    @Input() content: any[] = [];
-    @Input() language: string = 'en';
+    readonly title = input<string>('');
+    readonly description = input<string>('');
+    readonly content = input<any[]>([]);
+    readonly language = input<string>('en');
 
     summary: SeoValidationSummary | null = null;
     scoreColor: string = '#64748b';
@@ -250,10 +250,10 @@ export class SeoPanelComponent implements OnChanges {
 
     validate(): void {
         this.summary = this.seoValidator.validatePage({
-            title: this.title,
-            description: this.description,
-            content: this.content,
-            language: this.language
+            title: this.title(),
+            description: this.description(),
+            content: this.content(),
+            language: this.language()
         });
 
         this.scoreColor = this.seoValidator.getScoreColor(this.summary.score);

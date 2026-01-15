@@ -1,4 +1,4 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -21,11 +21,11 @@ import { I18nService } from '../../../core/services/i18n.service';
           [(ngModel)]="searchQuery"
           name="searchQuery"
           (ngModelChange)="onSearchInput($event)"
-          [placeholder]="placeholder"
+          [placeholder]="placeholder()"
           class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm transition-all outline-none"
           [ngClass]="{
-            'bg-slate-50 text-slate-900 border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white': mode === 'admin',
-            'bg-slate-100 text-slate-900 border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500': mode === 'public'
+            'bg-slate-50 text-slate-900 border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white': mode() === 'admin',
+            'bg-slate-100 text-slate-900 border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500': mode() === 'public'
           }"
         >
         <!-- Icon -->
@@ -42,11 +42,11 @@ import { I18nService } from '../../../core/services/i18n.service';
       <!-- Results Dropdown -->
       <div *ngIf="showResults && hasResults()" 
            class="absolute top-full left-0 w-80 mt-2 bg-white rounded-lg shadow-xl border border-slate-200 overflow-hidden z-50 max-h-96 overflow-y-auto"
-           [ngClass]="{'right-0 left-auto': mode === 'public'}"
+           [ngClass]="{'right-0 left-auto': mode() === 'public'}"
            >
         
         <!-- Public Mode Pages -->
-        <ng-container *ngIf="mode === 'public'">
+        <ng-container *ngIf="mode() === 'public'">
             <div *ngIf="searchResults.pages.length" class="p-2">
                 <a *ngFor="let page of searchResults.pages" 
                    [routerLink]="getPublicLink(page)"
@@ -62,7 +62,7 @@ import { I18nService } from '../../../core/services/i18n.service';
         </ng-container>
 
         <!-- Admin Mode Results -->
-        <ng-container *ngIf="mode === 'admin'">
+        <ng-container *ngIf="mode() === 'admin'">
             <!-- Pages -->
             <div *ngIf="searchResults.pages.length" class="p-2">
                 <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 mb-1">Pages</div>
@@ -110,8 +110,8 @@ import { I18nService } from '../../../core/services/i18n.service';
   `
 })
 export class GlobalSearchInputComponent {
-    @Input() mode: 'admin' | 'public' = 'admin';
-    @Input() placeholder: string = 'Search...';
+    readonly mode = input<'admin' | 'public'>('admin');
+    readonly placeholder = input<string>('Search...');
 
     searchQuery = '';
     searchResults: SearchResults = { pages: [], users: [], media: [] };
@@ -126,7 +126,7 @@ export class GlobalSearchInputComponent {
         this.searchSubject.pipe(
             debounceTime(300),
             distinctUntilChanged(),
-            switchMap(query => this.searchService.search(query, this.mode))
+            switchMap(query => this.searchService.search(query, this.mode()))
         ).subscribe(results => {
             this.searchResults = results;
             this.showResults = true;
@@ -149,7 +149,7 @@ export class GlobalSearchInputComponent {
     }
 
     hasResults(): boolean {
-        if (this.mode === 'public') {
+        if (this.mode() === 'public') {
             // Public mode returns pages even if empty array? No, checking length
             return this.searchResults.pages.length >= 0; // Always show dropdown if searched? Or only if results? Let's show "No results" if searched
         }
