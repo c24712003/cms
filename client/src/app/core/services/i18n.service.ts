@@ -9,6 +9,7 @@ export const LANG_KEY = makeStateKey<string>('I18N_LANG');
 
 const SUPPORTED_LANGS = ['en-US', 'zh-TW', 'ja', 'ko'];
 const DEFAULT_LANG = 'en-US';
+const LANG_COOKIE_NAME = 'preferred_lang';
 
 @Injectable({
     providedIn: 'root'
@@ -37,7 +38,14 @@ export class I18nService {
                 return;
             }
 
-            // 2. Browser Detection
+            // 2. Check cookie for user preference
+            const cookieLang = this.getCookie(LANG_COOKIE_NAME);
+            if (cookieLang && SUPPORTED_LANGS.includes(cookieLang)) {
+                this.loadTranslations(cookieLang).subscribe();
+                return;
+            }
+
+            // 3. Browser Detection
             const detected = this.detectBrowserLanguage();
             const normalized = this.normalizeLanguage(detected);
             this.loadTranslations(normalized).subscribe();
@@ -85,7 +93,17 @@ export class I18nService {
     switchLanguage(lang: string) {
         const normalized = this.normalizeLanguage(lang);
         if (normalized === this.currentLang()) return;
-        this.loadTranslations(normalized).subscribe();
+
+        // Save preference to cookie
+        this.setCookie(LANG_COOKIE_NAME, normalized, 365);
+
+        // Load translations and reload content
+        this.loadTranslations(normalized).subscribe(() => {
+            // Trigger page content reload by refreshing the current view
+            if (isPlatformBrowser(this.platformId)) {
+                window.location.reload();
+            }
+        });
     }
 
     /**
@@ -130,4 +148,19 @@ export class I18nService {
         this.translations.set(data);
         this.document.documentElement.lang = lang;
     }
+
+    // Cookie utilities
+    private setCookie(name: string, value: string, days: number): void {
+        if (!isPlatformBrowser(this.platformId)) return;
+        const expires = new Date();
+        expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+        this.document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+    }
+
+    private getCookie(name: string): string | null {
+        if (!isPlatformBrowser(this.platformId)) return null;
+        const match = this.document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : null;
+    }
 }
+

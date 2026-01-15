@@ -114,10 +114,10 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
        <div class="flex-1 overflow-hidden" *ngIf="activeTab === 'advanced'">
             <app-advanced-style-panel
                 class="block h-full"
-                *ngIf="block"
-                [customClasses]="block.styles?.customClasses || ''"
-                [inlineStyles]="block.styles?.inlineStyles || ''"
-                [customCss]="block.styles?.customCss || ''"
+                *ngIf="block()"
+                [customClasses]="block()?.styles?.customClasses || ''"
+                [inlineStyles]="block()?.styles?.inlineStyles || ''"
+                [customCss]="block()?.styles?.customCss || ''"
                 (stylesChange)="onAdvancedStyleChange($event)">
             </app-advanced-style-panel>
        </div>
@@ -197,12 +197,12 @@ export class BlockToolbarComponent {
     }
 
     onAdvancedStyleChange(advancedStyles: AdvancedStyleOutput) {
-        if (!this.block) return;
+        if (!this.block()) return;
 
-        const currentStyles = this.block.styles || {};
+        const currentStyles = this.block()!.styles || {};
 
         this.blockChange.emit({
-            ...this.block,
+            ...this.block()!,
             styles: {
                 ...currentStyles,
                 customClasses: advancedStyles.customClasses,

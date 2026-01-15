@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 
@@ -261,7 +261,7 @@ import { TeamGridComponent } from './team-grid.component';
   `
 })
 export class BlockRendererComponent {
-  readonly block = input.required<any>();
+  @Input() block: any;
 
   private registry = inject(BlockRegistryService);
   private styleValidator = inject(StyleValidatorService);

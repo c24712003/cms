@@ -67,9 +67,9 @@ import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component'
                          <!-- Rendered Block -->
                          <div (click)="selectBlock(block, $event)" 
                               class="cursor-pointer hover:ring-2 hover:ring-blue-400/50 rounded-lg transition-all"
-                              [class.ring-2]="selectedBlock?.id === block.id"
-                              [class.ring-blue-500]="selectedBlock?.id === block.id"
-                              [class.z-20]="selectedBlock?.id === block.id">
+                              [class.ring-2]="selectedBlock()?.id === block.id"
+                              [class.ring-blue-500]="selectedBlock()?.id === block.id"
+                              [class.z-20]="selectedBlock()?.id === block.id">
                               
                              <!-- Hidden Block Placeholder (shown when block has display:none) -->
                              <div *ngIf="isBlockHidden(block)" 

@@ -197,18 +197,27 @@ export class SeoService {
 
     /**
      * Set alternate language links (hreflang)
+     * With Accept-Language routing, all alternates point to the same URL
      */
-    setAlternateLanguages(alternates: Array<{ lang: string; url: string }>): void {
+    setAlternateLanguages(currentUrl: string, supportedLangs: string[] = ['en-US', 'zh-TW', 'ja', 'ko']): void {
         // Remove existing alternates
         this.document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
 
-        alternates.forEach(alt => {
+        // Add hreflang for each supported language - all point to same URL
+        supportedLangs.forEach(lang => {
             const link = this.document.createElement('link');
             link.setAttribute('rel', 'alternate');
-            link.setAttribute('hreflang', alt.lang);
-            link.setAttribute('href', alt.url);
+            link.setAttribute('hreflang', lang);
+            link.setAttribute('href', currentUrl);
             this.document.head.appendChild(link);
         });
+
+        // Add x-default for language negotiation fallback
+        const xDefault = this.document.createElement('link');
+        xDefault.setAttribute('rel', 'alternate');
+        xDefault.setAttribute('hreflang', 'x-default');
+        xDefault.setAttribute('href', currentUrl);
+        this.document.head.appendChild(xDefault);
     }
 
     /**

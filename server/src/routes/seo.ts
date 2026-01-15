@@ -95,12 +95,12 @@ router.get('/page/:slug', async (req: Request, res: Response) => {
             settingsObj[s.key] = s.value;
         });
 
-        // Build canonical URL if not custom
+        // Build canonical URL if not custom - no language prefix
         const baseUrl = process.env.BASE_URL || 'https://example.com';
         const canonicalUrl = content?.canonical_url ||
             (slug === 'home'
-                ? `${baseUrl}/${lang}`
-                : `${baseUrl}/${lang}/${content?.slug_localized || slug}`);
+                ? baseUrl
+                : `${baseUrl}/${content?.slug_localized || slug}`);
 
         // Build response
         const seoData = {

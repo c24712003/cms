@@ -16,16 +16,12 @@ export const routes: Routes = [
         children: [
             // Dynamic pages (including contact, home, about, services, etc.)
             {
-                path: ':lang/:slug',
+                path: ':slug',
                 loadComponent: () => import('./features/dynamic-page/dynamic-page.component').then(m => m.DynamicPageComponent)
             },
-            {
-                path: ':lang',
-                redirectTo: ':lang/home',
-                pathMatch: 'full'
-            },
-            { path: '', redirectTo: 'en/home', pathMatch: 'full' } // Fallback to default
+            { path: '', redirectTo: 'home', pathMatch: 'full' }
         ]
     },
-    { path: '**', redirectTo: 'en/home' } // Global Fallback
+    { path: '**', redirectTo: 'home' } // Global Fallback
 ];
+

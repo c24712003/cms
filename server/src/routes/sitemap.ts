@@ -57,11 +57,11 @@ router.get('/sitemap.xml', async (req, res) => {
             pageVersions.forEach((page: any) => {
                 xml += '  <url>\n';
 
-                // Location
+                // Location - no language prefix, same URL for all languages
                 const slug = page.slug_localized || page.slug_key || '';
                 const loc = slug === 'home' || slug === ''
-                    ? `${baseUrl}/${page.lang_code}`
-                    : `${baseUrl}/${page.lang_code}/${slug}`;
+                    ? baseUrl
+                    : `${baseUrl}/${slug}`;
                 xml += `    <loc>${escapeXml(loc)}</loc>\n`;
 
                 // Last Modified
@@ -75,26 +75,16 @@ router.get('/sitemap.xml', async (req, res) => {
                 xml += `    <changefreq>${changefreq}</changefreq>\n`;
                 xml += `    <priority>${priority}</priority>\n`;
 
-                // Hreflang alternates (for all language versions of this page)
+                // Hreflang alternates - all point to same URL (server uses Accept-Language)
                 pageVersions.forEach((altPage: any) => {
                     if (langCodes.includes(altPage.lang_code)) {
-                        const altSlug = altPage.slug_localized || altPage.slug_key || '';
-                        const altLoc = altSlug === 'home' || altSlug === ''
-                            ? `${baseUrl}/${altPage.lang_code}`
-                            : `${baseUrl}/${altPage.lang_code}/${altSlug}`;
-                        xml += `    <xhtml:link rel="alternate" hreflang="${altPage.lang_code}" href="${escapeXml(altLoc)}" />\n`;
+                        // All hreflang point to the same URL
+                        xml += `    <xhtml:link rel="alternate" hreflang="${altPage.lang_code}" href="${escapeXml(loc)}" />\n`;
                     }
                 });
 
                 // x-default for language negotiation fallback
-                const defaultPage = pageVersions.find((p: any) => p.lang_code === 'en-US') || pageVersions[0];
-                if (defaultPage) {
-                    const defaultSlug = defaultPage.slug_localized || defaultPage.slug_key || '';
-                    const defaultLoc = defaultSlug === 'home' || defaultSlug === ''
-                        ? `${baseUrl}/${defaultPage.lang_code}`
-                        : `${baseUrl}/${defaultPage.lang_code}/${defaultSlug}`;
-                    xml += `    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(defaultLoc)}" />\n`;
-                }
+                xml += `    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(loc)}" />\n`;
 
                 xml += '  </url>\n';
             });

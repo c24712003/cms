@@ -89,11 +89,8 @@ export class DynamicPageComponent implements OnInit {
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
-      const lang = params.get('lang') || 'en';
+      const lang = this.i18n.currentLang();
       const slug = params.get('slug') || 'home';
-
-      // Sync I18n Service
-      this.i18n.setLanguage(lang);
 
       this.pageService.getPage(slug, lang).subscribe({
         next: (data) => {

@@ -498,7 +498,10 @@ export class ThemeEditorComponent implements OnInit {
 
     showToast(msg: string, type: string) {
         this.toast = { message: msg, type };
-        this.cdr.detectChanges();
-        setTimeout(() => { this.toast.message = ''; this.cdr.detectChanges(); }, 3000);
+        // Manual detectChanges removed to let Angular Zone handle it
+        setTimeout(() => {
+            this.toast.message = '';
+            // Angular will detect this change automatically
+        }, 3000);
     }
 }

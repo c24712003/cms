@@ -107,7 +107,7 @@ export class DynamicBlockRendererComponent implements OnChanges, OnDestroy, DoCh
 
     ngOnChanges(changes: SimpleChanges): void {
         const blockChange = changes['block'];
-        if (blockChange && this.block()) {
+        if (blockChange && this.block) {
             const prev = blockChange.previousValue as BlockInstance;
             const curr = blockChange.currentValue as BlockInstance;
 
@@ -127,9 +127,8 @@ export class DynamicBlockRendererComponent implements OnChanges, OnDestroy, DoCh
     }
 
     ngOnDestroy(): void {
-        const currentBlock = this.block();
-        if (currentBlock) {
-            this.styleInjector.removeBlockStyles(currentBlock.id);
+        if (this.block) {
+            this.styleInjector.removeBlockStyles(this.block.id);
         }
     }
 
@@ -138,8 +137,7 @@ export class DynamicBlockRendererComponent implements OnChanges, OnDestroy, DoCh
      * Flattens the nested viewport structure (desktop/tablet/mobile) into a single object.
      */
     private getResolvedStyles(): any {
-        const currentBlock = this.block();
-        if (!currentBlock?.styles) return {};
+        if (!this.block?.styles) return {};
 
         const width = typeof window !== 'undefined' ? window.innerWidth : 1024;
         let viewport: 'desktop' | 'tablet' | 'mobile' = 'desktop';
@@ -147,8 +145,8 @@ export class DynamicBlockRendererComponent implements OnChanges, OnDestroy, DoCh
         else if (width < 768) viewport = 'tablet';
 
         // Deep merge: desktop as base, then layer viewport-specific styles on top
-        const base = currentBlock.styles.desktop || {};
-        const specific = currentBlock.styles[viewport] || {};
+        const base = this.block.styles.desktop || {};
+        const specific = this.block.styles[viewport] || {};
 
         return this.deepMerge(base, specific);
     }
@@ -177,22 +175,21 @@ export class DynamicBlockRendererComponent implements OnChanges, OnDestroy, DoCh
     }
 
     private updateInputs(): void {
-        const currentBlock = this.block();
-        if (!this.componentRef || !currentBlock || !currentBlock.data) return;
+        if (!this.componentRef || !this.block || !this.block.data) return;
 
         const ref = this.componentRef;
-        Object.keys(currentBlock.data).forEach(key => {
-            this.safeSetInput(ref, key, currentBlock.data[key]);
+        Object.keys(this.block.data).forEach(key => {
+            this.safeSetInput(ref, key, this.block!.data[key]);
         });
 
         // Pass resolved (flattened) styles if the component accepts it
-        if (currentBlock.styles && this.componentInputs.has('styles')) {
+        if (this.block.styles && this.componentInputs.has('styles')) {
             ref.setInput('styles', this.getResolvedStyles());
         }
 
         // Also pass blockId for data-block-id attribute binding
         if (this.componentInputs.has('blockId')) {
-            ref.setInput('blockId', currentBlock.id);
+            ref.setInput('blockId', this.block.id);
         }
 
         // Manually trigger change detection for the child component
@@ -204,10 +201,9 @@ export class DynamicBlockRendererComponent implements OnChanges, OnDestroy, DoCh
         this.componentRef = undefined;
         this.componentInputs.clear();
 
-        const currentBlock = this.block();
-        if (!currentBlock) return;
+        if (!this.block) return;
 
-        const componentClass = this.registry.getComponent(currentBlock.type);
+        const componentClass = this.registry.getComponent(this.block.type);
 
         if (componentClass) {
             // Cache the component's declared inputs using Angular's reflection API

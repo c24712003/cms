@@ -144,7 +144,8 @@ export class SiteFooterComponent implements OnInit {
   }
 
   getLocalizedLink(link: string): string {
-    return link.startsWith('/') ? `/${this.i18n.currentLang()}${link}` : link;
+    // No language prefix needed - language is determined by cookie/Accept-Language
+    return link;
   }
 }
 

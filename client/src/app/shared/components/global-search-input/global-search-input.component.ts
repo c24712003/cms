@@ -157,17 +157,9 @@ export class GlobalSearchInputComponent {
     }
 
     getPublicLink(page: any): any[] {
-        // Construct link based on current lang
-        const lang = this.i18n.currentLang();
-        // If page.slug_localized exists use it? Or slug_key? 
-        // For now our router uses slug_key usually, or we need to check routing logic.
-        // pages.ts router says: /:slug/content. 
-        // Angular router likely uses slug_key.
-        // Let's assume standard structure: /:lang/:slug
-        let slug = page.slug_key;
-        if (slug === 'home') slug = ''; // Home usually root
-
-        if (slug === '') return ['/', lang];
-        return ['/', lang, slug];
+        // No language prefix needed - language is determined by cookie/Accept-Language
+        let slug = page.slug_localized || page.slug_key;
+        if (slug === 'home') return ['/'];
+        return ['/', slug];
     }
 }

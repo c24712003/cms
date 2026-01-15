@@ -115,22 +115,14 @@ export class SiteHeaderComponent implements OnInit {
   }
 
   getLocalizedLink(link: string): string {
-    return link.startsWith('/') ? `/${this.i18n.currentLang()}${link}` : link;
+    // No language prefix needed - language is determined by cookie/Accept-Language
+    return link;
   }
 
   switchLang(event: any) {
     const lang = event.target.value;
-    const currentUrl = this.router.url;
-    // Replace the language segment in the URL
-    // Assumes URL structure is always /:lang/... or just /:lang
-    const newUrl = currentUrl.replace(/^\/[a-z]{2}(?:-[a-zA-Z]{2})?/, `/${lang}`);
-
-    // If replacement didn't happen (e.g. root url), default to home
-    if (newUrl === currentUrl && !currentUrl.match(/^\/[a-z]{2}/)) {
-      this.router.navigate([`/${lang}/home`]);
-    } else {
-      this.router.navigateByUrl(newUrl);
-    }
+    // Language switch is handled by i18n service which saves cookie and reloads
+    this.i18n.switchLanguage(lang);
   }
 }
 
