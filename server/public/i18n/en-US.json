@@ -322,5 +322,20 @@
   "VALIDATION_REQUIRED": "This field is required",
   "MEDIA_PICKER_TITLE": "Select Media",
   "MEDIA_PICKER_UPLOAD": "Upload New",
-  "MEDIA_PICKER_SELECT": "Select"
+  "MEDIA_PICKER_SELECT": "Select",
+  "BLOCK_TAB_ADVANCED": "Advanced",
+  "ADVANCED_CSS_CLASSES": "CSS Classes",
+  "ADVANCED_CSS_CLASSES_HINT": "Add space-separated CSS class names (e.g., my-class animate-fade)",
+  "ADVANCED_INLINE_STYLES": "Inline Styles",
+  "ADVANCED_INLINE_STYLES_HINT": "Add CSS properties directly (e.g., color: red; padding: 20px;)",
+  "ADVANCED_CUSTOM_CSS": "Custom CSS",
+  "ADVANCED_CUSTOM_CSS_HINT": "Write CSS rules scoped to this block",
+  "STYLE_VALIDATION_WARNING": "Security Warning",
+  "STYLE_VALIDATION_DANGEROUS": "Potentially dangerous pattern detected and removed",
+  "STYLE_ERROR_EXPRESSION": "CSS expression() is not allowed",
+  "STYLE_ERROR_JAVASCRIPT_URL": "JavaScript URLs are not allowed",
+  "STYLE_ERROR_INVALID_CLASS_CHAR": "Invalid character in class name",
+  "STYLE_WARNING_IMPORTANT": "Using !important may override theme styles",
+  "STYLE_ERROR_UNBALANCED_PARENS": "Unbalanced parentheses detected",
+  "STYLE_ERROR_UNBALANCED_BRACES": "Unbalanced braces detected"
 }

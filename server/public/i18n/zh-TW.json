@@ -322,5 +322,20 @@
   "VALIDATION_REQUIRED": "此欄位為必填項目",
   "MEDIA_PICKER_TITLE": "選擇媒體",
   "MEDIA_PICKER_UPLOAD": "上傳新檔案",
-  "MEDIA_PICKER_SELECT": "選擇"
+  "MEDIA_PICKER_SELECT": "選擇",
+  "BLOCK_TAB_ADVANCED": "進階",
+  "ADVANCED_CSS_CLASSES": "CSS 類別",
+  "ADVANCED_CSS_CLASSES_HINT": "輸入以空格分隔的 CSS 類別名稱（例如：my-class animate-fade）",
+  "ADVANCED_INLINE_STYLES": "內嵌樣式",
+  "ADVANCED_INLINE_STYLES_HINT": "直接輸入 CSS 屬性（例如：color: red; padding: 20px;）",
+  "ADVANCED_CUSTOM_CSS": "自訂 CSS",
+  "ADVANCED_CUSTOM_CSS_HINT": "撰寫僅套用於此區塊的 CSS 規則",
+  "STYLE_VALIDATION_WARNING": "安全性警告",
+  "STYLE_VALIDATION_DANGEROUS": "偵測到並移除潛在危險模式",
+  "STYLE_ERROR_EXPRESSION": "不允許使用 CSS expression()",
+  "STYLE_ERROR_JAVASCRIPT_URL": "不允許使用 JavaScript URL",
+  "STYLE_ERROR_INVALID_CLASS_CHAR": "類別名稱包含無效字元",
+  "STYLE_WARNING_IMPORTANT": "使用 !important 可能覆蓋主題樣式",
+  "STYLE_ERROR_UNBALANCED_PARENS": "偵測到不平衡的括號",
+  "STYLE_ERROR_UNBALANCED_BRACES": "偵測到不平衡的大括號"
 }

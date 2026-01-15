@@ -27,6 +27,12 @@ import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component'
             height: 100%; 
             width: 100%;
         }
+        /* Hidden blocks in editor should still be visible but faded */
+        .editor-hidden-block {
+            opacity: 0.3;
+            pointer-events: none;
+            filter: grayscale(50%);
+        }
     `],
     template: `
         <!-- Center: Canvas -->
@@ -64,7 +70,23 @@ import { BlockToolbarComponent } from '../block-toolbar/block-toolbar.component'
                               [class.ring-2]="selectedBlock?.id === block.id"
                               [class.ring-blue-500]="selectedBlock?.id === block.id"
                               [class.z-20]="selectedBlock?.id === block.id">
-                             <app-dynamic-block-renderer [block]="block"></app-dynamic-block-renderer>
+                              
+                             <!-- Hidden Block Placeholder (shown when block has display:none) -->
+                             <div *ngIf="isBlockHidden(block)" 
+                                  class="p-6 bg-slate-100 dark:bg-slate-700 border-2 border-dashed border-slate-300 dark:border-slate-500 rounded-lg flex items-center gap-3">
+                                 <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                                 </svg>
+                                 <div class="flex-1">
+                                     <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ getBlockDisplayName(block) }}</p>
+                                     <p class="text-xs text-slate-400 dark:text-slate-500">已設定為隱藏 (display: none)</p>
+                                 </div>
+                             </div>
+                             
+                             <!-- Actual Block Renderer (always rendered for editor preview) -->
+                             <div [class.editor-hidden-block]="isBlockHidden(block)">
+                                <app-dynamic-block-renderer [block]="block"></app-dynamic-block-renderer>
+                             </div>
                          </div>
 
                          <!-- Insert Between Zone (Bottom of each block) -->
@@ -320,5 +342,34 @@ export class EditorCanvasComponent {
 
     getBlockSchema(type: string) {
         return this.registry.getDefinition(type)?.manifest.schema;
+    }
+
+    /**
+     * Check if a block has display:none styling applied
+     */
+    isBlockHidden(block: BlockInstance): boolean {
+        if (!block.styles) return false;
+
+        // Check inline styles for display: none
+        const inlineStyles = block.styles.inlineStyles || '';
+        if (/display\s*:\s*none/i.test(inlineStyles)) {
+            return true;
+        }
+
+        // Check custom CSS for display: none patterns
+        const customCss = block.styles.customCss || '';
+        if (/display\s*:\s*none/i.test(customCss)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get display name for a block
+     */
+    getBlockDisplayName(block: BlockInstance): string {
+        const manifest = this.registry.getManifest(block.type);
+        return manifest?.displayName || block.type || 'Block';
     }
 }

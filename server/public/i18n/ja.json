@@ -291,5 +291,20 @@
   "NAV_FAQ": "よくある質問",
   "NAV_RESIDENTIAL": "住宅建築",
   "NAV_COMMERCIAL": "商業建築",
-  "NAV_PUBLIC": "公共事業"
+  "NAV_PUBLIC": "公共事業",
+  "BLOCK_TAB_ADVANCED": "高度な設定",
+  "ADVANCED_CSS_CLASSES": "CSSクラス",
+  "ADVANCED_CSS_CLASSES_HINT": "スペース区切りでCSSクラス名を入力（例：my-class animate-fade）",
+  "ADVANCED_INLINE_STYLES": "インラインスタイル",
+  "ADVANCED_INLINE_STYLES_HINT": "CSSプロパティを直接入力（例：color: red; padding: 20px;）",
+  "ADVANCED_CUSTOM_CSS": "カスタムCSS",
+  "ADVANCED_CUSTOM_CSS_HINT": "このブロック専用のCSSルールを記述",
+  "STYLE_VALIDATION_WARNING": "セキュリティ警告",
+  "STYLE_VALIDATION_DANGEROUS": "危険なパターンが検出され削除されました",
+  "STYLE_ERROR_EXPRESSION": "CSS expression()は許可されていません",
+  "STYLE_ERROR_JAVASCRIPT_URL": "JavaScript URLは許可されていません",
+  "STYLE_ERROR_INVALID_CLASS_CHAR": "クラス名に無効な文字が含まれています",
+  "STYLE_WARNING_IMPORTANT": "!importantはテーマスタイルを上書きする可能性があります",
+  "STYLE_ERROR_UNBALANCED_PARENS": "括弧のバランスが取れていません",
+  "STYLE_ERROR_UNBALANCED_BRACES": "波括弧のバランスが取れていません"
 }

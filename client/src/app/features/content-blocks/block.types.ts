@@ -100,21 +100,51 @@ export interface BlockSettings {
     id?: string; // HTML ID
 }
 
+/**
+ * CSS Validation Error for user feedback
+ */
+export interface CssValidationError {
+    line?: number;
+    message: string;
+    severity: 'warning' | 'error';
+}
+
+/**
+ * Result of CSS validation including sanitized output
+ */
+export interface CssValidationResult {
+    isValid: boolean;
+    errors: CssValidationError[];
+    sanitizedValue: string;
+}
+
+/**
+ * Advanced style output from the style panel
+ */
+export interface AdvancedStyleOutput {
+    customClasses: string;
+    inlineStyles: string;
+    customCss: string;
+    hasErrors: boolean;
+}
+
 export interface BlockInstance {
     type: string;
     id: string;
     data: Record<string, any>;
 
-    // 🎨 New: Styling Layer
+    // 🎨 Styling Layer
     styles?: {
         desktop?: BlockStyleProps;
         tablet?: BlockStyleProps;
         mobile?: BlockStyleProps;
-        customCss?: string; // User-written CSS (Advanced mode)
-        hover?: BlockStyleProps; // Hover state styles
+        customCss?: string;         // User-written CSS scoped to block
+        customClasses?: string;     // Space-separated CSS class names
+        inlineStyles?: string;      // Raw CSS properties like "color: red; font-size: 16px"
+        hover?: BlockStyleProps;    // Hover state styles
     };
 
-    // ✨ New: Interactive Layer
+    // ✨ Interactive Layer
     settings?: BlockSettings;
 
     children?: BlockInstance[];

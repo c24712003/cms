@@ -45,15 +45,57 @@ export class StyleInjectorService {
 
         // Custom CSS (Advanced)
         if (block.styles.customCss) {
-            // Very basic scoping for custom CSS.
-            // Ideally use specific parser to prefix selectors. 
-            // Here we assume user writes properties or uses & selector-like logic if we were using a preprocessor,
-            // but for raw CSS we often just wrap it. 
-            // Simple approach: wrap in scope selector
-            css += `${scopeSelector} { ${this.sanitize(block.styles.customCss)} }`;
+            // Scope each CSS rule properly by prefixing selectors with scope selector
+            css += this.scopeCustomCss(scopeSelector, block.styles.customCss);
         }
 
         this.injectStyleTag(block.id, css);
+    }
+
+    /**
+     * Scope custom CSS by prefixing each selector with the block's scope selector
+     */
+    private scopeCustomCss(scopeSelector: string, customCss: string): string {
+        const sanitized = this.sanitize(customCss);
+
+        // Split by closing braces to find each rule
+        // This is a simple approach - for complex CSS a proper parser would be needed
+        const result: string[] = [];
+
+        // Match CSS rules: selector { properties }
+        const ruleRegex = /([^{}]+)\{([^{}]*)\}/g;
+        let match;
+
+        while ((match = ruleRegex.exec(sanitized)) !== null) {
+            const selectors = match[1].trim();
+            const properties = match[2].trim();
+
+            if (!selectors || !properties) continue;
+
+            // Handle multiple selectors separated by comma
+            const scopedSelectors = selectors.split(',').flatMap(sel => {
+                sel = sel.trim();
+                // If selector starts with & (like in preprocessors), replace with scope
+                if (sel.startsWith('&')) {
+                    return [`${scopeSelector}${sel.slice(1)}`];
+                }
+                // For class selectors (.class) or id selectors (#id), generate BOTH:
+                // 1. scopeSelector.class - matches the wrapper itself
+                // 2. scopeSelector .class - matches descendants
+                if (sel.startsWith('.') || sel.startsWith('#')) {
+                    return [
+                        `${scopeSelector}${sel}`,        // No space: matches wrapper itself
+                        `${scopeSelector} ${sel}`        // With space: matches descendants
+                    ];
+                }
+                // For element selectors or complex selectors, just prepend
+                return [`${scopeSelector} ${sel}`];
+            }).join(', ');
+
+            result.push(`${scopedSelectors} { ${properties} }`);
+        }
+
+        return result.join('\n');
     }
 
     removeBlockStyles(blockId: string): void {

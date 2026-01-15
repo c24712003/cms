@@ -1,15 +1,16 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BlockInstance, BlockSettings, ContentBlockManifest } from '../../../features/content-blocks/block.types';
+import { BlockInstance, BlockSettings, ContentBlockManifest, AdvancedStyleOutput } from '../../../features/content-blocks/block.types';
 import { BlockRegistryService } from '../../../features/content-blocks/block-registry.service';
 import { PropertyPanelComponent } from '../../../features/content-blocks/editor/property-panel.component';
 import { SettingsPanelComponent } from '../settings-panel/settings-panel.component';
+import { AdvancedStylePanelComponent } from '../advanced-style-panel/advanced-style-panel.component';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
     selector: 'app-block-toolbar',
     standalone: true,
-    imports: [CommonModule, PropertyPanelComponent, SettingsPanelComponent, TranslatePipe],
+    imports: [CommonModule, PropertyPanelComponent, SettingsPanelComponent, AdvancedStylePanelComponent, TranslatePipe],
     template: `
     <div class="h-full flex flex-col bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 shadow-xl transition-all">
        <!-- Header -->
@@ -24,8 +25,8 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
        </div>
 
        <!-- Tabs -->
-       <div class="grid grid-cols-3 p-1 m-4 rounded-lg bg-slate-100 dark:bg-slate-700/50 gap-1 border border-slate-200 dark:border-slate-700">
-           <button class="px-3 py-2 text-xs font-medium rounded-md transition-all duration-200 focus:outline-none" 
+       <div class="grid grid-cols-4 p-1 m-4 rounded-lg bg-slate-100 dark:bg-slate-700/50 gap-1 border border-slate-200 dark:border-slate-700">
+           <button class="px-2 py-2 text-xs font-medium rounded-md transition-all duration-200 focus:outline-none" 
               [class.bg-white]="activeTab === 'content'"
               [class.dark:bg-slate-600]="activeTab === 'content'"
               [class.text-slate-900]="activeTab === 'content'"
@@ -36,7 +37,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
               [class.dark:text-slate-400]="activeTab !== 'content'"
               (click)="activeTab = 'content'">{{ 'BLOCK_TAB_CONTENT' | translate }}</button>
            
-           <button class="px-3 py-2 text-xs font-medium rounded-md transition-all duration-200 focus:outline-none" 
+           <button class="px-2 py-2 text-xs font-medium rounded-md transition-all duration-200 focus:outline-none" 
               [class.bg-white]="activeTab === 'styles'"
               [class.dark:bg-slate-600]="activeTab === 'styles'"
               [class.text-slate-900]="activeTab === 'styles'"
@@ -47,7 +48,18 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
               [class.dark:text-slate-400]="activeTab !== 'styles'"
               (click)="activeTab = 'styles'">{{ 'BLOCK_TAB_STYLES' | translate }}</button>
            
-           <button class="px-3 py-2 text-xs font-medium rounded-md transition-all duration-200 focus:outline-none" 
+           <button class="px-2 py-2 text-xs font-medium rounded-md transition-all duration-200 focus:outline-none" 
+              [class.bg-white]="activeTab === 'advanced'"
+              [class.dark:bg-slate-600]="activeTab === 'advanced'"
+              [class.text-slate-900]="activeTab === 'advanced'"
+              [class.dark:text-white]="activeTab === 'advanced'"
+              [class.shadow-sm]="activeTab === 'advanced'"
+              [class.text-slate-500]="activeTab !== 'advanced'"
+              [class.hover:text-slate-700]="activeTab !== 'advanced'"
+              [class.dark:text-slate-400]="activeTab !== 'advanced'"
+              (click)="activeTab = 'advanced'">{{ 'BLOCK_TAB_ADVANCED' | translate }}</button>
+           
+           <button class="px-2 py-2 text-xs font-medium rounded-md transition-all duration-200 focus:outline-none" 
               [class.bg-white]="activeTab === 'settings'"
               [class.dark:bg-slate-600]="activeTab === 'settings'"
               [class.text-slate-900]="activeTab === 'settings'"
@@ -98,6 +110,18 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
             </div>
        </div>
        
+       <!-- Advanced Style Panel -->
+       <div class="flex-1 overflow-hidden" *ngIf="activeTab === 'advanced'">
+            <app-advanced-style-panel
+                class="block h-full"
+                *ngIf="block"
+                [customClasses]="block.styles?.customClasses || ''"
+                [inlineStyles]="block.styles?.inlineStyles || ''"
+                [customCss]="block.styles?.customCss || ''"
+                (stylesChange)="onAdvancedStyleChange($event)">
+            </app-advanced-style-panel>
+       </div>
+       
        <!-- Settings Panel -->
        <div class="flex-1 overflow-hidden" *ngIf="activeTab === 'settings'">
             <app-settings-panel
@@ -117,7 +141,7 @@ export class BlockToolbarComponent {
     @Output() close = new EventEmitter<void>();
     @Output() viewportChange = new EventEmitter<'desktop' | 'tablet' | 'mobile'>();
 
-    activeTab: 'content' | 'styles' | 'settings' = 'content';
+    activeTab: 'content' | 'styles' | 'advanced' | 'settings' = 'content';
     _viewport: 'desktop' | 'tablet' | 'mobile' = 'desktop';
 
     get viewport() { return this._viewport; }
@@ -169,6 +193,22 @@ export class BlockToolbarComponent {
         this.blockChange.emit({
             ...this.block,
             settings: newSettings
+        });
+    }
+
+    onAdvancedStyleChange(advancedStyles: AdvancedStyleOutput) {
+        if (!this.block) return;
+
+        const currentStyles = this.block.styles || {};
+
+        this.blockChange.emit({
+            ...this.block,
+            styles: {
+                ...currentStyles,
+                customClasses: advancedStyles.customClasses,
+                inlineStyles: advancedStyles.inlineStyles,
+                customCss: advancedStyles.customCss
+            }
         });
     }
 }

@@ -1,7 +1,9 @@
-import { Component, Input, ViewChild, ViewContainerRef, OnChanges, SimpleChanges, ComponentRef, OnDestroy, reflectComponentType } from '@angular/core';
+import { Component, Input, ViewChild, ViewContainerRef, OnChanges, SimpleChanges, ComponentRef, OnDestroy, reflectComponentType, inject, signal, computed, ChangeDetectorRef, DoCheck } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { BlockRegistryService } from './block-registry.service';
 import { StyleInjectorService } from './style-injector.service';
+import { StyleValidatorService } from './style-validator.service';
 import { BlockInstance } from './block.types';
 
 @Component({
@@ -9,23 +11,99 @@ import { BlockInstance } from './block.types';
     standalone: true,
     imports: [CommonModule],
     template: `
-    <ng-template #container></ng-template>
-    <div *ngIf="!componentRef" class="p-4 border border-red-200 bg-red-50 text-red-700 rounded">
-      Block type "{{block?.type}}" not found in registry.
+    <div 
+      [attr.data-block-id]="block?.id"
+      [class]="combinedClasses()"
+      [style]="safeInlineStyle()">
+      <ng-template #container></ng-template>
+    </div>
+    <div *ngIf="!componentRef && block" class="p-4 border border-red-200 bg-red-50 text-red-700 rounded">
+      Block type "{{block.type}}" not found in registry.
     </div>
   `
 })
-export class DynamicBlockRendererComponent implements OnChanges, OnDestroy {
+export class DynamicBlockRendererComponent implements OnChanges, OnDestroy, DoCheck {
     @Input() block: BlockInstance | undefined;
     @ViewChild('container', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
 
     componentRef: ComponentRef<any> | undefined;
     private componentInputs: Set<string> = new Set();
 
-    constructor(
-        private registry: BlockRegistryService,
-        private styleInjector: StyleInjectorService
-    ) { }
+    // Track previous style values for change detection
+    private previousCustomClasses: string | undefined;
+    private previousInlineStyles: string | undefined;
+    private previousCustomCss: string | undefined;
+
+    // Dependency injection
+    private registry = inject(BlockRegistryService);
+    private styleInjector = inject(StyleInjectorService);
+    private styleValidator = inject(StyleValidatorService);
+    private sanitizer = inject(DomSanitizer);
+    private cdr = inject(ChangeDetectorRef);
+
+    /**
+     * Combine custom classes from settings and styles
+     */
+    combinedClasses(): string {
+        if (!this.block) return '';
+
+        const parts: string[] = [];
+
+        // From settings (legacy customClass field)
+        if (this.block.settings?.customClass) {
+            parts.push(this.block.settings.customClass);
+        }
+
+        // From styles.customClasses (new field)
+        if (this.block.styles?.customClasses) {
+            const validation = this.styleValidator.validateClasses(this.block.styles.customClasses);
+            parts.push(validation.sanitizedValue);
+        }
+
+        return parts.join(' ').trim();
+    }
+
+    /**
+     * Create safe inline style from styles.inlineStyles
+     */
+    safeInlineStyle(): SafeStyle | null {
+        if (!this.block?.styles?.inlineStyles) return null;
+
+        const validation = this.styleValidator.validateInlineStyles(this.block.styles.inlineStyles);
+        if (!validation.sanitizedValue) return null;
+
+        return this.sanitizer.bypassSecurityTrustStyle(validation.sanitizedValue);
+    }
+
+    /**
+     * DoCheck: detect style changes even when object reference doesn't change
+     */
+    ngDoCheck(): void {
+        if (!this.block) return;
+
+        const currentClasses = this.block.styles?.customClasses;
+        const currentInline = this.block.styles?.inlineStyles;
+        const currentCss = this.block.styles?.customCss;
+
+        // Check if any style values changed
+        if (currentClasses !== this.previousCustomClasses ||
+            currentInline !== this.previousInlineStyles ||
+            currentCss !== this.previousCustomCss) {
+
+            // Update tracked values
+            this.previousCustomClasses = currentClasses;
+            this.previousInlineStyles = currentInline;
+            this.previousCustomCss = currentCss;
+
+            // Re-inject custom CSS
+            if (this.block.styles) {
+                this.styleInjector.injectBlockStyles(this.block);
+            }
+
+            // Force view update
+            this.cdr.markForCheck();
+        }
+    }
 
     ngOnChanges(changes: SimpleChanges): void {
         const blockChange = changes['block'];

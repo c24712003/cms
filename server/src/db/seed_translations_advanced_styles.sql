@@ -1,0 +1,136 @@
+-- Advanced Style Panel Translations
+-- For the free-form block style configuration module
+
+-- Insert Keys
+INSERT OR IGNORE INTO translation_keys (key, namespace) VALUES 
+('BLOCK_TAB_ADVANCED', 'editor'),
+('ADVANCED_CSS_CLASSES', 'editor'),
+('ADVANCED_CSS_CLASSES_HINT', 'editor'),
+('ADVANCED_INLINE_STYLES', 'editor'),
+('ADVANCED_INLINE_STYLES_HINT', 'editor'),
+('ADVANCED_CUSTOM_CSS', 'editor'),
+('ADVANCED_CUSTOM_CSS_HINT', 'editor'),
+('STYLE_VALIDATION_WARNING', 'editor'),
+('STYLE_VALIDATION_DANGEROUS', 'editor'),
+('STYLE_ERROR_EXPRESSION', 'editor'),
+('STYLE_ERROR_JAVASCRIPT_URL', 'editor'),
+('STYLE_ERROR_BEHAVIOR', 'editor'),
+('STYLE_ERROR_MOZ_BINDING', 'editor'),
+('STYLE_ERROR_DATA_URL', 'editor'),
+('STYLE_ERROR_SCRIPT_TAG', 'editor'),
+('STYLE_ERROR_STYLE_TAG', 'editor'),
+('STYLE_ERROR_EVENT_HANDLER', 'editor'),
+('STYLE_ERROR_UNICODE_ESCAPE', 'editor'),
+('STYLE_ERROR_UNBALANCED_PARENS', 'editor'),
+('STYLE_ERROR_UNBALANCED_BRACES', 'editor'),
+('STYLE_ERROR_INVALID_CLASS_CHAR', 'editor'),
+('STYLE_ERROR_INVALID_CLASS_START', 'editor'),
+('STYLE_WARNING_IMPORTANT', 'editor');
+
+-- EN
+INSERT INTO translation_values (trans_key, lang_code, value) VALUES 
+('BLOCK_TAB_ADVANCED', 'en', 'Advanced'),
+('ADVANCED_CSS_CLASSES', 'en', 'CSS Classes'),
+('ADVANCED_CSS_CLASSES_HINT', 'en', 'Add space-separated CSS class names (e.g., my-class animate-fade)'),
+('ADVANCED_INLINE_STYLES', 'en', 'Inline Styles'),
+('ADVANCED_INLINE_STYLES_HINT', 'en', 'Add CSS properties directly (e.g., color: red; padding: 20px;)'),
+('ADVANCED_CUSTOM_CSS', 'en', 'Custom CSS'),
+('ADVANCED_CUSTOM_CSS_HINT', 'en', 'Write CSS rules scoped to this block'),
+('STYLE_VALIDATION_WARNING', 'en', 'Security Warning'),
+('STYLE_VALIDATION_DANGEROUS', 'en', 'Potentially dangerous pattern detected and removed'),
+('STYLE_ERROR_EXPRESSION', 'en', 'CSS expression() is not allowed'),
+('STYLE_ERROR_JAVASCRIPT_URL', 'en', 'JavaScript URLs are not allowed'),
+('STYLE_ERROR_BEHAVIOR', 'en', 'CSS behavior property is not allowed'),
+('STYLE_ERROR_MOZ_BINDING', 'en', 'Mozilla binding is not allowed'),
+('STYLE_ERROR_DATA_URL', 'en', 'Data URLs with HTML content are not allowed'),
+('STYLE_ERROR_SCRIPT_TAG', 'en', 'Script tags are not allowed'),
+('STYLE_ERROR_STYLE_TAG', 'en', 'Style tags are not allowed'),
+('STYLE_ERROR_EVENT_HANDLER', 'en', 'Event handlers are not allowed'),
+('STYLE_ERROR_UNICODE_ESCAPE', 'en', 'Unicode escapes are not allowed'),
+('STYLE_ERROR_UNBALANCED_PARENS', 'en', 'Unbalanced parentheses detected'),
+('STYLE_ERROR_UNBALANCED_BRACES', 'en', 'Unbalanced braces detected'),
+('STYLE_ERROR_INVALID_CLASS_CHAR', 'en', 'Invalid character in class name'),
+('STYLE_ERROR_INVALID_CLASS_START', 'en', 'Class name cannot start with hyphen followed by digit'),
+('STYLE_WARNING_IMPORTANT', 'en', 'Using !important may override theme styles')
+ON CONFLICT(trans_key, lang_code) DO UPDATE SET value = excluded.value;
+
+-- ZH-TW
+INSERT INTO translation_values (trans_key, lang_code, value) VALUES 
+('BLOCK_TAB_ADVANCED', 'zh-TW', '進階'),
+('ADVANCED_CSS_CLASSES', 'zh-TW', 'CSS 類別'),
+('ADVANCED_CSS_CLASSES_HINT', 'zh-TW', '輸入以空格分隔的 CSS 類別名稱（例如：my-class animate-fade）'),
+('ADVANCED_INLINE_STYLES', 'zh-TW', '內嵌樣式'),
+('ADVANCED_INLINE_STYLES_HINT', 'zh-TW', '直接輸入 CSS 屬性（例如：color: red; padding: 20px;）'),
+('ADVANCED_CUSTOM_CSS', 'zh-TW', '自訂 CSS'),
+('ADVANCED_CUSTOM_CSS_HINT', 'zh-TW', '撰寫僅套用於此區塊的 CSS 規則'),
+('STYLE_VALIDATION_WARNING', 'zh-TW', '安全性警告'),
+('STYLE_VALIDATION_DANGEROUS', 'zh-TW', '偵測到並移除潛在危險模式'),
+('STYLE_ERROR_EXPRESSION', 'zh-TW', '不允許使用 CSS expression()'),
+('STYLE_ERROR_JAVASCRIPT_URL', 'zh-TW', '不允許使用 JavaScript URL'),
+('STYLE_ERROR_BEHAVIOR', 'zh-TW', '不允許使用 CSS behavior 屬性'),
+('STYLE_ERROR_MOZ_BINDING', 'zh-TW', '不允許使用 Mozilla binding'),
+('STYLE_ERROR_DATA_URL', 'zh-TW', '不允許使用包含 HTML 內容的 Data URL'),
+('STYLE_ERROR_SCRIPT_TAG', 'zh-TW', '不允許使用 Script 標籤'),
+('STYLE_ERROR_STYLE_TAG', 'zh-TW', '不允許使用 Style 標籤'),
+('STYLE_ERROR_EVENT_HANDLER', 'zh-TW', '不允許使用事件處理器'),
+('STYLE_ERROR_UNICODE_ESCAPE', 'zh-TW', '不允許使用 Unicode 跳脫字元'),
+('STYLE_ERROR_UNBALANCED_PARENS', 'zh-TW', '偵測到不平衡的括號'),
+('STYLE_ERROR_UNBALANCED_BRACES', 'zh-TW', '偵測到不平衡的大括號'),
+('STYLE_ERROR_INVALID_CLASS_CHAR', 'zh-TW', '類別名稱包含無效字元'),
+('STYLE_ERROR_INVALID_CLASS_START', 'zh-TW', '類別名稱不能以連字號加數字開頭'),
+('STYLE_WARNING_IMPORTANT', 'zh-TW', '使用 !important 可能覆蓋主題樣式')
+ON CONFLICT(trans_key, lang_code) DO UPDATE SET value = excluded.value;
+
+-- JA
+INSERT INTO translation_values (trans_key, lang_code, value) VALUES 
+('BLOCK_TAB_ADVANCED', 'ja', '高度な設定'),
+('ADVANCED_CSS_CLASSES', 'ja', 'CSSクラス'),
+('ADVANCED_CSS_CLASSES_HINT', 'ja', 'スペース区切りでCSSクラス名を入力（例：my-class animate-fade）'),
+('ADVANCED_INLINE_STYLES', 'ja', 'インラインスタイル'),
+('ADVANCED_INLINE_STYLES_HINT', 'ja', 'CSSプロパティを直接入力（例：color: red; padding: 20px;）'),
+('ADVANCED_CUSTOM_CSS', 'ja', 'カスタムCSS'),
+('ADVANCED_CUSTOM_CSS_HINT', 'ja', 'このブロック専用のCSSルールを記述'),
+('STYLE_VALIDATION_WARNING', 'ja', 'セキュリティ警告'),
+('STYLE_VALIDATION_DANGEROUS', 'ja', '危険なパターンが検出され削除されました'),
+('STYLE_ERROR_EXPRESSION', 'ja', 'CSS expression()は許可されていません'),
+('STYLE_ERROR_JAVASCRIPT_URL', 'ja', 'JavaScript URLは許可されていません'),
+('STYLE_ERROR_BEHAVIOR', 'ja', 'CSS behaviorプロパティは許可されていません'),
+('STYLE_ERROR_MOZ_BINDING', 'ja', 'Mozillaバインディングは許可されていません'),
+('STYLE_ERROR_DATA_URL', 'ja', 'HTMLコンテンツを含むData URLは許可されていません'),
+('STYLE_ERROR_SCRIPT_TAG', 'ja', 'Scriptタグは許可されていません'),
+('STYLE_ERROR_STYLE_TAG', 'ja', 'Styleタグは許可されていません'),
+('STYLE_ERROR_EVENT_HANDLER', 'ja', 'イベントハンドラは許可されていません'),
+('STYLE_ERROR_UNICODE_ESCAPE', 'ja', 'Unicodeエスケープは許可されていません'),
+('STYLE_ERROR_UNBALANCED_PARENS', 'ja', '括弧のバランスが取れていません'),
+('STYLE_ERROR_UNBALANCED_BRACES', 'ja', '波括弧のバランスが取れていません'),
+('STYLE_ERROR_INVALID_CLASS_CHAR', 'ja', 'クラス名に無効な文字が含まれています'),
+('STYLE_ERROR_INVALID_CLASS_START', 'ja', 'クラス名はハイフン+数字で始められません'),
+('STYLE_WARNING_IMPORTANT', 'ja', '!importantはテーマスタイルを上書きする可能性があります')
+ON CONFLICT(trans_key, lang_code) DO UPDATE SET value = excluded.value;
+
+-- KO
+INSERT INTO translation_values (trans_key, lang_code, value) VALUES 
+('BLOCK_TAB_ADVANCED', 'ko', '고급'),
+('ADVANCED_CSS_CLASSES', 'ko', 'CSS 클래스'),
+('ADVANCED_CSS_CLASSES_HINT', 'ko', '공백으로 구분된 CSS 클래스 이름 입력 (예: my-class animate-fade)'),
+('ADVANCED_INLINE_STYLES', 'ko', '인라인 스타일'),
+('ADVANCED_INLINE_STYLES_HINT', 'ko', 'CSS 속성 직접 입력 (예: color: red; padding: 20px;)'),
+('ADVANCED_CUSTOM_CSS', 'ko', '사용자 정의 CSS'),
+('ADVANCED_CUSTOM_CSS_HINT', 'ko', '이 블록에만 적용되는 CSS 규칙 작성'),
+('STYLE_VALIDATION_WARNING', 'ko', '보안 경고'),
+('STYLE_VALIDATION_DANGEROUS', 'ko', '잠재적으로 위험한 패턴이 감지되어 제거됨'),
+('STYLE_ERROR_EXPRESSION', 'ko', 'CSS expression()은 허용되지 않습니다'),
+('STYLE_ERROR_JAVASCRIPT_URL', 'ko', 'JavaScript URL은 허용되지 않습니다'),
+('STYLE_ERROR_BEHAVIOR', 'ko', 'CSS behavior 속성은 허용되지 않습니다'),
+('STYLE_ERROR_MOZ_BINDING', 'ko', 'Mozilla 바인딩은 허용되지 않습니다'),
+('STYLE_ERROR_DATA_URL', 'ko', 'HTML 콘텐츠가 포함된 Data URL은 허용되지 않습니다'),
+('STYLE_ERROR_SCRIPT_TAG', 'ko', 'Script 태그는 허용되지 않습니다'),
+('STYLE_ERROR_STYLE_TAG', 'ko', 'Style 태그는 허용되지 않습니다'),
+('STYLE_ERROR_EVENT_HANDLER', 'ko', '이벤트 핸들러는 허용되지 않습니다'),
+('STYLE_ERROR_UNICODE_ESCAPE', 'ko', 'Unicode 이스케이프는 허용되지 않습니다'),
+('STYLE_ERROR_UNBALANCED_PARENS', 'ko', '괄호 균형이 맞지 않습니다'),
+('STYLE_ERROR_UNBALANCED_BRACES', 'ko', '중괄호 균형이 맞지 않습니다'),
+('STYLE_ERROR_INVALID_CLASS_CHAR', 'ko', '클래스 이름에 잘못된 문자가 있습니다'),
+('STYLE_ERROR_INVALID_CLASS_START', 'ko', '클래스 이름은 하이픈+숫자로 시작할 수 없습니다'),
+('STYLE_WARNING_IMPORTANT', 'ko', '!important 사용 시 테마 스타일이 재정의될 수 있습니다')
+ON CONFLICT(trans_key, lang_code) DO UPDATE SET value = excluded.value;
