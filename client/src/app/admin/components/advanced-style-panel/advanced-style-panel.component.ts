@@ -1,28 +1,29 @@
 import {
-    Component,
-    input,
-    output,
-    signal,
-    computed,
-    effect,
-    inject
+  Component,
+  input,
+  output,
+  signal,
+  computed,
+  effect,
+  inject
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { StyleValidatorService } from '../../../features/content-blocks/style-validator.service';
 import { AdvancedStyleOutput, CssValidationResult } from '../../../features/content-blocks/block.types';
+import { CssEditorComponent } from '../../../shared/components/css-editor/css-editor.component';
 
 /**
  * Advanced Style Panel Component
  * Provides free-form CSS customization with real-time validation and security checks.
- * Uses Angular Signals for fine-grained reactivity.
+ * Uses Angular Signals for fine-grained reactivity and CodeMirror for CSS editing.
  */
 @Component({
-    selector: 'app-advanced-style-panel',
-    standalone: true,
-    imports: [CommonModule, FormsModule, TranslatePipe],
-    template: `
+  selector: 'app-advanced-style-panel',
+  standalone: true,
+  imports: [CommonModule, FormsModule, TranslatePipe, CssEditorComponent],
+  template: `
     <div class="h-full flex flex-col bg-slate-50 dark:bg-slate-900">
       <div class="flex-1 overflow-y-auto p-4 space-y-6">
 
@@ -79,16 +80,12 @@ import { AdvancedStyleOutput, CssValidationResult } from '../../../features/cont
           </h4>
           
           <div class="form-control">
-            <textarea 
-              [ngModel]="localInlineStyles()"
-              (ngModelChange)="onInlineStylesChange($event)"
-              placeholder="background: linear-gradient(135deg, #667eea, #764ba2);
-border-radius: 16px;
-box-shadow: 0 10px 40px rgba(0,0,0,0.2);"
-              rows="4"
-              class="textarea textarea-bordered w-full font-mono text-sm leading-relaxed dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 resize-y"
-              [class.textarea-error]="!inlineValidation().isValid">
-            </textarea>
+            <app-css-editor
+              [value]="localInlineStyles()"
+              (valueChange)="onInlineStylesChange($event)"
+              [minHeight]="100"
+              [darkMode]="isDarkMode()">
+            </app-css-editor>
             <p class="text-xs text-slate-400 dark:text-slate-500 mt-2">
               {{ 'ADVANCED_INLINE_STYLES_HINT' | translate }}
             </p>
@@ -126,19 +123,12 @@ box-shadow: 0 10px 40px rgba(0,0,0,0.2);"
           </h4>
           
           <div class="form-control">
-            <textarea 
-              [ngModel]="localCustomCss()"
-              (ngModelChange)="onCustomCssChange($event)"
-              placeholder=".my-class {
-  transition: transform 0.3s ease;
-}
-.my-class:hover {
-  transform: scale(1.05);
-}"
-              rows="6"
-              class="textarea textarea-bordered w-full font-mono text-sm leading-relaxed dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 resize-y"
-              [class.textarea-error]="!cssValidation().isValid">
-            </textarea>
+            <app-css-editor
+              [value]="localCustomCss()"
+              (valueChange)="onCustomCssChange($event)"
+              [minHeight]="160"
+              [darkMode]="isDarkMode()">
+            </app-css-editor>
             <p class="text-xs text-slate-400 dark:text-slate-500 mt-2">
               {{ 'ADVANCED_CUSTOM_CSS_HINT' | translate }}
             </p>
@@ -183,93 +173,102 @@ box-shadow: 0 10px 40px rgba(0,0,0,0.2);"
   `
 })
 export class AdvancedStylePanelComponent {
-    // Dependency injection
-    private styleValidator = inject(StyleValidatorService);
+  // Dependency injection
+  private styleValidator = inject(StyleValidatorService);
 
-    // Signal-based inputs (Angular 17.1+)
-    readonly customClasses = input<string>('');
-    readonly inlineStyles = input<string>('');
-    readonly customCss = input<string>('');
+  // Signal-based inputs (Angular 17.1+)
+  readonly customClasses = input<string>('');
+  readonly inlineStyles = input<string>('');
+  readonly customCss = input<string>('');
 
-    // Output
-    readonly stylesChange = output<AdvancedStyleOutput>();
+  // Output
+  readonly stylesChange = output<AdvancedStyleOutput>();
 
-    // Local editing state (signals)
-    readonly localClasses = signal('');
-    readonly localInlineStyles = signal('');
-    readonly localCustomCss = signal('');
+  // Local editing state (signals)
+  readonly localClasses = signal('');
+  readonly localInlineStyles = signal('');
+  readonly localCustomCss = signal('');
 
-    // Track if initial sync has happened
-    private initialized = false;
+  // Track if initial sync has happened
+  private initialized = false;
 
-    constructor() {
-        // Effect: sync input values to local state when inputs change externally
-        effect(() => {
-            const inputClasses = this.customClasses();
-            const inputInline = this.inlineStyles();
-            const inputCss = this.customCss();
+  constructor() {
+    // Effect: sync input values to local state when inputs change externally
+    effect(() => {
+      const inputClasses = this.customClasses();
+      const inputInline = this.inlineStyles();
+      const inputCss = this.customCss();
 
-            // Only update local state if we haven't initialized yet
-            // or if the input genuinely changed (not from our own emit)
-            if (!this.initialized) {
-                this.localClasses.set(inputClasses);
-                this.localInlineStyles.set(inputInline);
-                this.localCustomCss.set(inputCss);
-                this.initialized = true;
-            }
-        });
-    }
-
-    // Computed: validation results
-    readonly classValidation = computed<CssValidationResult>(() =>
-        this.styleValidator.validateClasses(this.localClasses())
-    );
-
-    readonly inlineValidation = computed<CssValidationResult>(() =>
-        this.styleValidator.validateInlineStyles(this.localInlineStyles())
-    );
-
-    readonly cssValidation = computed<CssValidationResult>(() =>
-        this.styleValidator.validateCustomCss(this.localCustomCss())
-    );
-
-    // Computed: combined output
-    readonly combinedOutput = computed<AdvancedStyleOutput>(() => ({
-        customClasses: this.classValidation().sanitizedValue,
-        inlineStyles: this.inlineValidation().sanitizedValue,
-        customCss: this.cssValidation().sanitizedValue,
-        hasErrors: !this.classValidation().isValid ||
-            !this.inlineValidation().isValid ||
-            !this.cssValidation().isValid
-    }));
-
-    // Computed: check for security warnings
-    readonly hasSecurityWarnings = computed(() => {
-        const allErrors = [
-            ...this.classValidation().errors,
-            ...this.inlineValidation().errors,
-            ...this.cssValidation().errors
-        ];
-        return allErrors.some(e => e.severity === 'error');
+      // Only update local state if we haven't initialized yet
+      // or if the input genuinely changed (not from our own emit)
+      if (!this.initialized) {
+        this.localClasses.set(inputClasses);
+        this.localInlineStyles.set(inputInline);
+        this.localCustomCss.set(inputCss);
+        this.initialized = true;
+      }
     });
+  }
 
-    // Event handlers
-    onClassesChange(value: string): void {
-        this.localClasses.set(value);
-        this.emitChanges();
-    }
+  // Computed: validation results
+  readonly classValidation = computed<CssValidationResult>(() =>
+    this.styleValidator.validateClasses(this.localClasses())
+  );
 
-    onInlineStylesChange(value: string): void {
-        this.localInlineStyles.set(value);
-        this.emitChanges();
-    }
+  readonly inlineValidation = computed<CssValidationResult>(() =>
+    this.styleValidator.validateInlineStyles(this.localInlineStyles())
+  );
 
-    onCustomCssChange(value: string): void {
-        this.localCustomCss.set(value);
-        this.emitChanges();
-    }
+  readonly cssValidation = computed<CssValidationResult>(() =>
+    this.styleValidator.validateCustomCss(this.localCustomCss())
+  );
 
-    private emitChanges(): void {
-        this.stylesChange.emit(this.combinedOutput());
-    }
+  // Computed: combined output
+  readonly combinedOutput = computed<AdvancedStyleOutput>(() => ({
+    customClasses: this.classValidation().sanitizedValue,
+    inlineStyles: this.inlineValidation().sanitizedValue,
+    customCss: this.cssValidation().sanitizedValue,
+    hasErrors: !this.classValidation().isValid ||
+      !this.inlineValidation().isValid ||
+      !this.cssValidation().isValid
+  }));
+
+  // Computed: check for security warnings
+  readonly hasSecurityWarnings = computed(() => {
+    const allErrors = [
+      ...this.classValidation().errors,
+      ...this.inlineValidation().errors,
+      ...this.cssValidation().errors
+    ];
+    return allErrors.some(e => e.severity === 'error');
+  });
+
+  // Event handlers
+  onClassesChange(value: string): void {
+    this.localClasses.set(value);
+    this.emitChanges();
+  }
+
+  onInlineStylesChange(value: string): void {
+    this.localInlineStyles.set(value);
+    this.emitChanges();
+  }
+
+  onCustomCssChange(value: string): void {
+    this.localCustomCss.set(value);
+    this.emitChanges();
+  }
+
+  private emitChanges(): void {
+    this.stylesChange.emit(this.combinedOutput());
+  }
+
+  /**
+   * Check if the page is in dark mode
+   */
+  isDarkMode(): boolean {
+    if (typeof document === 'undefined') return false;
+    return document.documentElement.classList.contains('dark') ||
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
 }
