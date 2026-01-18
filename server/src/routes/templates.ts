@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { getDb } from '../index';
 import { logActivity } from './audit-logs';
+import { authenticateToken } from '../middleware/auth.middleware';
 import { BoardingTemplate, TemplateVariable } from '../types/template.types';
 
 const router = express.Router();
@@ -35,7 +36,7 @@ router.get('/', (req: Request, res: Response) => {
 
 // POST /api/templates/instantiate
 // Body: { templateId: string, variables: Record<string, string>, themeName: string }
-router.post('/instantiate', async (req: Request, res: Response) => {
+router.post('/instantiate', authenticateToken, async (req: Request, res: Response) => {
     const { templateId, variables, themeName } = req.body;
 
     if (!templateId || !themeName) {
@@ -142,7 +143,16 @@ router.post('/instantiate', async (req: Request, res: Response) => {
             }
         }
 
-        await logActivity('Theme Instantiated', `Instantiated theme "${themeName}" (${template.name})`, 'content');
+        await logActivity({
+            action: 'THEME_INSTANTIATED',
+            description: `Instantiated theme "${themeName}" (${template.name})`,
+            type: 'content',
+            userId: (req as any).user?.id,
+            username: (req as any).user?.username,
+            role: (req as any).user?.role,
+            resourceType: 'theme',
+            resourceId: themeId.toString()
+        });
 
         res.status(201).json({ success: true, themeId, pages: createdPages });
 

@@ -203,7 +203,16 @@ router.post('/:code', authenticateToken, async (req, res) => {
 
         await db.run('COMMIT');
 
-        await logActivity('Menu Updated', `Updated menu: ${req.params.code}`, 'content');
+        await logActivity({
+            action: 'MENU_UPDATED',
+            description: `Updated menu: ${req.params.code}`,
+            type: 'content',
+            userId: (req as any).user?.id,
+            username: (req as any).user?.username,
+            role: (req as any).user?.role,
+            resourceType: 'menu',
+            resourceId: req.params.code
+        });
 
         res.json({ success: true });
     } catch (e) {

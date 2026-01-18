@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { getDb } from '../index';
 import { logActivity } from './audit-logs';
+import { authenticateToken } from '../middleware/auth.middleware';
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ router.get('/', async (req: Request, res: Response) => {
     }
 });
 // POST /api/themes - Create a new theme
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', authenticateToken, async (req: Request, res: Response) => {
     const { name, template_id } = req.body;
 
     if (!name || !template_id) {
@@ -55,7 +56,16 @@ router.post('/', async (req: Request, res: Response) => {
         );
 
         const newThemeId = result.lastID;
-        await logActivity('Theme Created', `Created theme "${name}" (ID: ${newThemeId})`, 'system');
+        await logActivity({
+            action: 'THEME_CREATED',
+            description: `Created theme "${name}" (ID: ${newThemeId})`,
+            type: 'system',
+            userId: (req as any).user?.id,
+            username: (req as any).user?.username,
+            role: (req as any).user?.role,
+            resourceType: 'theme',
+            resourceId: newThemeId.toString()
+        });
 
         res.json({ success: true, id: newThemeId });
     } catch (e) {
@@ -64,7 +74,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // POST /api/themes/seed - Seed sample theme
-router.post('/seed', async (req: Request, res: Response) => {
+router.post('/seed', authenticateToken, async (req: Request, res: Response) => {
     try {
         const db = getDb();
         const sampleTheme = require('../seeds/sample-theme.json'); // Load seed file
@@ -118,7 +128,16 @@ router.post('/seed', async (req: Request, res: Response) => {
         }
 
         await db.run('COMMIT');
-        await logActivity('Theme Seeded', `Installed sample theme "${themeData.name}"`, 'system');
+        await logActivity({
+            action: 'THEME_SEEDED',
+            description: `Installed sample theme "${themeData.name}"`,
+            type: 'system',
+            userId: (req as any).user?.id,
+            username: (req as any).user?.username,
+            role: (req as any).user?.role,
+            resourceType: 'theme',
+            status: 'SUCCESS'
+        });
 
         res.json({ success: true, message: 'Theme installed successfully' });
 
@@ -129,7 +148,7 @@ router.post('/seed', async (req: Request, res: Response) => {
 });
 
 // POST /api/themes/seed/construction - Seed construction company theme (Traditional Chinese)
-router.post('/seed/construction', async (req: Request, res: Response) => {
+router.post('/seed/construction', authenticateToken, async (req: Request, res: Response) => {
     try {
         const db = getDb();
         const constructionTheme = require('../seeds/construction-theme.json');
@@ -186,7 +205,16 @@ router.post('/seed/construction', async (req: Request, res: Response) => {
         }
 
         await db.run('COMMIT');
-        await logActivity('Theme Seeded', `Installed construction theme "${themeData.name}"`, 'system');
+        await logActivity({
+            action: 'THEME_SEEDED',
+            description: `Installed construction theme "${themeData.name}"`,
+            type: 'system',
+            userId: (req as any).user?.id,
+            username: (req as any).user?.username,
+            role: (req as any).user?.role,
+            resourceType: 'theme',
+            resourceId: themeId?.toString()
+        });
 
         res.json({
             success: true,
@@ -201,7 +229,7 @@ router.post('/seed/construction', async (req: Request, res: Response) => {
 });
 
 // PATCH /api/themes/:id/activate - Activate a theme
-router.patch('/:id/activate', async (req: Request, res: Response) => {
+router.patch('/:id/activate', authenticateToken, async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const db = getDb();
@@ -223,7 +251,16 @@ router.patch('/:id/activate', async (req: Request, res: Response) => {
 
         await db.run('COMMIT');
 
-        await logActivity('Theme Activated', `Activated theme ID ${id} `, 'system');
+        await logActivity({
+            action: 'THEME_ACTIVATED',
+            description: `Activated theme ID ${id}`,
+            type: 'system',
+            userId: (req as any).user?.id,
+            username: (req as any).user?.username,
+            role: (req as any).user?.role,
+            resourceType: 'theme',
+            resourceId: id
+        });
         res.json({ success: true });
 
     } catch (e) {
@@ -233,7 +270,7 @@ router.patch('/:id/activate', async (req: Request, res: Response) => {
 });
 
 // PUT /api/themes/:id/pages - Update pages associated with a theme
-router.put('/:id/pages', async (req: Request, res: Response) => {
+router.put('/:id/pages', authenticateToken, async (req: Request, res: Response) => {
     const { id } = req.params;
     const { pageIds } = req.body; // Array of page IDs
 
@@ -262,7 +299,16 @@ router.put('/:id/pages', async (req: Request, res: Response) => {
 
         await db.run('COMMIT');
 
-        await logActivity('Theme Pages Updated', `Updated pages for theme ID ${id}`, 'system');
+        await logActivity({
+            action: 'THEME_PAGES_UPDATED',
+            description: `Updated pages for theme ID ${id}`,
+            type: 'system',
+            userId: (req as any).user?.id,
+            username: (req as any).user?.username,
+            role: (req as any).user?.role,
+            resourceType: 'theme',
+            resourceId: id
+        });
         res.json({ success: true });
 
     } catch (e) {
@@ -272,7 +318,7 @@ router.put('/:id/pages', async (req: Request, res: Response) => {
 });
 
 // DELETE /api/themes/:id - Delete a theme and its pages
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const db = getDb();
@@ -301,7 +347,16 @@ router.delete('/:id', async (req: Request, res: Response) => {
         // Delete theme
         await db.run('DELETE FROM themes WHERE id = ?', [id]);
 
-        await logActivity('Theme Deleted', `Deleted theme ${theme.name} (ID: ${id})`, 'system');
+        await logActivity({
+            action: 'THEME_DELETED',
+            description: `Deleted theme ${theme.name} (ID: ${id})`,
+            type: 'system',
+            userId: (req as any).user?.id,
+            username: (req as any).user?.username,
+            role: (req as any).user?.role,
+            resourceType: 'theme',
+            resourceId: id
+        });
         res.json({ success: true });
 
     } catch (e) {

@@ -4,14 +4,57 @@ import { getDb } from '../index';
 const router = express.Router();
 
 // Helper function to log activity (to be used by other routes)
-export const logActivity = async (action: string, description: string, type: 'content' | 'system' | 'security' = 'content', userId: number | null = null) => {
+// Helper function to log activity (to be used by other routes)
+export interface LogActivityOptions {
+    action: string;
+    description: string;
+    type?: 'content' | 'system' | 'security';
+    userId?: number | null;
+    username?: string;
+    role?: string;
+    resourceType?: string;
+    resourceId?: string;
+    status?: 'SUCCESS' | 'FAILURE';
+    details?: any;
+    ip?: string;
+}
+
+export const logActivity = async (options: LogActivityOptions) => {
     try {
         const db = getDb();
         if (!db) return; // DB might not be ready yet
 
+        const {
+            action,
+            description,
+            type = 'content',
+            userId = null,
+            username = 'System',
+            role = 'N/A',
+            resourceType = null,
+            resourceId = null,
+            status = 'SUCCESS',
+            details = null,
+            ip = null
+        } = options;
+
         await db.run(
-            'INSERT INTO audit_logs (action, description, type, user_id) VALUES (?, ?, ?, ?)',
-            [action, description, type, userId]
+            `INSERT INTO audit_logs 
+            (action, description, type, user_id, username, role, resource_type, resource_id, status, details, ip_address) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                action,
+                description,
+                type,
+                userId,
+                username,
+                role,
+                resourceType,
+                resourceId,
+                status,
+                details ? JSON.stringify(details) : null,
+                ip
+            ]
         );
     } catch (err) {
         console.error('Failed to log activity:', err);

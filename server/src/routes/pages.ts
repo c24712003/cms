@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { getDb } from '../index';
 import { logActivity } from './audit-logs';
+import { authenticateToken } from '../middleware/auth.middleware';
 
 const router = express.Router();
 
@@ -122,7 +123,7 @@ router.get('/:id/draft', async (req: Request, res: Response) => {
 
 // POST /api/pages/:id/draft - Save Draft (Work In Progress)
 // Does NOT update the live site
-router.post('/:id/draft', async (req: Request, res: Response) => {
+router.post('/:id/draft', authenticateToken, async (req: Request, res: Response) => {
     const { id } = req.params;
     const { lang, title, seo_title, seo_desc, content_json, slug_localized } = req.body;
 
@@ -149,7 +150,7 @@ router.post('/:id/draft', async (req: Request, res: Response) => {
 // POST /api/pages/:id/publish - Publish Draft to Live
 // 1. Archives current live content to history
 // 2. Promotes draft content to live
-router.post('/:id/publish', async (req: Request, res: Response) => {
+router.post('/:id/publish', authenticateToken, async (req: Request, res: Response) => {
     const { id } = req.params;
     const { lang, title, seo_title, seo_desc, content_json, slug_localized } = req.body;
 
@@ -195,7 +196,16 @@ router.post('/:id/publish', async (req: Request, res: Response) => {
                 updated_at = CURRENT_TIMESTAMP
         `, [id, lang, title, slug_localized, seo_title, seo_desc, JSON.stringify(content_json)]);
 
-        await logActivity('Page Published', `Published page: ${title} (${lang})`, 'content');
+        await logActivity({
+            action: 'PAGE_PUBLISHED',
+            description: `Published page: ${title} (${lang})`,
+            type: 'content',
+            userId: (req as any).user?.id,
+            username: (req as any).user?.username,
+            role: (req as any).user?.role,
+            resourceType: 'page',
+            resourceId: id
+        });
 
         res.json({ success: true, mode: 'published' });
     } catch (e) {
@@ -204,12 +214,21 @@ router.post('/:id/publish', async (req: Request, res: Response) => {
 });
 
 // POST /api/pages - Create Page (Metadata)
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', authenticateToken, async (req: Request, res: Response) => {
     const { slug_key, template } = req.body;
     try {
         const db = getDb();
         const result = await db.run('INSERT INTO pages (slug_key, template) VALUES (?, ?)', [slug_key, template]);
-        await logActivity('Page Created', `Created new page: ${slug_key}`, 'content');
+        await logActivity({
+            action: 'PAGE_CREATED',
+            description: `Created new page: ${slug_key}`,
+            type: 'content',
+            userId: (req as any).user?.id,
+            username: (req as any).user?.username,
+            role: (req as any).user?.role,
+            resourceType: 'page',
+            resourceId: result.lastID.toString()
+        });
         res.status(201).json({ success: true, id: result.lastID });
     } catch (e) {
         res.status(500).json({ error: String(e) });
@@ -217,7 +236,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // PATCH /api/pages/:id - Update Page Metadata (Theme, etc.)
-router.patch('/:id', async (req: Request, res: Response) => {
+router.patch('/:id', authenticateToken, async (req: Request, res: Response) => {
     const { id } = req.params;
     const { theme_id, template } = req.body;
 
@@ -244,7 +263,16 @@ router.patch('/:id', async (req: Request, res: Response) => {
         params.push(id);
         await db.run(`UPDATE pages SET ${updates.join(', ')} WHERE id = ?`, params);
 
-        await logActivity('Page Updated', `Updated page metadata for ID ${id}`, 'content');
+        await logActivity({
+            action: 'PAGE_UPDATED',
+            description: `Updated page metadata for ID ${id}`,
+            type: 'content',
+            userId: (req as any).user?.id,
+            username: (req as any).user?.username,
+            role: (req as any).user?.role,
+            resourceType: 'page',
+            resourceId: id
+        });
         res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: String(e) });

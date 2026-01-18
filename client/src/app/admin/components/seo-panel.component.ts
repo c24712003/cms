@@ -230,6 +230,51 @@ import { SeoValidatorService, SeoValidationSummary, SeoValidationResult } from '
         .seo-tips li {
             margin-bottom: 4px;
         }
+
+        /* Dark Mode Overrides */
+        :host-context(.dark) .seo-panel {
+            background: #1e293b;
+            color: #f1f5f9;
+        }
+
+        :host-context(.dark) .seo-header {
+            border-bottom-color: #334155;
+        }
+
+        :host-context(.dark) .seo-score {
+            background: #0f172a;
+        }
+
+        :host-context(.dark) .score-value {
+            color: #f1f5f9;
+        }
+
+        :host-context(.dark) .score-label,
+        :host-context(.dark) .status-text,
+        :host-context(.dark) .char-count {
+            color: #94a3b8;
+        }
+
+        :host-context(.dark) .result-item {
+            background: #0f172a;
+        }
+
+        :host-context(.dark) .result-message {
+            color: #cbd5e1;
+        }
+
+        :host-context(.dark) .seo-tips {
+            background: rgba(254, 252, 232, 0.05);
+            border-color: #854d0e;
+        }
+
+        :host-context(.dark) .seo-tips h4 {
+            color: #fde047;
+        }
+
+        :host-context(.dark) .seo-tips ul {
+            color: #cbd5e1;
+        }
     `]
 })
 export class SeoPanelComponent implements OnChanges {
